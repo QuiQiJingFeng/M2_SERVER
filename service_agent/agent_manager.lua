@@ -7,6 +7,10 @@ local redis = require "skynet.db.redis"
 local cjson = require "cjson"
 require "skynet.manager"
 
+local mysql = require "skynet.db.mysql"
+local md5 = require "md5"
+local account_db
+
 local CMD = {}
 local SOCKET = {}
 local self_info = {}
@@ -162,8 +166,10 @@ function SOCKET.data(fd, data)
                     local rsp_msg = {}
                     rsp_msg.result = "fail"
                     if login_type == "debug" then
-                        -- 测试，账号密码
-                        if user_id == "ABCDE" and token == "123456" then
+                        local password = md5.sumhexa(token)
+                        local check_str = string.format("select count(*) as count from account_register where name = '%s' and password='%s'",user_id,password)
+                        local ret = account_db:query(check_str) or {}
+                        if ret[1].count == 1 then
                             local reconnect_token = set_agent(agent_item, user_id, false)
                             rsp_msg.result = "success"
                             rsp_msg.reconnect_token = reconnect_token
@@ -236,6 +242,17 @@ skynet.start(function()
     local redis_address = skynet.getenv("redis_address")
     local address, port = string.match(redis_address, "([%d%.]+):([%d]+)")
     self_info.redis = redis.connect({ host = address, port = port })
+
+
+    account_mysql_conf = skynet.getenv("account_mysql")
+    local host, port = string.match(account_mysql_conf,"([%d%.]+):([%d]+)")
+    account_db = mysql.connect({
+        host= host,
+        port= tonumber(port),
+        user="root",
+        max_packet_size = 1024 * 1024,
+        database="gmtool"
+    })
 
     pbc.register_file(skynet.getenv("protobuf"))
 

@@ -18,6 +18,8 @@ start = "main"
 protobuf = root.."proto/protocol.pb"
 redis_address = "127.0.0.1:6379"
 
+account_mysql = "127.0.0.1:3306"
+
 mode = "debug"
 --cluster
 node_type = "agent_server"
