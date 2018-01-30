@@ -33,12 +33,13 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-8
-msg/test.protomsg.test"
-Test
-value (Rvalue
-ú
-protocol.protomsg/common.protomsg/login.protomsg/test.proto"Œ
+U
+msg/user.protomsg.user"
+QueryInfoReq")
+QueryInfoRsp
+gold_num (RgoldNum
+ 
+protocol.protomsg/common.protomsg/login.protomsg/user.proto"Ÿ
 C2S
 
 session_id (R	sessionId3
@@ -46,8 +47,9 @@ session_id (R	sessionId3
  (2.msg.common.HandshakeR	handshake3
 	heartbeat (2.msg.common.HeartbeatR	heartbeat)
 login (2.msg.login.LoginReqRlogin,
-logout (2.msg.login.LogoutReqRlogout#
-test‘N (2.msg.test.TestRtest"¥
+logout (2.msg.login.LogoutReqRlogout6
+
+query_info‘N (2.msg.user.QueryInfoReqR	queryInfo"¸
 S2C
 
 session_id (R	sessionId
@@ -56,5 +58,6 @@ session_id (R	sessionId
  (2.msg.common.HandshakeR	handshake3
 	heartbeat (2.msg.common.HeartbeatR	heartbeat)
 login (2.msg.login.LoginRspRlogin,
-logout (2.msg.login.LogoutRspRlogout#
-test‘N (2.msg.test.TestRtest
+logout (2.msg.login.LogoutRspRlogout6
+
+query_info‘N (2.msg.user.QueryInfoRspR	queryInfo

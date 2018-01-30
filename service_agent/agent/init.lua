@@ -182,10 +182,9 @@ end
 local function init_logic()
     -- agent自身的初始准备工作，与具体用户无关
     logic.user = require "logic.user"
-    logic.item = require "logic.item"
 
     for _,logic_item in pairs(logic) do
-        logic_item.init(self_info.user_info)
+        logic_item.init(self_info)
     end
 end
 
