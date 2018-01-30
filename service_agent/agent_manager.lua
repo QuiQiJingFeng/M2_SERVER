@@ -127,6 +127,30 @@ function SOCKET.open(fd, addr)
     check_map[fd] = skynet.time()
 end
 
+local MAX_USER_ID = 4967000
+local CONVERT = { [10] = "A", [11] = "B", [12] = "C", [13] = "D", [14] = "E", [15] = "F", [16] = "G",
+[17] = "H", [18] = "I", [19] = "J", [20] = "K", [21] = "L", [22] = "M", [23] = "N", [24] = "O", [25] = "P",
+[26] = "Q", [27] = "R", [28] = "S", [29] = "T",[30] = "U", [31] = "V",[32] = "W",[33] = "X", [34] = "Y", [35] = "Z" }
+
+local function CreateUserid()
+    local max_id = self_info.redis:incrby("user_id_generator", 1)
+    if max_id >= MAX_USER_ID then
+        return nil
+    end
+
+    local user_id = tonumber(string.format("%d%07d", 1, max_id))
+    local unin_id = ""
+    local multiple = 0
+    while user_id > 0 do
+        local dec = user_id%36
+        user_id = math.floor(user_id/36)
+        dec = CONVERT[dec] or dec
+        unin_id = dec .. unin_id
+        multiple = multiple + 1
+    end
+    return unin_id
+end
+
 function SOCKET.data(fd, data)
     local agent_item = agent_map[fd]
     if agent_item then
@@ -160,19 +184,24 @@ function SOCKET.data(fd, data)
                     local req_msg = data_content["login"]
 
                     local login_type = req_msg.login_type
-                    local user_id = req_msg.user_id
+                    local account = req_msg.account
                     local token = req_msg.token
 
                     local rsp_msg = {}
                     rsp_msg.result = "fail"
                     if login_type == "debug" then
                         local password = md5.sumhexa(token)
-                        local check_str = string.format("select count(*) as count from account_register where name = '%s' and password='%s'",user_id,password)
+                        local check_str = string.format("select count(*) as count from account_register where name = '%s' and password='%s'",account,password)
                         local ret = account_db:query(check_str) or {}
                         if ret[1].count == 1 then
-                            local reconnect_token = set_agent(agent_item, user_id, false)
-                            rsp_msg.result = "success"
-                            rsp_msg.reconnect_token = reconnect_token
+                            local user_id = CreateUserid()
+                            if user_id then
+                                self_info.redis:set(account,user_id)
+                                local reconnect_token = set_agent(agent_item, user_id, false)
+                                rsp_msg.result = "success"
+                                rsp_msg.reconnect_token = reconnect_token
+                                rsp_msg.user_id = user_id
+                            end
                         else
                             -- 验证失败
                             rsp_msg.result = "auth_fail"

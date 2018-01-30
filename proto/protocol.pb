@@ -11,16 +11,17 @@ msg.common"
 Result
 success
 fail
-Ÿ
-msg/login.proto	msg.login"n
+¹
+msg/login.proto	msg.login"o
 LoginReq3
 
-login_type (2.msg.login.LoginTypeR	loginType
-user_id (	RuserId
-token (	Rtoken"^
+login_type (2.msg.login.LoginTypeR	loginType
+account (	Raccount
+token (	Rtoken"w
 LoginRsp)
 result (2.msg.login.ResultRresult'
-reconnect_token (	RreconnectToken"
+reconnect_token (	RreconnectToken
+user_id (	RuserId"
 	LogoutReq"6
 	LogoutRsp)
 result (2.msg.login.ResultRresult*%
