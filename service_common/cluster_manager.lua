@@ -5,10 +5,9 @@ local cluster = require "skynet.cluster"
 require "skynet.manager"
 
 local CMD = {}
-local self_info = {}
 local node_map = {}
 
-function CMD.reload()
+function CMD.reload(ignore_node_name)
     log.info("start")
     local cluster_config = {}
     for node_type, node_list in pairs(node_map) do
@@ -20,17 +19,32 @@ function CMD.reload()
     end
     
     cluster.reload(cluster_config)
+
+    --通知所有的结点进行更新
+    for node_name,v in pairs(cluster_config) do
+        if node_name ~= skynet.getenv("node_name") then
+            if not (ignore_node_name and ignore_node_name == node_name) then
+                cluster.call(node_name, ".clusterd", "reload", cluster_config)
+            end
+        end
+    end
+    
+    return cluster_config
 end
 
-function CMD.self()
-    return self_info.node_name
-end
 
 function CMD.addNode(node_type, node_name, node_address)
     node_map[node_type] = node_map[node_type] or {}
+    local new_node = {node_name = node_name, node_address = node_address}
+    for index,node in pairs(node_map[node_type]) do
+        if node.node_name == node_name then
+            table.remove(node_map[node_type],index)
+            break
+        end
+    end
     table.insert(node_map[node_type], {node_name = node_name, node_address = node_address})
 
-    CMD.reload()
+    return CMD.reload(node_name)
 end
 
 function CMD.removeNode(node_type, node_name)
@@ -63,14 +77,12 @@ skynet.start(function()
         skynet.ret(skynet.pack(f(...)))
     end)
 
-    self_info = {}
-    self_info.node_type = skynet.getenv("node_type")
-    self_info.node_name = skynet.getenv("node_name")
-    self_info.node_address = skynet.getenv("node_address")
-
-    CMD.addNode(self_info.node_type, self_info.node_name, self_info.node_address)
-
-    cluster.open(self_info.node_name)
+    local config = {}
+    config.node_type = skynet.getenv("node_type")
+    config.node_name = skynet.getenv("node_name")
+    config.node_address = skynet.getenv("node_address")
+    CMD.addNode(config.node_type, config.node_name, config.node_address)
+    cluster.open(config.node_name)
 
     skynet.register(".cluster_manager")
 end)

@@ -1,4 +1,5 @@
 local skynet = require "skynet"
+require "skynet.manager"
 
 local clusterd
 local cluster = {}
@@ -48,8 +49,15 @@ function cluster.query(node, name)
 	return skynet.call(clusterd, "lua", "req", node, 0, skynet.pack(name))
 end
 
+--FYD UPDATE
+function cluster.querynames()
+	return skynet.call(clusterd, "lua", "querynames")
+end
+
 skynet.init(function()
 	clusterd = skynet.uniqueservice("clusterd")
+	--UPDATE
+	skynet.name(".clusterd", clusterd)
 end)
 
 return cluster

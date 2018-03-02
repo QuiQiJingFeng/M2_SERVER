@@ -196,6 +196,15 @@ function command.socket(source, subcmd, fd, msg)
 	end
 end
 
+--FYD UPDATE
+function command.querynames()
+	local temp = {}
+	for name,_ in pairs(node_address) do
+		table.insert(temp,name)
+	end
+	skynet.ret(skynet.pack(temp))
+end
+
 skynet.start(function()
 	loadconfig()
 	skynet.dispatch("lua", function(session , source, cmd, ...)
