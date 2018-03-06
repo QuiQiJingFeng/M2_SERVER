@@ -1,1 +1,1 @@
-./skynet service_center/config.lua
+nohup ./skynet service_center/config.lua > service_center/log/print.log 2>&1 &
