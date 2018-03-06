@@ -58,6 +58,11 @@ function user_info:setData(key,value)
     center_redis:set(key,value)
 end
 
+function user_info:hdelData(key1,key2)
+    local center_redis = self:getRedis()
+    center_redis:hdel(key1,key2)  
+end
+
 function user_info:hsetData(key1,key2,value)
     local center_redis = self:getRedis()
     center_redis:hset(key1,key2,value)  

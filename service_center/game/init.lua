@@ -7,21 +7,22 @@ local redis = require "skynet.db.redis"
 local cjson = require "cjson"
 require "skynet.manager"
 
-local mysql = require "skynet.db.mysql"
-local md5 = require "md5"
-local account_db
+
 
 local CMD = {}
 
-function CMD.StartGame(room_info)
-
+function CMD.startGame(game_type,room_info)
+	local game = require(game_type..".".."game.lua")
+	--初始化
+	game:init(room_info)
+	game:start()
 end
 
-function CMD.GameCMD()
-
+function CMD.gameCMD(command,user_id,info)
+	game:gameCMD(command,user_id,info)
 end
 
-function CMD.CleanData()
+function CMD.clean()
 
 end
 

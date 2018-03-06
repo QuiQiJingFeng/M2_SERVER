@@ -44,18 +44,18 @@ login_type (2.msg.login.LoginTypeR	loginType
 CreateRoomReq"n
 CreateRoomRsp
 result (	Rresult
-room_id (	RroomId,
+room_id (RroomId,
 players (2.msg.user.UserInfoRplayers"
 PushTest
 msg (	Rmsg"X
 RefreshRoomInfo
-room_id (	RroomId,
+room_id (RroomId,
 players (2.msg.user.UserInfoRplayers"&
 JoinRoomReq
-room_id (	RroomId"l
+room_id (RroomId"l
 JoinRoomRsp
 result (	Rresult
-room_id (	RroomId,
+room_id (RroomId,
 players (2.msg.user.UserInfoRplayers
 Ø
 protocol.protomsg/common.protomsg/login.protomsg/user.proto"×
