@@ -57,6 +57,11 @@ function CMD.free()
     user_info:clear()
 end
 
+--断开连接
+function CMD.disconnect()
+    user_info:leaveRoom()
+end
+
 -- 请求处理函数
 function CMD.request(data_content)
     -- 获取数据包中的各项值

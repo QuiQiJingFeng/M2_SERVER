@@ -52,12 +52,7 @@ end
 
 --离开房间
 function user:leaveRoom()
-	local room_id = user_info._room_id
-	local user_id = user_info._user_id
-	local target_node = user_info:getTargetNodeByRoomId(room_id)
-	local result = cluster.call(target_node,".room_manager","leaveRoom",room_id,user_id)
-	--清理绑定的room_id
-	user_info:hdelData(user_info._user_info_key,"room_id",room_id)
+	local result = user_info:leaveRoom()
 	return "leaveRoom",{result = result}
 end
 

@@ -47,6 +47,16 @@ function user_info:loadfromDb()
     center_redis:disconnect()
 end
 
+function user_info:leaveRoom()
+    local room_id = self._room_id
+    local user_id = self._user_id
+    local target_node = self:getTargetNodeByRoomId(room_id)
+    local result = cluster.call(target_node,".room_manager","leaveRoom",room_id,user_id)
+    --清理绑定的room_id
+    self:hdelData(self._self_key,"room_id",room_id)
+    return result
+end
+
 function user_info:getTargetNodeByRoomId(room_id)
     local center_redis = self:getRedis()
     local target_node = center_redis:hget("room_list",room_id)

@@ -37,6 +37,7 @@ local function disconnect_fd(fd)
             USER_MAP[agent_item.user_id] = nil
         end
         if agent_item.service_id then
+            skynet.call(agent_item.service_id, "lua", "disconnect")
             skynet.send(agent_item.service_id, "lua", "free")
             table.insert(AGENT_POOL, agent_item.service_id)
         end
