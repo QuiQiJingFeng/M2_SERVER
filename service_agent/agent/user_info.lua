@@ -1,6 +1,7 @@
 local skynet = require "skynet"
 local redis = require "skynet.db.redis"
 local cjson = require "cjson"
+local cluster = require "skynet.cluster"
 
 local user_info = {}
 
@@ -48,12 +49,13 @@ function user_info:loadfromDb()
 end
 
 function user_info:leaveRoom()
-    local room_id = self._room_id
+    local room_id = user_info:hgetData(user_info._user_info_key,"room_id")
     local user_id = self._user_id
     local target_node = self:getTargetNodeByRoomId(room_id)
     local result = cluster.call(target_node,".room_manager","leaveRoom",room_id,user_id)
     --清理绑定的room_id
-    self:hdelData(self._self_key,"room_id",room_id)
+    print("FYD  清理")
+    self:hdelData(self._user_info_key,"room_id",room_id)
     return result
 end
 

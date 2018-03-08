@@ -86,14 +86,15 @@ function CMD.joinRoom(room_id,user_id,user_name,node_name,service_id)
 	--刷新其他玩家的房间信息
 	broadcast(other_players,"refresh_room_info",temp)
 
-
-
 	return "success",temp
 end
 
 --离开房间
 function CMD.leaveRoom(room_id,user_id)
 	local room = room_pool:getRoomByRoomID(room_id)
+	if not room then
+		return "success"
+	end
 	for index,player in ipairs(room.players) do
 		if player.user_id == user_id then
 			table.remove(room.players,index)
