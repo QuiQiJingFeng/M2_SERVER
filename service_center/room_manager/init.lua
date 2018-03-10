@@ -1,153 +1,120 @@
 local skynet = require "skynet"
-local socket = require "skynet.socket"
-local crypt = require "skynet.crypt"
 local log = require "skynet.log"
-local pbc = require "protobuf"
-local redis = require "skynet.db.redis"
-local cjson = require "cjson"
 require "skynet.manager"
 local cluster = require "skynet.cluster"
 
-local mysql = require "skynet.db.mysql"
-local md5 = require "md5"
-local account_db
+local constant = require "constant"
 
-local STATE = {
-	UN_PREPARE = 1,
-	PREPARE = 2,
-	GAME_STARTING = 3,
-	GAME_END = 4
-}
+local PLAYER_STATE = constant["PLAYER_STATE"]
+local PUSH_EVENT = constant["PUSH_EVENT"]
+local ZJ_MODE = constant["ZJ_MODE"]
 
 local CMD = {}
 
-local room_pool = require "room_pool"
-
---广播消息
-local function broadcast(players,msg_name,msg_data)
-	for _,player in ipairs(players) do
-		local node_name = player.node_name
-		local service_id = player.service_id
-		cluster.call(node_name, service_id, "push",msg_name,msg_data)
-	end
-end
-
-local function createRoomTemp(room)
-	local temp = {}
-	temp.room_id = room.room_id
-	temp.players = {}
-	for i,player in ipairs(room.players) do
-		local tp = {}
-		tp.user_id = player.user_id
-		tp.user_name = player.user_name
-		table.insert(temp.players,tp)
-	end
-	return temp
-end
+local RoomPool = require "RoomPool"
 
 --创建房间
 --参数:node_name 为用户所在的游戏服务器结点的名称
 --参数:service 为用户在该游戏结点上服务的名称
-function CMD.createRoom(user_id,user_name,node_name,service_id)
-	--获取一个没有使用到的房间
-	local room = room_pool:getUnusedRoom()
-	--构建玩家数据
-	local player = { user_id = user_id, user_name = user_name, node_name = node_name,service_id = service_id}
-	--将玩家数据添加入房间信息中
-	table.insert(room.players,player)
-	--设定玩家的状态为 未准备 状态
-	player.state = STATE.UN_PREPARE
+function CMD.createRoom(data)
 
-	local temp = createRoomTemp(room)
+	local game_type = data.game_type
+	local user_id = data.user_id
+	local user_name = data.user_name
+	local user_pic = data.user_pic
+	local node_name = data.node_name
+	local service_id = data.service_id
 
-	return "success",temp
+
+	local room = RoomPool:getUnusedRoom()
+	room:setGameType(game_type)
+
+	room:addPlayer(user_id,user_name,user_pic,node_name,service_id)
+
+	local rsp_msg = room:getPlayerInfo("user_id","user_name","user_pic","user_pos")
+
+	return "success",rsp_msg
 end
 
 --加入房间
-function CMD.joinRoom(room_id,user_id,user_name,node_name,service_id)
-	--通过房间号来获取对应的房间信息
+function CMD.joinRoom(data)
+	local room_id = data.room_id
+	local user_id = data.user_id
+	local user_name = data.user_name
+	local user_pic = data.user_pic
+	local node_name = data.node_name
+	local service_id = data.service_id
+
+
 	local room = room_pool:getRoomByRoomID(room_id)
-	--构建玩家数据
-	local player = {user_id = user_id, user_name = user_name, node_name = node_name,service_id = service_id}
-	--将玩家数据添加入房间信息中
-	table.insert(room.players,player)
-	--设定玩家的状态为 未准备 状态
-	player.state = STATE.UN_PREPARE
+	room:addPlayer(user_id,user_name,user_pic,node_name,service_id)
 
-	--通知除了该玩家之外的其他玩家,有人加入房间
-	local other_players = {}
-	for _,player in ipairs(room.players) do
-		if player.user_id ~= user_id then
-			table.insert(other_players,player)
-		end
-	end
+	local rsp_msg = room:getPlayerInfo("user_id","user_name","user_pic","user_pos")
 
-	local temp = createRoomTemp(room)
-	--刷新其他玩家的房间信息
-	broadcast(other_players,"refresh_room_info",temp)
+	room:broadcastOtherPlayers(user_id,PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
 
-	return "success",temp
+	return "success",rsp_msg
 end
 
 --离开房间
-function CMD.leaveRoom(room_id,user_id)
+function CMD.leaveRoom(data)
+	local room_id = data.room_id
+	local user_id = data.user_id
+
 	local room = room_pool:getRoomByRoomID(room_id)
 	if not room then
 		return "success"
 	end
-	for index,player in ipairs(room.players) do
-		if player.user_id == user_id then
-			table.remove(room.players,index)
-			break
-		end
-	end
-	local temp = createRoomTemp(room)
-	--刷新剩余玩家的房间信息
-	broadcast(room.players,"refresh_room_info",temp)
+
+	room:removePlayer(user_id)
+	
+	local rsp_msg = room:getPlayerInfo("user_id","user_name","user_pic","user_pos")
+	room:broadcastOtherPlayers(user_id,PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
 
 	return "success"
 end
 
 --准备
-function CMD.prepare(room_id,user_id)
-	local room = room_pool:getRoomByRoomID(room_id)
-	for k,player in pairs(room.players) do
-		if palyer.user_id == user_id then
-			--如果当前没有处于准备状态
-			if palyer.state ~= STATE.PREPARE then
-				palyer.state = STATE.PREPARE
-				room.prepare_num = room.prepare_num + 1
-			else
-				return "repeate_prepare"
-			end
-			break
-		end
-	end
-	return "success"
-end
+function CMD.prepare(data)
+	local room_id = data.room_id
+	local user_id = data.user_id
 
---开始游戏
-function CMD.startGame(game_type,player_num)
 	local room = room_pool:getRoomByRoomID(room_id)
-	if need_num ~= room.prepare_num then
-		return "node_enough_prepare"
+	local full = room:updatePlayerState(user_id,PLAYER_STATE.PREPARE_FINISH)
+	if full then
+		--洗牌
+		room:fisherYates()
+		--发牌
+		room:dealCards()
 	end
-
-	skynet.call(room.service_id,"lua","startGame",game_type,room)
 
 	return "success"
 end
 
---获取房间的信息
-function CMD.getRoomInfo(room_id)
-	return "success",room_pool:getRoomByRoomID(room_id)
+--发牌完毕
+function CMD.dealFinish(data)
+	local room_id = data.room_id
+	local user_id = data.user_id
+
+	local room = room_pool:getRoomByRoomID(room_id)
+	local full = room:updatePlayerState(user_id,PLAYER_STATE.DEAL_FINISH)
+	if full then
+		--所有人都发牌完毕之后 开始游戏
+		skynet.call(room.service_id,"lua","startGame",room:getAllInfo())
+	end
 end
 
 --游戏指令
-function CMD.gameCMD(command,user_id,info)
+function CMD.gameCMD(data)
+	local command = data.command
+	local user_id = data.user_id
 	local room = room_pool:getRoomByUserID(user_id)
-	skynet.call(room.service_id,"gameCMD",command,user_id,info)
-	return "success"
+	local support = room:isSuportCommand(command)
+	if not support then
+		return "nosupport_command"
+	end
+	local result = skynet.call(room.service_id,"gameCMD",data)
+	return result
 end
 
 skynet.start(function()
@@ -155,6 +122,8 @@ skynet.start(function()
         local f = assert(CMD[cmd])
         skynet.ret(skynet.pack(f(subcmd, ...)))
     end)
+    math.randomseed(skynet.time())
+
     --初始化房间池并预创建一部分房间
     room_pool:init()
     skynet.register ".room_manager"

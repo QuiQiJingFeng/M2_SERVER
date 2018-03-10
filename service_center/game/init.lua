@@ -1,29 +1,22 @@
 local skynet = require "skynet"
-local socket = require "skynet.socket"
-local crypt = require "skynet.crypt"
 local log = require "skynet.log"
-local pbc = require "protobuf"
-local redis = require "skynet.db.redis"
-local cjson = require "cjson"
 require "skynet.manager"
 
-
-
 local CMD = {}
+local GAME = nil
 
-function CMD.startGame(game_type,room_info)
-	local game = require(game_type..".".."game.lua")
+function CMD.startGame(room_info)
+	GAME = require(game_type..".".."game.lua")
 	--初始化
-	game:init(room_info)
-	game:start()
+	GAME:start(room_info)
 end
 
-function CMD.gameCMD(command,user_id,info)
-	game:gameCMD(command,user_id,info)
+function CMD.gameCMD(data)
+	return GAME:gameCMD(data)
 end
 
-function CMD.clean()
-
+function CMD.clear()
+	GAME = nil
 end
 
 skynet.start(function()

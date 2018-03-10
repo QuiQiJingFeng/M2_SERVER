@@ -51,8 +51,8 @@ end
 function user_info:leaveRoom()
     local room_id = user_info:hgetData(user_info._user_info_key,"room_id")
     local user_id = self._user_id
-    local target_node = self:getTargetNodeByRoomId(room_id)
-    local result = cluster.call(target_node,".room_manager","leaveRoom",room_id,user_id)
+    local center_node = self:getTargetNodeByRoomId(room_id)
+    local result = cluster.call(center_node,".room_manager","leaveRoom",room_id,user_id)
     --清理绑定的room_id
     print("FYD  清理")
     self:hdelData(self._user_info_key,"room_id",room_id)
@@ -61,8 +61,8 @@ end
 
 function user_info:getTargetNodeByRoomId(room_id)
     local center_redis = self:getRedis()
-    local target_node = center_redis:hget("room_list",room_id)
-    return target_node
+    local center_node = center_redis:hget("room_list",room_id)
+    return center_node
 end
 
 function user_info:setData(key,value)

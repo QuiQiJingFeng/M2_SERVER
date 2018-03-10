@@ -86,8 +86,6 @@ function CMD.request(data_content)
 
             -- 根据请求包包名分发处理
             local rsp_name, rsp_msg = event_handler:emit(req_name, req_msg)
-            print("FYD req_name = ",req_name)
-            print("FYD++++++",rsp_name)
             if rsp_name then
                 -- 以请求包的session_id组装回包
                 local send_data = {["session_id"] = session_id, [rsp_name] = rsp_msg}
