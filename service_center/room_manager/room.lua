@@ -9,6 +9,9 @@ local ALL_DEAL_NUM = constant["ALL_DEAL_NUM"]
 local ALL_COMMAND = constant["ALL_COMMAND"]
 local OPERATER = constant["OPERATER"]
 local PUSH_EVENT = constant["PUSH_EVENT"]
+
+local RECOVER_GAME_TYPE = constant["RECOVER_GAME_TYPE"]
+
 local Room = {}
 
 Room.__index = Room
@@ -35,122 +38,25 @@ function Room:init(room_id,node_name)
 	self.property.node_name = node_name
 	--房间中的玩家列表
 	self.property.players = {}
+end
 
-	--房间中 已经准备的玩家数量
-	self.property.prepare_num = 0
-	--房间中 发牌动画完毕的玩家数量
-	self.property.finish_deal_num = 0
-	--游戏房间的地址
-	self.property.service_id = nil
-	--游戏的类型
-	self.property.game_type = nil
-	--房间座位的数量
-	self.property.place_number = 0
-	--房间座位
-	self.property.palces = {}
+function Room:setInfo(info)
+	self.property.game_type = info.game_type
+	self.property.round = info.round
+	self.property.pay_type = info.pay_type
+	self.property.seat_num = info.seat_num
+	self.property.is_friend_room = info.is_friend_room
+	self.property.is_open_voice = info.is_open_voice
+	self.property.is_open_gps = info.is_open_gps
+	self.property.other_setting = info.other_setting
+
 	--庄家模式
-	self.property.zj_mode = nil
-	--当前庄家
-	self.property.cur_zhuang_pos = nil
-	--牌池
-	self.property.card_list = {}
-	--发牌的数量
-	self.property.deal_num = nil
-	--支持的命令
-	self.property.commands = {}
-	--当前出的牌
-	self.property.cur_card = nil
-	--等待玩家操作
-	self.property.wait_users = {}
-	--按顺序记录所有可以胡牌/碰牌、杠牌的ID
-	self.property.record = {[OPERATER.HU]={},[OPERATER.PENG]={},[OPERATER.GANG]={},operaters={}}
-
+	self.property.zj_mode = ALL_ZJ_MODE[RECOVER_GAME_TYPE[info.game_type]]
 end
-
---清空记录
-function Room:clearRecord()
-	self.property.record = {[OPERATER.HU]={},[OPERATER.PENG]={},[OPERATER.GANG]={},operaters={}}
-end
-
-
 
 --设置游戏房间地址
 function Room:setServiceId(service_id)
 	self.property.service_id = service_id
-end
-
---设置游戏的类型
-function Room:setGameType(game_type)
-	self.property.game_type = game_type
-	print("game_type = ",game_type)
-	self.property.place_number = ALL_GAME_NUMS[game_type]
-	for i=1,self.property.place_number do
-		self.property.palces[i] = false
-	end
-
-	self.property.zj_mode = ALL_ZJ_MODE[game_type]
-	self.property.deal_num = ALL_DEAL_NUM[game_type]
-	self.property.commands = ALL_COMMAND[game_type]
-	for _,value in ipairs(ALL_CARDS[game_type]) do
-		table.insert(self.property.card_list,value)
-	end
-end
-
-function Room:isSuportCommand(command)
-	for _,cmd in ipairs(self.property.commands) do
-	   if cmd == command then
-	      return true
-	   end
-	end
-	return false
-end
-
---洗牌  FisherYates洗牌算法
---算法的思想是每次从未选中的数字中随机挑选一个加入排列，时间复杂度为O(n)
-function Room:fisherYates()
-	for i = #self.card_list,1,-1 do
-		--在剩余的牌中随机取一张
-		local j = math.random(i)
-		--交换i和j位置的牌
-		local temp = self.card_list[i]
-		self.card_list[i] = self.card_list[j]
-		self.card_list[j] = temp
-	end
-end
-
---发牌
-function Room:dealCards()
-	local zhuang_pos = nil
-
-	local zj_mode = self.property.zj_mode
-	local cur_zhuang_pos = self.property.cur_zhuang_pos
-	local place_number = self.property.place_number
-	if zj_mode == ZJ_MODE.YING_ZHUANG then
-		if not cur_zhuang_pos then
-			zhuang_pos = math.random(1,place_number)
-		else
-			zhuang_pos = cur_zhuang_pos
-		end
-	elseif zj_mode == ZJ_MODE.LIAN_ZHUANG then
-		if not cur_zhuang_pos then
-			zhuang_pos = math.random(1,place_number)
-		else
-			zhuang_pos = (cur_zhuang_pos + 1) % place_number
-		end
-	end
-
-	local players = self.property.players
-	for index=1,self.property.place_number do
-		local cards = {}
-		for j=1,self.property.deal_num do
-			local card = table.remove(self.property.card_list)
-			table.insert(cards,card)
-		end
-		local player = players[index]
-		player.card_list = cards
-		local rsp_msg = {zhuang_pos = zhuang_pos,cards = cards}
-		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
-	end
 end
 
 function Room:getPlayerByPos(pos)
@@ -170,35 +76,25 @@ function Room:getPlayerByUserId(user_id)
 end
 
 --添加玩家
-function Room:addPlayer(user_id,user_name,user_pic,node_name,service_id)
-	
+function Room:addPlayer(info)
 	local player = {}
 	--玩家的ID
-	player.user_id = user_id
+	player.user_id = info.user_id
 	--玩家的名称
-	player.user_name = user_name
+	player.user_name = info.user_name
 	--玩家头像的url
-	player.user_pic = user_pic
+	player.user_pic = info.user_pic
+	--玩家IP
+	player.user_ip = info.user_ip
 	--玩家所在游戏服的地址
-	player.node_name = node_name
+	player.node_name = info.node_name
 	--玩家服务的地址
-	player.service_id = service_id
+	player.service_id = info.service_id
 	--积分
 	player.score = 0
 	--玩家状态初始化
 	player.state = PLAYER_STATE.UN_PREPARE
-	--玩家位置 选择一个没有被占用的位置设置为玩家的位置
-	local pos 
-	for index,value in ipairs(self.property.palces) do
-		if not value then
-			pos = index
-			break
-		end
-	end
-	player.user_pos = pos
-	--玩家手里的牌
-	player.card_list = {}
-
+	
 	table.insert(self.property.players,player)
 end
 

@@ -10,7 +10,7 @@ msg.common"
 Result
 success
 fail
-‚
+é
 msg/login.proto	msg.login"§
 LoginReq3
 
@@ -18,11 +18,10 @@ login_type (2.msg.login.LoginTypeR	loginType
 account (	Raccount
 token (	Rtoken
 	user_name (	RuserName
-user_pic (	RuserPic"|
+user_pic (	RuserPic"c
 LoginRsp.
 result (2.msg.login.LoginResultRresult'
-reconnect_token (	RreconnectToken
-user_id (	RuserId"
+reconnect_token (	RreconnectToken"
 	LogoutReq";
 	LogoutRsp.
 result (2.msg.login.LoginResultRresult*&
@@ -35,15 +34,22 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Ì
-msg/user.protomsg.user"v
+’
+msg/user.protomsg.user"t
 UserInfo
 user_id (	RuserId
 	user_name (	RuserName
-user_pic (	RuserPic
-user_pos (RuserPos"@
-CreateRoomReq/
-	game_type (2.msg.user.GameTypeRgameType"€
+user_pic (	RuserPic
+user_ip (	RuserIp"‡
+CreateRoomReq
+	game_type (RgameType
+round (Rround
+pay_type (RpayType
+seat_num (RseatNum$
+is_friend_room (RisFriendRoom"
+is_open_voice (RisOpenVoice
+is_open_gps (R	isOpenGps#
+other_setting (RotherSetting"€
 CreateRoomRsp(
 result (2.msg.user.ResultRresult
 room_id (RroomId,
@@ -71,7 +77,13 @@ GameCmdReq+
 card (Rcard"6
 
 GameCmdRsp(
-result (2.msg.user.ResultRresult"X
+result (2.msg.user.ResultRresult"“
+PushUserInfo
+user_id (	RuserId
+	user_name (	RuserName
+user_pic (	RuserPic
+user_ip (	RuserIp
+gold_num (RgoldNum"X
 RefreshRoomInfo
 room_id (RroomId,
 players (2.msg.user.UserInfoRplayers"?
@@ -112,9 +124,7 @@ zhuang_pos (R	zhuangPos
 cannot_gang
 
 cord_command
-not_exist_room*
-GameType
-HZMJ*?
+not_exist_room*?
 Command
 CHI
 PENG
@@ -122,7 +132,7 @@ zhuang_pos (R	zhuangPos
 
 HU_PAI
 CHU_PAI
-¾
+þ
 protocol.protomsg/common.protomsg/login.protomsg/user.proto"¯
 C2S
 
@@ -140,7 +150,7 @@ leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom/
 prepare”N (2.msg.user.PrepareReqRprepare9
 finish_deal•N (2.msg.user.FinishDealReqR
 finishDeal2
-	game_comd–N (2.msg.user.GameCmdReqRgameComd"Æ
+	game_comd–N (2.msg.user.GameCmdReqRgameComd"†	
 S2C
 
 session_id (R	sessionId
@@ -158,12 +168,13 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom/
 prepare”N (2.msg.user.PrepareRspRprepare9
 finish_deal•N (2.msg.user.FinishDealRspR
 finishDeal2
-	game_comd–N (2.msg.user.GameCmdRspRgameComdG
-refresh_room_info¡œ (2.msg.user.RefreshRoomInfoRrefreshRoomInfo1
-	deal_card¢œ (2.msg.user.DealCardRdealCard;
-deal_one_card£œ (2.msg.user.DealOneCardRdealOneCard%
-zi_mo¤œ (2.msg.user.ZiMoRziMoG
-notice_other_deal¥œ (2.msg.user.NoticeOtherDealRnoticeOtherDeal>
-notice_chu_pai¦œ (2.msg.user.NoticeChuPaiRnoticeChuPaiM
-notice_player_state§œ (2.msg.user.NoticePlayerStateRnoticePlayerStateD
-notice_game_over¨œ (2.msg.user.NoticeGameOverRnoticeGameOver
+	game_comd–N (2.msg.user.GameCmdRspRgameComd>
+push_user_info¡œ (2.msg.user.PushUserInfoRpushUserInfoG
+refresh_room_info±ê (2.msg.user.RefreshRoomInfoRrefreshRoomInfo1
+	deal_card²ê (2.msg.user.DealCardRdealCard;
+deal_one_card³ê (2.msg.user.DealOneCardRdealOneCard%
+zi_mo´ê (2.msg.user.ZiMoRziMoG
+notice_other_dealµê (2.msg.user.NoticeOtherDealRnoticeOtherDeal>
+notice_chu_pai¶ê (2.msg.user.NoticeChuPaiRnoticeChuPaiM
+notice_player_state·ê (2.msg.user.NoticePlayerStateRnoticePlayerStateD
+notice_game_over¸ê (2.msg.user.NoticeGameOverRnoticeGameOver

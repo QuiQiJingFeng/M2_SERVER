@@ -14,24 +14,11 @@ local CMD = {}
 local RoomPool = require "RoomPool"
 
 --创建房间
---参数:node_name 为用户所在的游戏服务器结点的名称
---参数:service 为用户在该游戏结点上服务的名称
 function CMD.createRoom(data)
-
-	local game_type = data.game_type
-	local user_id = data.user_id
-	local user_name = data.user_name
-	local user_pic = data.user_pic
-	local node_name = data.node_name
-	local service_id = data.service_id
-
-
 	local room = RoomPool:getUnusedRoom()
-	room:setGameType(game_type)
-
-	room:addPlayer(user_id,user_name,user_pic,node_name,service_id)
-
-	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_pos")
+	room:setInfo(data)
+	room:addPlayer(data)
+	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
 	local rsp_msg = {room_id = room:get("room_id"),players = players}
 	return "success",rsp_msg
 end
@@ -39,21 +26,16 @@ end
 --加入房间
 function CMD.joinRoom(data)
 	local room_id = data.room_id
-	local user_id = data.user_id
-	local user_name = data.user_name
-	local user_pic = data.user_pic
-	local node_name = data.node_name
-	local service_id = data.service_id
-
-	print("ROOM ID = ",room_id)
 	local room = RoomPool:getRoomByRoomID(room_id)
 	if not room then
 		return "not_exist_room",{}
 	end
-	room:addPlayer(user_id,user_name,user_pic,node_name,service_id)
+	
+	room:addPlayer(data)
 
-	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_pos")
+	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
 	local rsp_msg = {room_id = room:get("room_id"),players = players}
+
 	room:broadcastOtherPlayers(user_id,PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
 
 	return "success",rsp_msg

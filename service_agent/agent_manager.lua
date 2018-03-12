@@ -108,6 +108,7 @@ function SOCKET.open(fd, addr)
     agent_item.state = SECRET_STATE.WAIT_CLIENT_KEY
     agent_item.challenge = crypt.randomkey()
     agent_item.serverkey = crypt.randomkey()
+    agent_item.ip = addr
 
     local req_msg = {}
     req_msg["v1"] = crypt.base64encode(agent_item.challenge)
@@ -189,8 +190,6 @@ function SOCKET.data(fd, data)
                 CENTER_REDIS:hset("info:"..user_id, "reconnect_token", reconnect_token)
 
                 rsp_msg.reconnect_token = reconnect_token
-                rsp_msg.user_id = user_id
-
 
                 agent_item.user_id = user_id
 
@@ -211,7 +210,8 @@ function SOCKET.data(fd, data)
                 local unused_agent = allock_agent()
                 agent_item.service_id = unused_agent
 
-                local data = {fd = fd, secret = secret, user_id = user_id}
+                local ip = agent_item.ip
+                local data = {fd = fd, secret = secret, user_id = user_id,ip = ip}
                 data.user_name = user_name
                 data.user_pic = user_pic
                 --通知该service重新加载数据

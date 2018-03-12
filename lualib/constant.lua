@@ -39,10 +39,7 @@ local MJ_CARDS_TYPE = {
 	[36] = "🀆"
 }
 
-constant["ZJ_MODE"] = {
-	LIAN_ZHUANG = 1,	 --连庄  每局一个庄家
-	YING_ZHUANG = 2      --谁赢谁坐庄
-}
+
 
 constant["PLAYER_STATE"] = {
 	UN_PREPARE = 1,		--未准备
@@ -53,6 +50,9 @@ constant["PLAYER_STATE"] = {
 }
 
 constant["PUSH_EVENT"] = {
+	PUSH_USER_INFO = "push_user_info",  --推送玩家的基本信息
+
+
 	REFRESH_ROOM_INFO = "refresh_room_info", --刷新房间信息
 	DEAL_CARD = "deal_card", --发牌 开局发牌
 	DEAL_ONE_CARD = "deal_a_card", --发一张牌
@@ -65,13 +65,25 @@ constant["PUSH_EVENT"] = {
 }
 -----------------------游戏类型配置相关--------------------------
 
+--通用常量配置
+constant["PAY_TYPE"] = {
+	["ROOM_OWNER_COST"] = 1;  --房主出资
+	["AMORTIZED_COST"] = 2;   --平摊
+	["WINNER_COST"] = 3;      --赢家出资
+}
+
+-----------------------游戏选择配置-------------------
+--所有的游戏类型
 constant["ALL_GAME_TYPE"] = {
 	["HZMJ"] = 1,
 }
-constant["ALL_GAME_NUMS"] = {
-	["HZMJ"] = 4,
-}
---红中麻将所有牌型
+
+constant["RECOVER_GAME_TYPE"] = {}
+for k,v in pairs(constant["ALL_GAME_TYPE"]) do
+	constant["RECOVER_GAME_TYPE"][v] = k
+end
+
+--所有游戏的牌型
 constant["ALL_CARDS"] = {
 	["HZMJ"] = {
 		1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,34,
@@ -81,33 +93,15 @@ constant["ALL_CARDS"] = {
 	}
 }
 
-constant["ALL_DEAL_NUM"] = {
-	["HZMJ"] = 13,
-}
-
+--所有游戏的坐庄模式
+----LIAN 连庄  每局一个庄家  YING --谁赢谁坐庄
 constant["ALL_ZJ_MODE"] = {
-	["HZMJ"] = constant["ZJ_MODE"]["YING_ZHUANG"],
-}
-
-constant["COMMAND"] = {
-	CHI = 1,
-	PENG = 2,
-	GANG = 3,
-	HU_PAI =4,
-	CHU_PAI = 5,
-}
-
-constant["ALL_COMMAND"] = {
-	["HZMJ"] = {"PENG","GANG","CHU_PAI"}
-}
-
-constant["OPERATER"] = {
-	PENG = "PENG",
-	GANG = "GANG",
-	HU = "HU"
+	["HZMJ"] = "YING",
 }
 
 
+
+----------------------网络事件常量----------------
 constant["NET_EVENT"] = {
 	HANDSHAKE = "handshake",
 	LOGIN = "login",
@@ -129,5 +123,6 @@ constant["NET_RESULT"] = {
 	AUTH_FAIL = "auth_fail",
 	NOT_EXIST_ROOM = "not_exist_room",
 }
+
 
 return constant
