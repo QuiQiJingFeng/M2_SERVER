@@ -98,6 +98,7 @@ function Room:addPlayer(info)
 	table.insert(self.property.players,player)
 end
 
+
 --游戏开始的时候按照位置进行排序一次  出牌顺序为
 function Room:sortPlayers()
 	table.sort(self.property.players,function(a,b) 
