@@ -4,7 +4,7 @@ local PLAYER_STATE = constant["PLAYER_STATE"]
 local ZJ_MODE = constant["ZJ_MODE"]
 local ALL_GAME_NUMS = constant["ALL_GAME_NUMS"]
 local ALL_ZJ_MODE = constant["ALL_ZJ_MODE"]
-local ALL_CARDS = constant.constant["ALL_CARDS"]
+local ALL_CARDS = constant["ALL_CARDS"]
 local ALL_DEAL_NUM = constant["ALL_DEAL_NUM"]
 local ALL_COMMAND = constant["ALL_COMMAND"]
 local OPERATER = constant["OPERATER"]
@@ -14,8 +14,9 @@ local Room = {}
 Room.__index = Room
 
 function Room.new(room_id,node_name)
-	local new_room = setmetatable({ property = {}}, room)
-	new_room.__index = room
+	local new_room = { property = {}}
+	setmetatable(new_room, Room)
+	new_room.__index = Room
 	new_room:init(room_id,node_name)
 
 	return new_room
@@ -81,6 +82,7 @@ end
 --设置游戏的类型
 function Room:setGameType(game_type)
 	self.property.game_type = game_type
+	print("game_type = ",game_type)
 	self.property.place_number = ALL_GAME_NUMS[game_type]
 	for i=1,self.property.place_number do
 		self.property.palces[i] = false

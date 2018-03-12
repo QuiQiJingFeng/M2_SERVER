@@ -1,15 +1,15 @@
-local RedisManager = {}
+local redis = require "skynet.db.redis"
+local skynet = require "skynet"
+local redis_manager = {}
 
-function RedisManager:init()
-	local host, port = string.match(skynet.getenv("center_redis"), "([%d%.]+):([%d]+)")
-	self.conf = {}
-	self.conf["CENTER_REDIS"] = {host = host, port = port}
-end
+local conf = {}
+local host, port = string.match(skynet.getenv("center_redis"), "([%d%.]+):([%d]+)")
+conf["CENTER_REDIS"] = {host = host, port = port}
 
 --连接center服
-function RedisManager:connectCenterRedis()
-    return redis.connect(self.conf["CENTER_REDIS"])
+function redis_manager:connectCenterRedis()
+    return redis.connect(conf["CENTER_REDIS"])
 end
 
 
-return RedisManager
+return redis_manager

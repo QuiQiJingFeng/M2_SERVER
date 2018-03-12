@@ -1,14 +1,14 @@
 local skynet = require "skynet"
 
 local Room = require "Room"
-local RedisManager = require "RedisManager"
+local redis_manager = require "redis_manager"
 local CENTER_REDIS
 local INIT_NUM = 100
 
 local RoomPool = {}
 
 function RoomPool:init()
-    CENTER_REDIS = RedisManager:connectCenterRedis()
+    CENTER_REDIS = redis_manager:connectCenterRedis()
     --空闲的房间列表
     self.unused_list = {}
     --正在使用的房间列表
@@ -43,6 +43,7 @@ end
 
 --绑定房间ID 和 服务器地址
 function RoomPool:bindRoomIdToServer(room_id)
+	local node_name = skynet.getenv("node_name")
 	CENTER_REDIS:hset("room_list",room_id,node_name)
 end
 -----------------------------内部方法 END-----------------------
@@ -79,7 +80,7 @@ end
 --通过room_id 来获取room
 function RoomPool:getRoomByRoomID(room_id)
 	for _,room in ipairs(self.used_list) do
-		if room.get("room_id") == room_id then
+		if room:get("room_id") == room_id then
 			return room
 		end
 	end

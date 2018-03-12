@@ -31,8 +31,8 @@ local function send(data_content)
     end
 
     -- 根据密钥进行加密
-    if data and user_info._secret then
-        success, data = pcall(crypt.desencode, user_info._secret, data)
+    if data and user_info.secret then
+        success, data = pcall(crypt.desencode, user_info.secret, data)
         if not success then
             log.error("desencode error")
             return
@@ -40,7 +40,7 @@ local function send(data_content)
     end
 
     -- 拼接包长后发送
-    socket.write(user_info._fd, string.pack(">s2", crypt.base64encode(data)))
+    socket.write(user_info.fd, string.pack(">s2", crypt.base64encode(data)))
 end
 
 -- 分配给用户后调用此方法，设置用户相关数据
@@ -80,9 +80,9 @@ function CMD.request(data_content)
     elseif session_id then
 
         -- 请求包的session_id如果大于当前记录值，视为新请求，否则视为客户端重发数据包
-        if user_info._session_id < session_id then
+        if user_info.session_id < session_id then
             -- 记录新包的session_id
-            user_info._session_id = session_id
+            user_info.session_id = session_id
 
             -- 根据请求包包名分发处理
             local rsp_name, rsp_msg = event_handler:emit(req_name, req_msg)
@@ -103,7 +103,7 @@ function CMD.request(data_content)
     end
 
     -- 更新最后通讯时间
-    user_info._last_check_time = skynet.time()
+    user_info.last_check_time = skynet.time()
 end
 
 -- 推送包

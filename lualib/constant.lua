@@ -108,5 +108,26 @@ constant["OPERATER"] = {
 }
 
 
+constant["NET_EVENT"] = {
+	HANDSHAKE = "handshake",
+	LOGIN = "login",
+	RECONNECT = "reconnect",
+	LOGOUT = "logout",
+	CREATE_ROOM = "create_room",
+	JOIN_ROOM = "join_room",
+	PREPARE = "prepare",
+	FINISH_DEAL = "finish_deal",
+	LEAVE_ROOM = "leave_room",
+	GAME_CMD = "game_cmd",
+
+}
+
+constant["NET_RESULT"] = {
+	SUCCESS = "success",
+	ALREADY_IN_ROOM = "already_in_room",
+	FAIL = "fail",
+	AUTH_FAIL = "auth_fail",
+	NOT_EXIST_ROOM = "not_exist_room",
+}
 
 return constant
