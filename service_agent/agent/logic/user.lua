@@ -41,15 +41,14 @@ function user:createRoom(req_msg)
 		req_msg[k] = v
 	end
 
-	local success,result,rsp_msg = user_info:safeClusterCall(center_node,".room_manager","createRoom",req_msg)
+	local success,result,room_id = user_info:safeClusterCall(center_node,".room_manager","createRoom",req_msg)
 	if not success then
 		return NET_EVENT.CREATE_ROOM,{result = NET_RESULT.FAIL}
 	end
-	rsp_msg.result = result
 
-	user_info:set("room_id",rsp_msg.room_id)
+	user_info:set("room_id",room_id)
 
-	return NET_EVENT.CREATE_ROOM,rsp_msg
+	return NET_EVENT.CREATE_ROOM,{result = NET_RESULT.SUCCESS}
 end
 
 --加入房间
@@ -70,16 +69,20 @@ function user:joinRoom(req_msg)
 	data.service_id = user_info.service_id
 	data.user_ip = user_info.user_ip
 
-	local success,result,rsp_msg = user_info:safeClusterCall(center_node,".room_manager","joinRoom",req_msg)
+	for k,v in pairs(data) do
+		req_msg[k] = v
+	end
+
+	local success,result = user_info:safeClusterCall(center_node,".room_manager","joinRoom",req_msg)
 	if not success then
 		return NET_EVENT.CREATE_ROOM,{result = NET_RESULT.FAIL}
 	end
-	rsp_msg.result = result
+ 
 	if result == NET_RESULT.SUCCESS then
 		user_info:set("room_id",room_id)
 	end
 
-	return NET_EVENT.JOIN_ROOM,rsp_msg
+	return NET_EVENT.JOIN_ROOM,{result = NET_RESULT.SUCCESS}
 end
 
 --离开房间

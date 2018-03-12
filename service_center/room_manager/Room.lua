@@ -178,18 +178,11 @@ function Room:broadcastAllPlayers(msg_name,msg_data)
 	for _,player in ipairs(self.property.players) do
 		local node_name = player.node_name
 		local service_id = player.service_id
-		local success = pcall(cluster.call,node_name, service_id, "push",msg_name,msg_data)
-		if not success then
-			print("ERROR: 网络错误,center服向游戏服发送信息失败")
-		end
+		print(node_name,service_id,"push",msg_name,msg_name)
+		cluster.call(node_name, service_id, "push",msg_name,msg_data)
 	end
 end
 
---广播消息
-function Room:broadcastOtherPlayers(except_user_id,msg_name,msg_data)
-	local players = self:getOtherPlayer(except_user_id)
-	self:broadcastAllPlayers(players,msg_name,msg_data)
-end
 
 --向某个人发送消息
 function Room:sendMsgToPlyaer(player,msg_name,msg_data)

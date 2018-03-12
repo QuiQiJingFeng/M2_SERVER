@@ -4,7 +4,7 @@ require "skynet.manager"
 local cluster = require "skynet.cluster"
 
 local constant = require "constant"
-
+local NET_RESULT = constant.NET_RESULT
 local PLAYER_STATE = constant["PLAYER_STATE"]
 local PUSH_EVENT = constant["PUSH_EVENT"]
 local ZJ_MODE = constant["ZJ_MODE"]
@@ -17,10 +17,14 @@ local RoomPool = require "RoomPool"
 function CMD.createRoom(data)
 	local room = RoomPool:getUnusedRoom()
 	room:setInfo(data)
+
 	room:addPlayer(data)
 	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
 	local rsp_msg = {room_id = room:get("room_id"),players = players}
-	return "success",rsp_msg
+
+	room:broadcastAllPlayers(PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+
+	return NET_RESULT.SUCCESS,room:get("room_id")
 end
 
 --加入房间
@@ -28,35 +32,40 @@ function CMD.joinRoom(data)
 	local room_id = data.room_id
 	local room = RoomPool:getRoomByRoomID(room_id)
 	if not room then
-		return "not_exist_room",{}
+		return NET_RESULT.NOT_EXIST_ROOM,{}
 	end
-	
+	local cjson = require "cjson"
+	print("data = ",cjson.encode(data))
 	room:addPlayer(data)
 
 	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
 	local rsp_msg = {room_id = room:get("room_id"),players = players}
 
-	room:broadcastOtherPlayers(user_id,PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+	 
+	room:broadcastAllPlayers(PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+ 
+	
 
-	return "success",rsp_msg
+	return NET_RESULT.SUCCESS,rsp_msg
 end
 
 --离开房间
 function CMD.leaveRoom(data)
 	local room_id = data.room_id
-	local user_id = data.user_id
-
+	
 	local room = RoomPool:getRoomByRoomID(room_id)
 	if not room then
-		return "success"
+		return NET_RESULT.NOT_EXIST_ROOM
 	end
-
+	local user_id = data.user_id
 	room:removePlayer(user_id)
 	
-	local rsp_msg = room:getPlayerInfo("user_id","user_name","user_pic","user_pos")
+	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
+	local rsp_msg = {room_id = room:get("room_id"),players = players}
+
 	room:broadcastOtherPlayers(user_id,PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
 
-	return "success"
+	return NET_RESULT.SUCCESS
 end
 
 --准备

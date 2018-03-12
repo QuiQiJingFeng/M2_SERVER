@@ -246,9 +246,6 @@ function SOCKET.data(fd, data)
             log.errorf("wrong connect, state: %s", agent_item.state)
         end
     end
-
-
-
 end
 
 skynet.start(function()

@@ -87,11 +87,11 @@ function user_info:safeClusterCall(node_name,service_name,func,...)
 end
 
 function user_info:send(data_content)
-    print("S2C->",cjson.encode(data_content))
+    -- print("S2C->",cjson.encode(data_content))
     -- 转换为protobuf编码
     local success, data, err = pcall(pbc.encode, "S2C", data_content)
     if not success or err then
-        print("encode protobuf error")
+        print("encode protobuf error",cjson.encode(data_content))
         return
     end
 

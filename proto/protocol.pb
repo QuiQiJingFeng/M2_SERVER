@@ -34,13 +34,14 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-í
-msg/user.protomsg.user"t
+⁄
+msg/user.protomsg.user"è
 UserInfo
 user_id (	RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
-user_ip (	RuserIp"á
+user_ip (	RuserIp
+user_pos (RuserPos"á
 CreateRoomReq
 	game_type (RgameType
 round (Rround
@@ -70,10 +71,10 @@ PrepareRsp(
 result (2.msg.user.ResultRresult"
 FinishDealReq"9
 FinishDealRsp(
-result (2.msg.user.ResultRresult"M
+result (2.msg.user.ResultRresult":
 
-GameCmdReq+
-command (2.msg.user.CommandRcommand
+GameCmdReq
+command (	Rcommand
 card (Rcard"6
 
 GameCmdRsp(
@@ -124,14 +125,7 @@ zhuang_pos (R	zhuangPos
 cannot_gang
 
 cord_command
-not_exist_room*?
-Command
-CHI
-PENG
-GANG
-
-HU_PAI
-CHU_PAI
+not_exist_room
 ˛
 protocol.protomsg/common.protomsg/login.protomsg/user.proto"Ø
 C2S
