@@ -91,19 +91,19 @@ function user:leaveRoom()
 	return NET_EVENT.LEAVE_ROOM,{result = result}
 end
 
---准备
+--入座
 function user:sitDown(req_msg)
-
+	print("FDY USER 1111111111")
 	local room_id = user_info:getCurrentRoomId()
 	if not room_id then  
 		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.NOT_EXIST_ROOM}
 	end
-
+	print("FDY USER 22222222222222")
 	local center_node = user_info:getTargetNodeByRoomId(room_id)
 	if not center_node then
 		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.NOT_EXIST_ROOM}  
 	end
-
+	print("FDY USER 3333333333333")
 	local data = user_info:getValues("user_id")
 	data.room_id = room_id
 	data.pos = req_msg.pos
@@ -116,30 +116,24 @@ function user:sitDown(req_msg)
 	return NET_EVENT.SIT_DOWN,{result = result}
 end
 
---发牌完毕
-function user:dealFinish()
-	local room_id = user_info.room_id
-	local user_id = user_info.user_id
-	local data = {room_id = room_id,user_id = user_id}
-	local center_node = user_info:getTargetNodeByRoomId(room_id)
-	if not center_node then
-		return NET_EVENT.FINISH_DEAL,{result = NET_RESULT.NOT_EXIST_ROOM}  
-	end
-	local result = cluster.call(center_node,".room_manager","dealFinish",data)
-	return NET_EVENT.FINISH_DEAL,{result = result}
-end
-
 --游戏命令 
 function user:gameCmd(data)
-	local room_id = user_info.room_id
-	local user_id = user_info.user_id
-
-	data.user_id = user_id
+	local room_id = user_info:getCurrentRoomId()
+	if not room_id then  
+		return NET_EVENT.GAME_CMD,{result = NET_RESULT.NOT_EXIST_ROOM}
+	end
+ 
 	local center_node = user_info:getTargetNodeByRoomId(room_id)
 	if not center_node then
 		return NET_EVENT.GAME_CMD,{result = NET_RESULT.NOT_EXIST_ROOM}  
 	end
-	local result = cluster.call(center_node,".room_manager","gameCmd",data)
+
+	data.user_id = user_info:get("user_id")
+	data.room_id = room_id
+	local success,result = user_info:safeClusterCall(center_node,".room_manager","gameCMD",data)
+	if not success then
+		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.FAIL}
+	end
 
 	return NET_EVENT.GAME_CMD,{result=result}
 end

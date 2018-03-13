@@ -53,11 +53,10 @@ constant["PUSH_EVENT"] = {
 	PUSH_USER_INFO = "push_user_info",  --推送玩家的基本信息
 	REFRESH_ROOM_INFO = "refresh_room_info", --刷新房间信息
 	PUSH_SIT_DOWN = "push_sit_down",      --推送玩家坐下的信息
+	DEAL_CARD = "deal_card", --发牌
+	PUSH_CARD = "push_card", --摸牌 --通知其他人 有人摸牌了
 
-	DEAL_CARD = "deal_card", --发牌 开局发牌
-	DEAL_ONE_CARD = "deal_a_card", --发一张牌
-	ZI_MO = "zi_mo",--胡牌
-	NOTICE_OTHER_DEAL = "notice_other_deal", --通知其他人 有人摸牌了
+	
 	NOTICE_PLAYER_STATE = "notice_player_state",  --通知其他人的碰、杠、胡状态
 	NOTICE_CHU_PAI = "notice_chu_pai", --通知其他人有人出牌了
 	NOTICE_GAME_OVER = "notice_game_over", --本局结束
@@ -99,6 +98,10 @@ constant["ALL_ZJ_MODE"] = {
 	["HZMJ"] = "YING",
 }
 
+constant["ZJ_MODE"] = {
+	["YING"] = "YING",
+	["LIAN"] = "LIAN",
+}
 
 
 ----------------------网络事件常量----------------
@@ -113,6 +116,10 @@ constant["NET_EVENT"] = {
 	FINISH_DEAL = "finish_deal",
 	LEAVE_ROOM = "leave_room",
 	GAME_CMD = "game_cmd",
+}
+
+constant["GAME_CMD"] = {
+	DEAL_FINISH = "DEAL_FINISH",	--发牌完毕
 
 }
 
@@ -123,6 +130,7 @@ constant["NET_RESULT"] = {
 	AUTH_FAIL = "auth_fail",
 	NOT_EXIST_ROOM = "not_exist_room",
 	SIT_ALREADY_HAS = "sit_already_has",
+	NOSUPPORT_COMMAND = "nosupport_command",
 
 }
 

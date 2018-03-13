@@ -1,23 +1,27 @@
 local skynet = require "skynet"
+local cluster = require "skynet.cluster"
 local log = require "skynet.log"
 require "skynet.manager"
-
+local constant = require "constant"
+local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
 local CMD = {}
-local GAME = nil
+local game
 
 function CMD.startGame(room_info)
-	local game_type = room_info.game_type
-	GAME = require(game_type..".".."game.lua")
+	print("FYD++++++START GAME")
+	local game_type = RECOVER_GAME_TYPE[room_info.game_type]
+	game = require(game_type..".".."game")
 	--初始化
-	GAME:start(room_info)
+	game:init(room_info)
+	game:start()
 end
 
 function CMD.gameCMD(data)
-	return GAME:gameCMD(data)
+	return game:gameCMD(data)
 end
 
 function CMD.clear()
-	GAME = nil
+	game:clear()
 end
 
 skynet.start(function()

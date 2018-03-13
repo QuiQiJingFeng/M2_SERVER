@@ -26,8 +26,9 @@ function Room.new(room_id,node_name)
 end
 --使用数据重建房间,因为虚拟机之间只能传递数据,所以需要重新构建
 function Room.rebuild(property)
-	local new_room = setmetatable({ property = property}, room)
-	new_room.__index = room
+	local new_room = { property = property}
+	setmetatable(new_room, Room)
+	new_room.__index = Room
 	return new_room
 end
 
@@ -42,6 +43,9 @@ function Room:init(room_id,node_name)
 	self.property.sit_down_num = 0
 	--发牌完毕的玩家数量
 	self.property.finish_deal_num = 0
+
+	self.card_list = {}
+	self.handle_cards = {}
 end
 
 function Room:setInfo(info)
@@ -58,7 +62,7 @@ function Room:setInfo(info)
 	self.property.zj_mode = ALL_ZJ_MODE[RECOVER_GAME_TYPE[info.game_type]]
 end
 
---设置游戏房间地址
+--设置游戏房间地址 
 function Room:setServiceId(service_id)
 	self.property.service_id = service_id
 end
@@ -161,6 +165,8 @@ end
 
 function Room:updatePlayerProperty(user_id,name,value)
 	for index,player in ipairs(self.property.players) do
+		print("user_id = ",user_id)
+		print("player_user_id = ",player.user_id)
 		if player.user_id == user_id then
 			player[name] = value
 			return true
@@ -178,6 +184,8 @@ function Room:updatePlayerState(user_id,new_state)
 			return self.property.sit_down_num == self.property.seat_num
 		elseif new_state == PLAYER_STATE.DEAL_FINISH then
 			self.property.finish_deal_num = self.property.finish_deal_num + 1
+			print("FYD+++++>finish_deal_num = ",self.property.finish_deal_num)
+			print("FYD+++++>seat_num = ",self.property.seat_num)
 			return self.property.finish_deal_num == self.property.seat_num
 		end
 	end	

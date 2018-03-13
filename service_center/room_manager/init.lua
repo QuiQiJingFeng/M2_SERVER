@@ -2,7 +2,7 @@ local skynet = require "skynet"
 local log = require "skynet.log"
 require "skynet.manager"
 local cluster = require "skynet.cluster"
-
+local Room = require "Room"
 local constant = require "constant"
 local NET_RESULT = constant.NET_RESULT
 local PLAYER_STATE = constant["PLAYER_STATE"]
@@ -72,56 +72,48 @@ function CMD.sitDown(data)
 	local user_id = data.user_id
 	local pos = data.pos
 	local room = RoomPool:getRoomByRoomID(room_id)
-
+	print("1111111111pos=>",pos)
+	if pos > room:get("seat_num") then
+		return NET_RESULT.FAIL
+	end
+	print("222222222222222=>")
 	local player = room:getPlayerByPos(pos)
 	if player and player.user_pos then
 		return NET_RESULT.SIT_ALREADY_HAS
 	end
 
+	print("3333333333333=>")
 	room:updatePlayerProperty(user_id,"user_pos",pos)
-	local full_seat = room:updatePlayerState(user_id,PLAYER_STATE.SIT_DOWN_FINISH)
+	
 
 	--推送
 	local sit_list = room:getPlayerInfo("user_id","user_pos")
 	local rsp_msg = {room_id = room_id,sit_list = sit_list}
 	room:broadcastAllPlayers(PUSH_EVENT.PUSH_SIT_DOWN,rsp_msg)
 
+	
+	local full_seat = room:updatePlayerState(user_id,PLAYER_STATE.SIT_DOWN_FINISH)
 	if full_seat then
 		--所有人都坐下之后 开始游戏
-		-- skynet.call(room.service_id,"lua","startGame",room:getAllInfo())
+		skynet.call(room:get("service_id"),"lua","startGame",room:getAllInfo())
 	end
 
 	return NET_RESULT.SUCCESS
 end
 
---发牌完毕
-function CMD.dealFinish(data)
-	local room_id = data.room_id
-	local user_id = data.user_id
-
-	local room = RoomPool:getRoomByRoomID(room_id)
-	local full = room:updatePlayerState(user_id,PLAYER_STATE.DEAL_FINISH)
-	if full then
-		--所有人都发牌完毕之后 开始游戏
-		skynet.call(room.service_id,"lua","startGame",room:getAllInfo())
-	end
-end
-
 --游戏指令
 function CMD.gameCMD(data)
-	local command = data.command
+
 	local user_id = data.user_id
-	local room = RoomPool:getRoomByUserID(user_id)
-	local support = room:isSuportCommand(command)
-	if not support then
-		return "nosupport_command"
-	end
-	local result = skynet.call(room.service_id,"gameCMD",data)
+	local room_id = data.room_id
+	local room = RoomPool:getRoomByRoomID(room_id)
+	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
 	return result
 end
 
 skynet.start(function()
     skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
+
         local f = assert(CMD[cmd])
         skynet.ret(skynet.pack(f(subcmd, ...)))
     end)

@@ -34,7 +34,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ó
+é
 msg/user.protomsg.user"t
 UserInfo
 user_id (	RuserId
@@ -68,9 +68,6 @@ SitDownReq
 pos (Rpos"6
 
 SitDownRsp(
-result (2.msg.user.ResultRresult"
-FinishDealReq"9
-FinishDealRsp(
 result (2.msg.user.ResultRresult":
 
 GameCmdReq
@@ -102,17 +99,13 @@ GameCmdRsp(
 user_pos (RuserPos"T
 PushSitDown
 room_id (RroomId,
-sit_list (2.msg.user.SitItemRsitList"?
-DealCard
-
-zhuang_pos (R	zhuangPos
-cards (Rcards"!
-DealOneCard
-card (Rcard"
-ZiMo
-zi_mo (RziMo"*
-NoticeOtherDeal
-user_id (	RuserId";
+sit_list (2.msg.user.SitItemRsitList"4
+DealCard
+zpos (Rzpos
+cards (Rcards"7
+PushCard
+user_id (	RuserId
+card (Rcard";
 NoticeChuPai
 user_id (	RuserId
 card (Rcard"K
@@ -142,8 +135,8 @@ zhuang_pos (R	zhuangPos
 cord_command
 not_exist_room
 sit_already_has
-½
-protocol.protomsg/common.protomsg/login.protomsg/user.proto"°
+É
+protocol.protomsg/common.protomsg/login.protomsg/user.proto"ó
 C2S
 
 session_id (R	sessionId3
@@ -157,10 +150,8 @@ createRoom3
 	join_room’N (2.msg.user.JoinRoomReqRjoinRoom6
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
-sit_down”N (2.msg.user.SitDownReqRsitDown9
-finish_deal•N (2.msg.user.FinishDealReqR
-finishDeal2
-	game_comd–N (2.msg.user.GameCmdReqRgameComd"Ä	
+sit_down”N (2.msg.user.SitDownReqRsitDown0
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"
 S2C
 
 session_id (R	sessionId
@@ -175,17 +166,13 @@ createRoom3
 	join_room’N (2.msg.user.JoinRoomRspRjoinRoom6
 
 leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
-sit_down”N (2.msg.user.SitDownRspRsitDown9
-finish_deal•N (2.msg.user.FinishDealRspR
-finishDeal2
-	game_comd–N (2.msg.user.GameCmdRspRgameComd>
+sit_down”N (2.msg.user.SitDownRspRsitDown0
+game_cmd•N (2.msg.user.GameCmdRspRgameCmd>
 push_user_info¡œ (2.msg.user.PushUserInfoRpushUserInfoG
 refresh_room_info¢œ (2.msg.user.RefreshRoomInfoRrefreshRoomInfo;
 push_sit_down£œ (2.msg.user.PushSitDownRpushSitDown1
-	deal_card²ê (2.msg.user.DealCardRdealCard;
-deal_one_card³ê (2.msg.user.DealOneCardRdealOneCard%
-zi_mo´ê (2.msg.user.ZiMoRziMoG
-notice_other_dealµê (2.msg.user.NoticeOtherDealRnoticeOtherDeal>
+	deal_card¤œ (2.msg.user.DealCardRdealCard1
+	push_card¥œ (2.msg.user.PushCardRpushCard>
 notice_chu_pai¶ê (2.msg.user.NoticeChuPaiRnoticeChuPaiM
 notice_player_state·ê (2.msg.user.NoticePlayerStateRnoticePlayerStateD
 notice_game_over¸ê (2.msg.user.NoticeGameOverRnoticeGameOver

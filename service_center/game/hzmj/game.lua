@@ -1,46 +1,129 @@
 local skynet = require "skynet"
-local cluster = require "skynet.cluster"
 local Room = require "Room"
 local constant = require "constant"
-local COMMAND = constant["COMMAND"]
+local ALL_CARDS = constant.ALL_CARDS
+local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
+local GAME_CMD = constant.GAME_CMD
+local NET_RESULT = constant.NET_RESULT
+local PLAYER_STATE = constant.PLAYER_STATE
+local ZJ_MODE = constant.ZJ_MODE
+local PUSH_EVENT = constant.PUSH_EVENT
+
 local judgecard = require "judgecard"
 
 local game = {}
 
-local CUR_STATE
+local game_meta = {}
+setmetatable(game,game_meta)
+game.__index = game_meta
+game.__newindex = game_meta
 
-function game:start(room_info)
-	print("startGame ++++++")
-	-- self.room = Room.rebuild(room_info)
-	-- --玩家位置排序
-	-- self.room:sortPlayers()
+function game:clear()
+	local game_meta = {}
+	setmetatable(game,game_meta)
+	game.__index = game_meta
+	game.__newindex = game_meta
+end
 
-	-- local players = self.room:get("players")
-	-- --将card按类别和数字存储
-	-- for _,player in ipairs(players) do
-	-- 	local card_list = player.card_list
+--洗牌  FisherYates洗牌算法
+--算法的思想是每次从未选中的数字中随机挑选一个加入排列，时间复杂度为O(n)
+function game:fisherYates()
+	for i = #self.card_list,1,-1 do
+		--在剩余的牌中随机取一张
+		local j = math.random(i)
+		--交换i和j位置的牌
+		local temp = self.card_list[i]
+		self.card_list[i] = self.card_list[j]
+		self.card_list[j] = temp
+	end
+end
 
-	-- 	local all_card = { }
-	-- 	for i= 1,4 do
-	-- 		all_card[i] = {}
-	-- 		for j= 1,10 do
-	-- 			all_card[i][j] = 0
-	-- 		end
-	-- 	end
+--游戏初始化
+function game:init(room_info)
+	self.room = Room.rebuild(room_info)
+	local game_type = room_info.game_type
+	--填充牌库
+	self.card_list = {}
+	game_type = RECOVER_GAME_TYPE[game_type]
+	print("FYD++++>game_type = ",game_type)
+	for _,value in ipairs(ALL_CARDS[game_type]) do
+		table.insert(self.card_list,value)
+	end
 
-	-- 	for _,value in ipairs(card_list) do
-	-- 		local card_type = math.floor(value / 10) + 1
-	-- 		local card_value = value % 10
-	-- 		all_card[card_type][10] = all_card[card_type][10] + 1
-	-- 		all_card[card_type][card_value] = all_card[card_type][card_value] + 1
-	-- 	end
-	-- 	player.all_card = all_card
-	-- end
+	--洗牌
+	self:fisherYates()
+end
 
-	-- --开始之后 给庄家发一张牌
-	-- local first = self.room:get("cur_zhuang_pos")
-	-- local player = self.room:getPlayerByPos(first)
-	-- self:pushCard(player)
+--更新庄家的位置
+function game:updateZpos()
+	local zpos = nil
+
+	local zj_mode = self.room:get("zj_mode")
+	local sit_down_num = self.room:get("sit_down_num")
+	if zj_mode == ZJ_MODE.YING_ZHUANG then
+		if not self.zpos then
+			zpos = math.random(1,sit_down_num)
+		else
+			zpos = self.zpos
+		end
+	elseif zj_mode == ZJ_MODE.LIAN_ZHUANG then
+		if not self.zpos then
+			zpos = math.random(1,sit_down_num)
+		else
+			zpos = (self.zpos + 1) % sit_down_num
+		end
+	end
+	self.zpos = zpos
+end
+
+function game:start()
+	--1、更新庄家的位置
+	self:updateZpos()
+
+	local players = self.room:get("players")
+	local cjson = require "cjson"
+	print("PLAYER = cjson =-",cjson.encode(players))
+	--2、发牌
+	local deal_num = 13 --红中麻将发13张牌
+	local players = self.room:get("players")
+	for index=1,self.room:get("sit_down_num") do
+		local cards = {}
+		for j=1,deal_num do
+			--从最后一个开始移除,避免大量的元素位置重排
+			local card = table.remove(self.card_list) 
+			table.insert(cards,card)
+		end
+
+		local player = self.room:getPlayerByPos(index)
+		player.card_list = cards
+
+		local rsp_msg = {zpos = self.zpos,cards = cards}
+		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
+	end
+
+	--3、将card按类别和数字存储
+	for _,player in ipairs(players) do
+		local card_list = player.card_list
+
+		local handle_cards = { }
+		for i= 1,4 do
+			handle_cards[i] = {}
+			for j= 1,10 do
+				handle_cards[i][j] = 0
+			end
+		end
+
+		for _,value in ipairs(card_list) do
+			local card_type = math.floor(value / 10) + 1
+			local card_value = value % 10
+			handle_cards[card_type][10] = handle_cards[card_type][10] + 1
+			handle_cards[card_type][card_value] = handle_cards[card_type][card_value] + 1
+		end
+		player.handle_cards = handle_cards
+	end
+
+	--等待玩家发牌完毕
+	print("等待玩家发牌完毕")
 end
 
 --增加手牌
@@ -77,6 +160,63 @@ function game:removeHandleCard(player,card)
 	return true
 end
 
+--向A发一张牌 摸牌
+function game:pushCard(player)
+
+	local card = table.remove(self.card_list)
+	self:addHandleCard(player,card)
+
+	local user_id = player.user_id
+	local rsp_msg = {user_id = user_id,card = card}
+
+	--通知摸牌
+	self.room:broadcastAllPlayers(PUSH_EVENT.PUSH_CARD,rsp_msg)
+end
+
+
+--发牌完毕
+game["DEAL_FINISH"] = function(user_id)
+	print("1111111 user_id = ",user_id)
+	local all = game.room:updatePlayerState(user_id,PLAYER_STATE.DEAL_FINISH)
+	if all then
+		print("FYD++++++发牌完毕,A出牌")
+	end
+	print("222222")
+end
+
+function game:gameCMD(data)
+	print("FYD++++++GMCOMD  user_id = ",user_id)
+	local user_id = data.user_id
+	local command = data.command
+	local func = game[command]
+	if not func then
+		return NET_RESULT.NOSUPPORT_COMMAND
+	end
+	func(user_id)
+	return NET_RESULT.SUCCESS
+end
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function game:checkHu(player)
 	local tempResult = {
 		iChiNum = 0;	
@@ -109,33 +249,7 @@ function game:checkHu(player)
 	return judgecard:JudgeIfHu2(player.all_card, tempResult, false);
 end
 
---向A发一张牌
-function game:pushCard(player)
-	local card_list = self.room:get("card_list")
-	local card = table.remove(card_list,1)
-	
-	self:addHandleCard(player,card)
-	local rsp_msg = {card = card}
-	--给玩家A 下发一张牌 card
-	self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_ONE_CARD,rsp_msg)
-	local user_id = player.user_id
-	--通知BCD 现在给A 发了一张牌
-	self.room:broadcastOtherPlayers(user_id,PUSH_EVENT.NOTICE_OTHER_DEAL,{user_id = user_id})
 
-	--检查A 收到这张牌后 是否可以胡牌
-	local is_hu = self:checkHu(player)
-	if is_hu then
-		local record = self.room:get("record")
-		table.insert(record[OPERATER.HU],player.user_id)
-		record["operaters"][player.user_id] = false
-		--向A推送，现在可以胡牌
-		self.room:sendMsgToPlyaer(player,PUSH_EVENT.ZI_MO,{})
-	end
-	
-	--等待玩家A操作
-	local wait_users = self.room:get("wait_users")
-	wait_users[player.user_id] = true
-end
 
 function game:checkPeng(player,card)
 	local card_type = math.floor(value / 10) + 1
@@ -445,29 +559,5 @@ function game:gangPai(player)
 	end
 	return "success"
 end
-
-function game:gameCMD(data)
-	local user_id = data.user_id
-	local command = data.command
-
-	local player = self.room:getPlayerByUserId(user_id)
-
-	if command == COMMAND.HU_PAI then
-		return self:huPai(player)
-	elseif command == COMMAND.PENG then
-		return self:pengPai(player)
-	elseif command == COMMAND.GANG then
-		return self:gangPai(player)
-	elseif command == COMMAND.CHU_PAI then
-		local card = data.card
-		return self:chuPai(player,card)
-	else
-		print("UNKOWN COMMAND =>",command)
-	end
-
-	return "success"
-end
- 
-
 
 return game
