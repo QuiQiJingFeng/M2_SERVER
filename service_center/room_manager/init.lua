@@ -20,8 +20,8 @@ function CMD.createRoom(data)
 
 	room:addPlayer(data)
 	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
-	local rsp_msg = {room_id = room:get("room_id"),players = players}
-
+	local rsp_msg = room:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
+	rsp_msg.players = players
 	room:broadcastAllPlayers(PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
 
 	return NET_RESULT.SUCCESS,room:get("room_id")
@@ -34,12 +34,12 @@ function CMD.joinRoom(data)
 	if not room then
 		return NET_RESULT.NOT_EXIST_ROOM,{}
 	end
-	local cjson = require "cjson"
-	print("data = ",cjson.encode(data))
+
 	room:addPlayer(data)
 
 	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
-	local rsp_msg = {room_id = room:get("room_id"),players = players}
+	local rsp_msg = room:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
+	rsp_msg.players = players
 
 	room:broadcastAllPlayers(PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
  

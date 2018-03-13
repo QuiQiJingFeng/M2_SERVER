@@ -111,6 +111,15 @@ function Room:set(property_name,value)
 	self.property[property_name] = value
 end
 
+function Room:getPropertys(...)
+	local args = {...}
+	local info = {}
+	for i,v in ipairs(args) do
+		info[v] = self.property[v]
+	end
+	return info
+end
+
 --获取所有玩家的 ID 名称 头像 状态数据
 function Room:getPlayerInfo(...)
 	local filters = {...}

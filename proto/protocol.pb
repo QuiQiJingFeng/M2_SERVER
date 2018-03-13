@@ -34,7 +34,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ú
+ó
 msg/user.protomsg.user"t
 UserInfo
 user_id (	RuserId
@@ -84,10 +84,19 @@ GameCmdRsp(
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
-gold_num (RgoldNum"X
+gold_num (RgoldNum"Ð
 RefreshRoomInfo
 room_id (RroomId,
-players (2.msg.user.UserInfoRplayers"=
+players (2.msg.user.UserInfoRplayers
+	game_type (RgameType
+round (Rround
+pay_type (RpayType
+seat_num (RseatNum$
+is_friend_room (RisFriendRoom"
+is_open_voice (RisOpenVoice
+is_open_gps	 (R	isOpenGps#
+other_setting
+ (RotherSetting"=
 SitItem
 user_id (	RuserId
 user_pos (RuserPos"T
