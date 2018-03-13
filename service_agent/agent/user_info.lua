@@ -45,6 +45,7 @@ end
 
 function user_info:clear()
 	property = {}
+    self:center_redis:disconnect()
 end
 
 --更新用户属性

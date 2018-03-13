@@ -92,7 +92,7 @@ function SOCKET.close(fd)
 end
 
 function SOCKET.error(fd, msg)
-    log.info("socket error",fd, msg)
+    print("socket error",fd, msg)
     disconnect_fd(fd)
 end
 
