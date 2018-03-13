@@ -38,6 +38,10 @@ function Room:init(room_id,node_name)
 	self.property.node_name = node_name
 	--房间中的玩家列表
 	self.property.players = {}
+	--坐下的人数
+	self.property.sit_down_num = 0
+	--发牌完毕的玩家数量
+	self.property.finish_deal_num = 0
 end
 
 function Room:setInfo(info)
@@ -93,17 +97,9 @@ function Room:addPlayer(info)
 	--积分
 	player.score = 0
 	--玩家状态初始化
-	player.state = PLAYER_STATE.UN_PREPARE
+	player.state = PLAYER_STATE.UN_SIT_DOWN
 	
 	table.insert(self.property.players,player)
-end
-
-
---游戏开始的时候按照位置进行排序一次  出牌顺序为
-function Room:sortPlayers()
-	table.sort(self.property.players,function(a,b) 
-			return a.user_pos < b.user_pos
-		end)
 end
 
 --获取房间的属性
@@ -154,23 +150,28 @@ function Room:removePlayer(user_id)
 	end
 end
 
---更新玩家的状态 并且返回是否已经坐满人
-function Room:updatePlayerState(user_id,new_state)
+function Room:updatePlayerProperty(user_id,name,value)
 	for index,player in ipairs(self.property.players) do
 		if player.user_id == user_id then
-				palyer.state = new_state
-				if new_state == PLAYER_STATE.PREPARE_FINISH then
-					self.property.prepare_num = self.property.prepare_num + 1
-					return self.property.prepare_num == self.property.place_number
-				elseif new_state == PLAYER_STATE.DEAL_FINISH then
-					self.property.finish_deal_num = self.property.finish_deal_num + 1
-					return self.property.finish_deal_num == self.property.place_number
-				end
-			break
+			player[name] = value
+			return true
 		end
 	end
+	return false
+end
 
-	
+--更新玩家的状态 并且返回是否已经坐满人
+function Room:updatePlayerState(user_id,new_state)
+	local result = self:updatePlayerProperty(user_id,"state",new_state)
+	if result then
+		if new_state == PLAYER_STATE.SIT_DOWN_FINISH then
+			self.property.sit_down_num = self.property.sit_down_num + 1
+			return self.property.sit_down_num == self.property.seat_num
+		elseif new_state == PLAYER_STATE.DEAL_FINISH then
+			self.property.finish_deal_num = self.property.finish_deal_num + 1
+			return self.property.finish_deal_num == self.property.seat_num
+		end
+	end	
 end
 
 --广播消息
@@ -178,7 +179,7 @@ function Room:broadcastAllPlayers(msg_name,msg_data)
 	for _,player in ipairs(self.property.players) do
 		local node_name = player.node_name
 		local service_id = player.service_id
-		print(node_name,service_id,"push",msg_name,msg_name)
+		print("PUSH:",node_name,service_id,"push",msg_name,msg_name)
 		cluster.call(node_name, service_id, "push",msg_name,msg_data)
 	end
 end

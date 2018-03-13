@@ -42,8 +42,8 @@ local MJ_CARDS_TYPE = {
 
 
 constant["PLAYER_STATE"] = {
-	UN_PREPARE = 1,		--未准备
-	PREPARE_FINISH = 2, --准备完毕  
+	UN_SIT_DOWN = 1,	--未入座
+	SIT_DOWN_FINISH = 2, --入座完毕  
 	DEAL_FINISH = 3,	--发牌完毕
 	GAME_PLAYING = 3,	--游戏进行中
 	GAME_OVER = 4		--游戏结束
@@ -51,9 +51,9 @@ constant["PLAYER_STATE"] = {
 
 constant["PUSH_EVENT"] = {
 	PUSH_USER_INFO = "push_user_info",  --推送玩家的基本信息
-
-
 	REFRESH_ROOM_INFO = "refresh_room_info", --刷新房间信息
+	PUSH_SIT_DOWN = "push_sit_down",      --推送玩家坐下的信息
+
 	DEAL_CARD = "deal_card", --发牌 开局发牌
 	DEAL_ONE_CARD = "deal_a_card", --发一张牌
 	ZI_MO = "zi_mo",--胡牌
@@ -109,7 +109,7 @@ constant["NET_EVENT"] = {
 	LOGOUT = "logout",
 	CREATE_ROOM = "create_room",
 	JOIN_ROOM = "join_room",
-	PREPARE = "prepare",
+	SIT_DOWN = "sit_down",
 	FINISH_DEAL = "finish_deal",
 	LEAVE_ROOM = "leave_room",
 	GAME_CMD = "game_cmd",
@@ -122,6 +122,8 @@ constant["NET_RESULT"] = {
 	FAIL = "fail",
 	AUTH_FAIL = "auth_fail",
 	NOT_EXIST_ROOM = "not_exist_room",
+	SIT_ALREADY_HAS = "sit_already_has",
+
 }
 
 

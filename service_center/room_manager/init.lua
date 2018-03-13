@@ -41,11 +41,8 @@ function CMD.joinRoom(data)
 	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
 	local rsp_msg = {room_id = room:get("room_id"),players = players}
 
-	 
 	room:broadcastAllPlayers(PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
  
-	
-
 	return NET_RESULT.SUCCESS,rsp_msg
 end
 
@@ -63,26 +60,37 @@ function CMD.leaveRoom(data)
 	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip")
 	local rsp_msg = {room_id = room:get("room_id"),players = players}
 
-	room:broadcastOtherPlayers(user_id,PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+	room:broadcastAllPlayers(PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
 
 	return NET_RESULT.SUCCESS
 end
 
---准备
-function CMD.prepare(data)
+--坐下
+function CMD.sitDown(data)
 	local room_id = data.room_id
 	local user_id = data.user_id
-
+	local pos = data.pos
 	local room = RoomPool:getRoomByRoomID(room_id)
-	local full = room:updatePlayerState(user_id,PLAYER_STATE.PREPARE_FINISH)
-	if full then
-		--洗牌
-		room:fisherYates()
-		--发牌
-		room:dealCards()
+
+	local player = room:getPlayerByPos(pos)
+	if player and player.user_pos then
+		return NET_RESULT.SIT_ALREADY_HAS
 	end
 
-	return "success"
+	room:updatePlayerProperty(user_id,"user_pos",pos)
+	local full_seat = room:updatePlayerState(user_id,PLAYER_STATE.SIT_DOWN_FINISH)
+
+	--推送
+	local sit_list = room:getPlayerInfo("user_id","user_pos")
+	local rsp_msg = {room_id = room_id,sit_list = sit_list}
+	room:broadcastAllPlayers(PUSH_EVENT.PUSH_SIT_DOWN,rsp_msg)
+
+	if full_seat then
+		--所有人都坐下之后 开始游戏
+		-- skynet.call(room.service_id,"lua","startGame",room:getAllInfo())
+	end
+
+	return NET_RESULT.SUCCESS
 end
 
 --发牌完毕

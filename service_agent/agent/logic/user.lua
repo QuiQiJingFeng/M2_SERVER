@@ -13,7 +13,7 @@ local user = {}
 function user:init()
     event_handler:on(NET_EVENT.CREATE_ROOM,utils:handler(self,user.createRoom))
     event_handler:on(NET_EVENT.JOIN_ROOM,utils:handler(self,user.joinRoom))
-    event_handler:on(NET_EVENT.PREPARE,utils:handler(self,user.prepare))
+    event_handler:on(NET_EVENT.SIT_DOWN,utils:handler(self,user.sitDown))
     event_handler:on(NET_EVENT.FINISH_DEAL,utils:handler(self,user.finishDeal))
     event_handler:on(NET_EVENT.LEAVE_ROOM,utils:handler(self,user.leaveRoom))
     event_handler:on(NET_EVENT.GAME_CMD,utils:handler(self,user.gameCmd))
@@ -92,15 +92,28 @@ function user:leaveRoom()
 end
 
 --准备
-function user:prepare()
-	local room_id = user_info.room_id
-	local user_id = user_info.user_id
+function user:sitDown(req_msg)
+
+	local room_id = user_info:getCurrentRoomId()
+	if not room_id then  
+		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.NOT_EXIST_ROOM}
+	end
+
 	local center_node = user_info:getTargetNodeByRoomId(room_id)
 	if not center_node then
-		return NET_EVENT.PREPARE,{result = NET_RESULT.NOT_EXIST_ROOM}  
+		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.NOT_EXIST_ROOM}  
 	end
-	local result = cluster.call(center_node,".room_manager","prepare",room_id,user_id)
-	return NET_EVENT.PREPARE,{result = result}
+
+	local data = user_info:getValues("user_id")
+	data.room_id = room_id
+	data.pos = req_msg.pos
+
+	local success,result = user_info:safeClusterCall(center_node,".room_manager","sitDown",data)
+	if not success then
+		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.FAIL}
+	end
+
+	return NET_EVENT.SIT_DOWN,{result = result}
 end
 
 --发牌完毕

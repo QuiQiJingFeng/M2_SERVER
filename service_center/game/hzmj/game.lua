@@ -10,36 +10,37 @@ local game = {}
 local CUR_STATE
 
 function game:start(room_info)
-	self.room = Room.rebuild(room_info)
-	--玩家位置排序
-	self.room:sortPlayers()
+	print("startGame ++++++")
+	-- self.room = Room.rebuild(room_info)
+	-- --玩家位置排序
+	-- self.room:sortPlayers()
 
-	local players = self.room:get("players")
-	--将card按类别和数字存储
-	for _,player in ipairs(players) do
-		local card_list = player.card_list
+	-- local players = self.room:get("players")
+	-- --将card按类别和数字存储
+	-- for _,player in ipairs(players) do
+	-- 	local card_list = player.card_list
 
-		local all_card = { }
-		for i= 1,4 do
-			all_card[i] = {}
-			for j= 1,10 do
-				all_card[i][j] = 0
-			end
-		end
+	-- 	local all_card = { }
+	-- 	for i= 1,4 do
+	-- 		all_card[i] = {}
+	-- 		for j= 1,10 do
+	-- 			all_card[i][j] = 0
+	-- 		end
+	-- 	end
 
-		for _,value in ipairs(card_list) do
-			local card_type = math.floor(value / 10) + 1
-			local card_value = value % 10
-			all_card[card_type][10] = all_card[card_type][10] + 1
-			all_card[card_type][card_value] = all_card[card_type][card_value] + 1
-		end
-		player.all_card = all_card
-	end
+	-- 	for _,value in ipairs(card_list) do
+	-- 		local card_type = math.floor(value / 10) + 1
+	-- 		local card_value = value % 10
+	-- 		all_card[card_type][10] = all_card[card_type][10] + 1
+	-- 		all_card[card_type][card_value] = all_card[card_type][card_value] + 1
+	-- 	end
+	-- 	player.all_card = all_card
+	-- end
 
-	--开始之后 给庄家发一张牌
-	local first = self.room:get("cur_zhuang_pos")
-	local player = self.room:getPlayerByPos(first)
-	self:pushCard(player)
+	-- --开始之后 给庄家发一张牌
+	-- local first = self.room:get("cur_zhuang_pos")
+	-- local player = self.room:getPlayerByPos(first)
+	-- self:pushCard(player)
 end
 
 --增加手牌

@@ -34,14 +34,13 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Ú
-msg/user.protomsg.user"
+ú
+msg/user.protomsg.user"t
 UserInfo
 user_id (	RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
-user_ip (	RuserIp
-user_pos (RuserPos"‡
+user_ip (	RuserIp"‡
 CreateRoomReq
 	game_type (RgameType
 round (Rround
@@ -63,11 +62,12 @@ login_type (2.msg.login.LoginTypeR	loginType
 players (2.msg.user.UserInfoRplayers"
 LeaveRoomReq"8
 LeaveRoomRsp(
-result (2.msg.user.ResultRresult"
+result (2.msg.user.ResultRresult"
 
-PrepareReq"6
+SitDownReq
+pos (Rpos"6
 
-PrepareRsp(
+SitDownRsp(
 result (2.msg.user.ResultRresult"
 FinishDealReq"9
 FinishDealRsp(
@@ -87,7 +87,13 @@ GameCmdRsp(
 gold_num (RgoldNum"X
 RefreshRoomInfo
 room_id (RroomId,
-players (2.msg.user.UserInfoRplayers"?
+players (2.msg.user.UserInfoRplayers"=
+SitItem
+user_id (	RuserId
+user_pos (RuserPos"T
+PushSitDown
+room_id (RroomId,
+sit_list (2.msg.user.SitItemRsitList"?
 DealCard
 
 zhuang_pos (R	zhuangPos
@@ -111,7 +117,7 @@ zhuang_pos (R	zhuangPos
 	card_list (RcardList"S
 NoticeGameOver
 user_id (	RuserId(
-players (2.msg.user.ItemRplayers*Ö
+players (2.msg.user.ItemRplayers*ë
 Result
 success
 fail
@@ -125,9 +131,10 @@ zhuang_pos (R	zhuangPos
 cannot_gang
 
 cord_command
-not_exist_room
-þ
-protocol.protomsg/common.protomsg/login.protomsg/user.proto"¯
+not_exist_room
+sit_already_has
+½
+protocol.protomsg/common.protomsg/login.protomsg/user.proto"°
 C2S
 
 session_id (R	sessionId3
@@ -140,11 +147,11 @@ session_id (R	sessionId3
 createRoom3
 	join_room’N (2.msg.user.JoinRoomReqRjoinRoom6
 
-leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom/
-prepare”N (2.msg.user.PrepareReqRprepare9
+leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
+sit_down”N (2.msg.user.SitDownReqRsitDown9
 finish_deal•N (2.msg.user.FinishDealReqR
 finishDeal2
-	game_comd–N (2.msg.user.GameCmdReqRgameComd"†	
+	game_comd–N (2.msg.user.GameCmdReqRgameComd"Ä	
 S2C
 
 session_id (R	sessionId
@@ -158,13 +165,14 @@ session_id (R	sessionId
 createRoom3
 	join_room’N (2.msg.user.JoinRoomRspRjoinRoom6
 
-leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom/
-prepare”N (2.msg.user.PrepareRspRprepare9
+leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
+sit_down”N (2.msg.user.SitDownRspRsitDown9
 finish_deal•N (2.msg.user.FinishDealRspR
 finishDeal2
 	game_comd–N (2.msg.user.GameCmdRspRgameComd>
 push_user_info¡œ (2.msg.user.PushUserInfoRpushUserInfoG
-refresh_room_info±ê (2.msg.user.RefreshRoomInfoRrefreshRoomInfo1
+refresh_room_info¢œ (2.msg.user.RefreshRoomInfoRrefreshRoomInfo;
+push_sit_down£œ (2.msg.user.PushSitDownRpushSitDown1
 	deal_card²ê (2.msg.user.DealCardRdealCard;
 deal_one_card³ê (2.msg.user.DealOneCardRdealOneCard%
 zi_mo´ê (2.msg.user.ZiMoRziMoG

@@ -6,6 +6,7 @@ local CMD = {}
 local GAME = nil
 
 function CMD.startGame(room_info)
+	local game_type = room_info.game_type
 	GAME = require(game_type..".".."game.lua")
 	--初始化
 	GAME:start(room_info)
