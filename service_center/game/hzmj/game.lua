@@ -176,16 +176,13 @@ end
 
 --发牌完毕
 game["DEAL_FINISH"] = function(user_id)
-	print("1111111 user_id = ",user_id)
 	local all = game.room:updatePlayerState(user_id,PLAYER_STATE.DEAL_FINISH)
 	if all then
 		print("FYD++++++发牌完毕,A出牌")
 	end
-	print("222222")
 end
 
 function game:gameCMD(data)
-	print("FYD++++++GMCOMD  user_id = ",user_id)
 	local user_id = data.user_id
 	local command = data.command
 	local func = game[command]

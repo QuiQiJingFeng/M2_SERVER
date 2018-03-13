@@ -104,8 +104,8 @@ GameCmdRsp(
 zpos (Rzpos
 cards (Rcards"7
 PushCard
-user_id (	RuserId
-card (Rcard";
+user_id (	RuserId
+card (Rcard";
 NoticeChuPai
 user_id (	RuserId
 card (Rcard"K

@@ -124,14 +124,15 @@ end
 function user_info:leaveRoom()
     local room_id = user_info:hgetData(user_info.user_info_key,"room_id")
     local user_id = self.user_id
-    local center_node = self:getTargetNodeByRoomId(room_id)
+    local center_node = self:getCurrentRoomId()
     if not center_node then
         return true
     end
-    local result = cluster.call(center_node,".room_manager","leaveRoom",room_id,user_id)
+    local data = {room_id = room_id,user_id = user_id}
+    local result = self:safeClusterCall(center_node,".room_manager","leaveRoom",data)
     --清理绑定的room_id
     print("FYD  清理")
-    self:hdelData(self.user_info_key,"room_id",room_id)
+    self.center_redis:hdel(self.user_info_key,"room_id")
     return result
 end
 
