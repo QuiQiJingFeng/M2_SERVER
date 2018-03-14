@@ -79,6 +79,11 @@ function CMD.push(push_name, push_msg)
     user_info:send(send_data)
 end
 
+function CMD.debugProto(proto_name,proto_msg)
+    local rsp_name, rsp_msg = event_handler:emit(proto_name,proto_msg)
+    return cjson.encode({rsp_name,rsp_msg})
+end
+
 local function init_logic()
     local user = require("logic.user")
     user:init()
