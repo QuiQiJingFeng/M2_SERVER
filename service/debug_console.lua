@@ -158,11 +158,12 @@ function COMMAND.help()
 		shrtbl = "Show shared short string table info",
 		ping = "ping address",
 		call = "call address ...",
+		debugProto = "debugProto user_id proto_name proto_msg"
 	}
 end
 
 function COMMAND.debugProto(user_id,proto_name,proto_msg)
-	return skynet.call(".agent_manager","lua","debugProto",proto_name,proto_msg)
+	return skynet.call(".agent_manager","lua","debugProto",user_id,proto_name,proto_msg)
 end
 
 function COMMAND.clearcache()

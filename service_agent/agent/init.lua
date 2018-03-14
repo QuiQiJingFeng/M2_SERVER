@@ -80,6 +80,7 @@ function CMD.push(push_name, push_msg)
 end
 
 function CMD.debugProto(proto_name,proto_msg)
+    proto_msg = cjson.decode(proto_msg)
     local rsp_name, rsp_msg = event_handler:emit(proto_name,proto_msg)
     return cjson.encode({rsp_name,rsp_msg})
 end
