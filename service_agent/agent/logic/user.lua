@@ -82,7 +82,7 @@ function user:joinRoom(req_msg)
 		user_info:set("room_id",room_id)
 	end
 
-	return NET_EVENT.JOIN_ROOM,{result = NET_RESULT.SUCCESS}
+	return NET_EVENT.JOIN_ROOM,{result = result}
 end
 
 --离开房间

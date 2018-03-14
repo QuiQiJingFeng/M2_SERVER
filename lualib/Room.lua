@@ -44,6 +44,9 @@ function Room:init(room_id,node_name)
 	--发牌完毕的玩家数量
 	self.property.finish_deal_num = 0
 
+
+	--碰牌、杠牌
+	self.cur_card = nil
 	self.card_list = {}
 	self.handle_cards = {}
 end
@@ -103,6 +106,8 @@ function Room:addPlayer(info)
 	--玩家状态初始化
 	player.state = PLAYER_STATE.UN_SIT_DOWN
 	
+	--记录已经碰或者杠的牌
+	player.card_stack = { PENG = {},GANG = {}}
 	table.insert(self.property.players,player)
 end
 

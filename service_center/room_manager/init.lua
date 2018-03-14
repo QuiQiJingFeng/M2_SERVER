@@ -72,17 +72,14 @@ function CMD.sitDown(data)
 	local user_id = data.user_id
 	local pos = data.pos
 	local room = RoomPool:getRoomByRoomID(room_id)
-	print("1111111111pos=>",pos)
 	if pos > room:get("seat_num") then
 		return NET_RESULT.FAIL
 	end
-	print("222222222222222=>")
 	local player = room:getPlayerByPos(pos)
 	if player and player.user_pos then
 		return NET_RESULT.SIT_ALREADY_HAS
 	end
 
-	print("3333333333333=>")
 	room:updatePlayerProperty(user_id,"user_pos",pos)
 	
 
