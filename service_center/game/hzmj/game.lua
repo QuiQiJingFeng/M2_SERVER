@@ -38,6 +38,10 @@ function game:fisherYates()
 		self.card_list[i] = self.card_list[j]
 		self.card_list[j] = temp
 	end
+
+	if constant["DEBUG"] then
+		self.card_list = require("hzmj/conf")
+	end
 end
 
 --游戏结束
@@ -432,7 +436,7 @@ end
 
 --杠
 game["GANG"] = function(self,player,data)
-	local card = self.room:get("cur_card")
+	local card = data.card
 	local gang_type = self:checkGang(player,card)
 	if not gang_type then
 		return NET_RESULT.FAIL
