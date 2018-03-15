@@ -91,7 +91,7 @@ function CMD.sitDown(data)
 	local sit_list = room:getPlayerInfo("user_id","user_pos")
 	for i=#sit_list,1,-1 do
 		local obj = sit_list[i]
-		if not obj.user_pos then
+		if not obj.is_sit then
 			table.remove(sit_list,i)
 		end
 	end
