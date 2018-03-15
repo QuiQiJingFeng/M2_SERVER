@@ -106,6 +106,8 @@ function Room:addPlayer(info)
 	--记录已经碰或者杠的牌
 	player.card_stack = { PENG = {},GANG = {}}
 	table.insert(self.property.players,player)
+	player.user_pos = #self.property.players
+	player.sit_state = false
 end
 
 --获取房间的属性
