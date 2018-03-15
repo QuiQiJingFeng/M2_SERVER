@@ -159,8 +159,6 @@ end
 function Room:removePlayer(user_id)
 	for index,player in ipairs(self.property.players) do
 		if player.user_id == user_id then
-			--清空座位
-			self.property.palces[player.user_pos] = false
 			table.remove(self.property.players,index)
 			break
 		end
@@ -169,8 +167,6 @@ end
 
 function Room:updatePlayerProperty(user_id,name,value)
 	for index,player in ipairs(self.property.players) do
-		print("user_id = ",user_id)
-		print("player_user_id = ",player.user_id)
 		if player.user_id == user_id then
 			player[name] = value
 			return true
@@ -188,8 +184,6 @@ function Room:updatePlayerState(user_id,new_state)
 			return self.property.sit_down_num == self.property.seat_num
 		elseif new_state == PLAYER_STATE.DEAL_FINISH then
 			self.property.finish_deal_num = self.property.finish_deal_num + 1
-			print("FYD+++++>finish_deal_num = ",self.property.finish_deal_num)
-			print("FYD+++++>seat_num = ",self.property.seat_num)
 			return self.property.finish_deal_num == self.property.seat_num
 		end
 	end	
@@ -200,7 +194,6 @@ function Room:broadcastAllPlayers(msg_name,msg_data)
 	for _,player in ipairs(self.property.players) do
 		local node_name = player.node_name
 		local service_id = player.service_id
-		print("PUSH:",node_name,service_id,"push",msg_name,msg_name)
 		cluster.call(node_name, service_id, "push",msg_name,msg_data)
 	end
 end
