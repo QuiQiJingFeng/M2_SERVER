@@ -34,13 +34,14 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ı
-msg/user.protomsg.user"t
+ˆ
+msg/user.protomsg.user"è
 UserInfo
 user_id (	RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
-user_ip (	RuserIp"á
+user_ip (	RuserIp
+user_pos (RuserPos"á
 CreateRoomReq
 	game_type (RgameType
 round (Rround
@@ -75,14 +76,13 @@ GameCmdReq
 card (Rcard"6
 
 GameCmdRsp(
-result (2.msg.user.ResultRresult"Æ
+result (2.msg.user.ResultRresult"ì
 PushUserInfo
 user_id (	RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
-gold_num (RgoldNum
-user_pos (RuserPos"–
+gold_num (RgoldNum"–
 RefreshRoomInfo
 room_id (RroomId,
 players (2.msg.user.UserInfoRplayers
