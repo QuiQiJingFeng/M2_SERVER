@@ -107,7 +107,7 @@ function Room:addPlayer(info)
 	player.card_stack = { PENG = {},GANG = {}}
 	table.insert(self.property.players,player)
 	player.user_pos = #self.property.players
-	player.sit_state = false
+	player.is_sit = false
 end
 
 --获取房间的属性

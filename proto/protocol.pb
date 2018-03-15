@@ -34,14 +34,15 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ˆ
-msg/user.protomsg.user"è
+ç
+msg/user.protomsg.user"¶
 UserInfo
 user_id (	RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
-user_pos (RuserPos"á
+user_pos (RuserPos
+is_sit (RisSit"á
 CreateRoomReq
 	game_type (RgameType
 round (Rround

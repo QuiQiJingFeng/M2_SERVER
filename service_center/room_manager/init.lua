@@ -19,7 +19,7 @@ function CMD.createRoom(data)
 	room:setInfo(data)
 
 	room:addPlayer(data)
-	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos")
+	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit")
 	local rsp_msg = room:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	rsp_msg.players = players
 	room:broadcastAllPlayers(PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
@@ -37,7 +37,7 @@ function CMD.joinRoom(data)
 
 	room:addPlayer(data)
 
-	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos")
+	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit")
 	local rsp_msg = room:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	rsp_msg.players = players
 
@@ -57,7 +57,7 @@ function CMD.leaveRoom(data)
 	local user_id = data.user_id
 	room:removePlayer(user_id)
 	
-	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos")
+	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit")
 	local rsp_msg = room:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	rsp_msg.players = players
 
@@ -76,12 +76,12 @@ function CMD.sitDown(data)
 		return NET_RESULT.FAIL
 	end
 	local player = room:getPlayerByPos(pos)
-	if player and player.sit_state then
+	if player and player.is_sit then
 		return NET_RESULT.SIT_ALREADY_HAS
 	end
 
 	room:updatePlayerProperty(user_id,"user_pos",pos)
-	player.sit_state = true
+	player.is_sit = true
 
 	--推送
 	local sit_list = room:getPlayerInfo("user_id","user_pos")
