@@ -10,7 +10,7 @@ local game
 function CMD.startGame(room_info)
 	print("FYD++++++START GAME")
 	local game_type = RECOVER_GAME_TYPE[room_info.game_type]
-	game = require(game_type..".".."game")
+	game = require(string.lower(game_type)..".".."game")
 	--初始化
 	game:init(room_info)
 	game:start()
