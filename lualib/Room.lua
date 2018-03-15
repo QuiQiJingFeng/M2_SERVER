@@ -60,9 +60,6 @@ function Room:setInfo(info)
 	self.property.is_open_voice = info.is_open_voice
 	self.property.is_open_gps = info.is_open_gps
 	self.property.other_setting = info.other_setting
-
-	--庄家模式
-	self.property.zj_mode = ALL_ZJ_MODE[RECOVER_GAME_TYPE[info.game_type]]
 end
 
 --设置游戏房间地址 

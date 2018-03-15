@@ -124,7 +124,7 @@ end
 
 function user_info:leaveRoom()
     local room_id = user_info:hgetData(user_info.user_info_key,"room_id")
-    local user_id = self.user_id
+    local user_id = self:get("user_id")
     local center_node = self:getCurrentRoomId()
     if not center_node then
         return true

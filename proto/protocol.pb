@@ -145,7 +145,7 @@ GameCmdRsp(
 AN_GANG
 	MING_GANG
 	PENG_GANG
-¿
+»
 protocol.protomsg/common.protomsg/login.protomsg/user.proto"ó
 C2S
 
@@ -161,8 +161,7 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"ƒ
-
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"ÿ	
 S2C
 
 session_id (R	sessionId
@@ -187,6 +186,6 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 push_play_card¦œ (2.msg.user.PushPlayCardRpushPlayCardD
 notice_play_card§œ (2.msg.user.NoticePlayCardRnoticePlayCardD
 notice_peng_card¨œ (2.msg.user.NoticePengCardRnoticePengCardD
-notice_gang_card©œ (2.msg.user.NoticeGangCardRnoticeGangCardd
-notice_player_operator_stateªœ (2!.msg.user.PushPlayerOperatorStateRnoticePlayerOperatorStateD
+notice_gang_card©œ (2.msg.user.NoticeGangCardRnoticeGangCard`
+push_player_operator_stateªœ (2!.msg.user.PushPlayerOperatorStateRpushPlayerOperatorStateD
 notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver

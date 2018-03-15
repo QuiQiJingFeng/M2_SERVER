@@ -5,7 +5,7 @@ local log = require "skynet.log"
 local pbc = require "protobuf"
 local redis = require "skynet.db.redis"
 require "skynet.manager"
-
+local utils = require "utils"
 local constant = require "constant"
 local NET_EVENT = constant.NET_EVENT
 local NET_RESULT = constant.NET_RESULT
@@ -179,9 +179,10 @@ function SOCKET.data(fd, data)
             if login_result then
                 local user_id = CENTER_REDIS:get(login_type..":"..account)
                 if not user_id then
+                    
 
                     local max_id = CENTER_REDIS:incrby("user_id_generator", 1)
-                    user_id = string.upper(string.format("%d%07x",1,max_id))
+                    user_id = utils:createUserid(max_id)
                     CENTER_REDIS:set(login_type..":"..account,user_id)
                 end
 

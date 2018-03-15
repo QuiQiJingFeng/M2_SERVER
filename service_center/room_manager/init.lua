@@ -85,6 +85,12 @@ function CMD.sitDown(data)
 
 	--推送
 	local sit_list = room:getPlayerInfo("user_id","user_pos")
+	for i=#sit_list,1,-1 do
+		local obj = sit_list[i]
+		if not obj.user_pos then
+			table.remove(sit_list,i)
+		end
+	end
 	local rsp_msg = {room_id = room_id,sit_list = sit_list}
 	room:broadcastAllPlayers(PUSH_EVENT.PUSH_SIT_DOWN,rsp_msg)
 
