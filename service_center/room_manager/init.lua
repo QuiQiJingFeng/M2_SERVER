@@ -66,8 +66,6 @@ function CMD.leaveRoom(data)
 	return NET_RESULT.SUCCESS
 end
 
-	player.user_pos = #self.property.players
-	player.sit_state = false
 --坐下
 function CMD.sitDown(data)
 	local room_id = data.room_id
