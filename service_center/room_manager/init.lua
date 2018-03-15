@@ -76,8 +76,12 @@ function CMD.sitDown(data)
 		return NET_RESULT.FAIL
 	end
 	local player = room:getPlayerByPos(pos)
-	if player and player.is_sit then
+	if player then
 		return NET_RESULT.SIT_ALREADY_HAS
+	end
+
+	if player.is_sit then
+		return NET_RESULT.FAIL
 	end
 
 	room:updatePlayerProperty(user_id,"user_pos",pos)
