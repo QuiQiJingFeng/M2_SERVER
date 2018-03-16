@@ -83,18 +83,17 @@ function CMD.sitDown(data)
 	if pos > room:get("seat_num") then
 		return constant.NET_RESULT.INVALID_PARAMATER
 	end
-	local player = room:getPlayerByPos(pos)
-	if player and player.user_id ~= user_id then
+	local obj = room:getPlayerByPos(pos)
+	--如果这个位置有人,并且处于坐下状态
+	if obj and obj.is_sit then
 		return constant.NET_RESULT.SIT_ALREADY_HAS
 	end
 
-	if player.is_sit then
-		return constant.NET_RESULT.FAIL
-	end
-
-	room:updatePlayerProperty(user_id,"user_pos",pos)
+	local player = room:getPlayerByUserId(user_id)
 	player.is_sit = true
 
+	room:updatePlayerProperty(user_id,"user_pos",pos)
+	
 	--推送
 	local sit_list = room:getPlayerInfo("user_id","user_pos","is_sit")
 	for i=#sit_list,1,-1 do
