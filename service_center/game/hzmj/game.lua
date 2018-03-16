@@ -39,9 +39,9 @@ function game:fisherYates()
 		self.card_list[j] = temp
 	end
 
-	if constant["DEBUG"] then
-		self.card_list = require("hzmj/conf")
-	end
+	-- if constant["DEBUG"] then
+	-- 	self.card_list = require("hzmj/conf")
+	-- end
 end
 
 --游戏结束
@@ -201,7 +201,7 @@ function game:removeHandleCard(player,card,num)
 end
 
 --通知玩家出牌
-function game:noticePushPlayCard()
+function game:noticePushPlayCard(user_id)
 	local players = self.room:get("players")
 	for i,player in ipairs(players) do
 		local rsp_msg = {user_id=user_id}
@@ -237,7 +237,7 @@ function game:drawCard(player)
 	end
 
 	--通知玩家出牌了
-	self:noticePushPlayCard()
+	self:noticePushPlayCard(player.user_id)
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 end
@@ -369,7 +369,7 @@ game["PENG"] = function(self,player,data)
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PENG_CARD,data)
 
 	--通知玩家出牌
-	self:noticePushPlayCard()
+	self:noticePushPlayCard(player.user_id)
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 
