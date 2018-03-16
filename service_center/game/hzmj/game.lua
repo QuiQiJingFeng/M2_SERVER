@@ -127,7 +127,6 @@ function game:start()
 
 		local player = self.room:getPlayerByPos(index)
 		player.card_list = cards
-		print("FYD++++>>>>ZPOSK = ",self.zpos)
 		local rsp_msg = {zpos = self.zpos,cards = cards}
 		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
 	end
@@ -156,8 +155,6 @@ function game:start()
 	for i,player in ipairs(players) do
 		self.waite_operators[player.user_id] = "DEAL_FINISH"
 	end
-
-	print("FYD=====>>>>发牌完毕:=>",cjson.encode(self.waite_operators))
 end
 
 --增加手牌
@@ -203,6 +200,20 @@ function game:removeHandleCard(player,card,num)
 	return true
 end
 
+--通知玩家出牌
+function game:noticePushPlayCard()
+	local players = self.room:get("players")
+	for i,player in ipairs(players) do
+		local rsp_msg = {user_id=user_id}
+		if player.user_id == user_id then
+			rsp_msg.card_list = player.card_list
+			rsp_msg.peng_list = player.card_stack["PENG"]
+			rsp_msg.gang_list = player.card_stack["GANG"]
+		end
+		self.room:sendMsgToPlyaer(player,PUSH_EVENT.PUSH_PLAY_CARD,rsp_msg)
+	end
+end
+
 --向A发一张牌 摸牌
 function game:drawCard(player)
 	--检查是否流局
@@ -225,8 +236,8 @@ function game:drawCard(player)
 		self.room:sendMsgToPlyaer(obj,PUSH_EVENT.PUSH_DRAW_CARD,data)
 	end
 
-	--通知玩家A该出牌了
-	self.room:sendMsgToPlyaer(player,PUSH_EVENT.PUSH_PLAY_CARD,{})
+	--通知玩家出牌了
+	self:noticePushPlayCard()
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 end
@@ -234,25 +245,17 @@ end
 --发牌完毕
 game["DEAL_FINISH"] = function(self,player)
 
-	print("FYD=====>>>>DEAL_FINISH111:=>",cjson.encode(self.waite_operators))
-
 	local user_id = player.user_id
-	print("DEAL_FINISH user_id=",user_id,"type =- ",type(user_id))
-	print("self.waite_operators[user_id] = ",self.waite_operators[user_id])
-
-	print("IS SAME = ",self.waite_operators[user_id] ~= "DEAL_FINISH")
 	if self.waite_operators[user_id] ~= "DEAL_FINISH" then
-		print("FYD++++++)))(((((*")
 		return NET_RESULT.FAIL
 	end
-	print("FYD+++++++++in")
 	self.waite_operators[user_id] = nil
 	--计算剩余的数量
 	local num = 0
 	for k,v in pairs(self.waite_operators) do
 		num = num + 1
 	end
-	print("FYD=====>>>>DEAL_FINISH222:=>",cjson.encode(self.waite_operators))
+
 	if num == 0 then
 		--庄家出牌
 		local zplayer = self.room:getPlayerByPos(self.zpos)
@@ -348,7 +351,6 @@ game["PENG"] = function(self,player,data)
 	
 	local card = self.room:get("cur_card")
 	if not self:checkPeng(player,card) then
-		print("=======11111")
 		return NET_RESULT.FAIL
 	end
 
@@ -359,7 +361,6 @@ game["PENG"] = function(self,player,data)
 	--移除手牌
 	local result = self:removeHandleCard(player,card,2)
 	if not result then
-		print("=======222222")
 		return NET_RESULT.FAIL
 	end
 
@@ -367,8 +368,8 @@ game["PENG"] = function(self,player,data)
 	local data = {user_id=player.user_id,card = card}
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PENG_CARD,data)
 
-	--通知玩家该出牌了
-	self.room:sendMsgToPlyaer(player,PUSH_EVENT.PUSH_PLAY_CARD,{})
+	--通知玩家出牌
+	self:noticePushPlayCard()
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 

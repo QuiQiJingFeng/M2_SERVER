@@ -34,7 +34,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ç
+÷
 msg/user.protomsg.user"¶
 UserInfo
 user_id (	RuserId
@@ -107,8 +107,15 @@ GameCmdRsp(
 cards (Rcards";
 PushDrawCard
 user_id (	RuserId
-card (Rcard"
-PushPlayCard"=
+card (Rcard"2
+GPItem
+value (Rvalue
+type (Rtype"¢
+PushPlayCard
+user_id (	RuserId
+	card_list (RcardList-
+	peng_list (2.msg.user.GPItemRpengList-
+	gang_list (2.msg.user.GPItemRgangList"=
 NoticePlayCard
 user_id (	RuserId
 card (Rcard"=
