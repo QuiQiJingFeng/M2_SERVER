@@ -90,21 +90,21 @@ end
 
 --离开房间
 function user:leaveRoom()
-    local room_id = self:get("room_id")
+    local room_id = user_info:get("room_id")
     if not room_id then
         log.warning("FYD=>leaveRoom user not bind room_id")
         return NET_EVENT.LEAVE_ROOM,{result = NET_RESULT.NO_BIND_ROOM_ID}
     end
 
-    local center_node = self:getTargetNodeByRoomId(room_id)
+    local center_node = user_info:getTargetNodeByRoomId(room_id)
     if not center_node then
     	log.warning("FYD=>leaveRoom room_list hasn't room_id")
         return NET_EVENT.LEAVE_ROOM,{result = NET_RESULT.NOT_EXIST_ROOM}
     end
 
-    local user_id = self:get("user_id")
+    local user_id = user_info:get("user_id")
     local data = {room_id = room_id,user_id = user_id}
-    local success,result = self:safeClusterCall(center_node,".room_manager","leaveRoom",data)
+    local success,result = user_info:safeClusterCall(center_node,".room_manager","leaveRoom",data)
 
     if not success then
     	log.warning("FYD=>leaveRoom call "..center_node.." failed !!")
@@ -112,7 +112,7 @@ function user:leaveRoom()
     end
 
     if result == NET_RESULT.SUCCESS then
-	    skynet.call(".redis_center","lua","HDEL",DB_INDEX,self.user_info_key,"room_id")
+	    skynet.call(".redis_center","lua","HDEL",DB_INDEX,user_info.user_info_key,"room_id")
 	end
 	return NET_EVENT.LEAVE_ROOM,{result = result}
 end
