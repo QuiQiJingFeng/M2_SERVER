@@ -110,9 +110,9 @@ function user:leaveRoom()
     	log.warning("FYD=>leaveRoom call "..center_node.." failed !!")
     	return NET_EVENT.LEAVE_ROOM,{result = NET_RESULT.CALL_CENTER_FAIL}
     end
-
+    local db_index = 1
     if result == NET_RESULT.SUCCESS then
-	    skynet.call(".redis_center","lua","HDEL",DB_INDEX,user_info.user_info_key,"room_id")
+	    skynet.call(".redis_center","lua","HDEL",db_index,user_info.user_info_key,"room_id")
 	end
 	return NET_EVENT.LEAVE_ROOM,{result = result}
 end
