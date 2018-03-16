@@ -8,7 +8,7 @@ local redis_manager = require "redis_manager"
 local cjson = require "cjson"
 local constant = require "constant"
 local PUSH_EVENT = constant["PUSH_EVENT"]
-
+local DB_INDEX = 1
 local Map = require "Map"
 
 local user_info = {}
@@ -29,9 +29,7 @@ function user_info:init(info)
     --初始化金币数量为0
     property.gold_num = 0
     
-    local center_redis = redis_manager:connectCenterRedis()
-    property = Map.new(center_redis,self.user_info_key,property)
-    self.center_redis = center_redis
+    property = Map.new(DB_INDEX,self.user_info_key,property)
     --登陆成功之后,推送玩家信息
     local data = {}
     data.user_id = info.user_id
@@ -45,12 +43,16 @@ end
 
 function user_info:clear()
 	property = {}
-    self.center_redis:disconnect()
 end
 
 --更新用户属性
 function user_info:set(key,value)
     property[key] = value
+end
+
+--更新数据到redis
+function user_info:update()
+    property:update()
 end
 
 --获取用户属性
@@ -84,7 +86,7 @@ function user_info:getCenterNode()
 end
 
 function user_info:safeClusterCall(node_name,service_name,func,...)
-    return pcall(cluster.call,node_name,service_name,func,...)
+    return xpcall(cluster.call,debug.traceback,node_name,service_name,func,...)
 end
 
 function user_info:send(data_content)
@@ -110,57 +112,16 @@ function user_info:send(data_content)
 end
 
 function user_info:getTargetNodeByRoomId(room_id)
-    local center_node = self.center_redis:hget("room_list",room_id)
+    local room_db_index = 2
+    print("FYD===>>>room_id>",room_id)
+    local center_node = skynet.call(".redis_center","lua","HGET",room_db_index,"room_list",room_id)
     return center_node
 end
 
 
 function user_info:leaveRoom()
 
-    local room_id = self:get("room_id")
-    local user_id = self:get("user_id")
-    local center_node = self:getTargetNodeByRoomId(room_id)
-    if not center_node then
-        return true
-    end
-    local data = {room_id = room_id,user_id = user_id}
-    local success,result = self:safeClusterCall(center_node,".room_manager","leaveRoom",data)
-
-    self.center_redis:hdel(self.user_info_key,"room_id")
-    return result
 end
 
-
-
-function user_info:setData(key,value)
-    local center_redis = self:getRedis()
-    center_redis:set(key,value)
-    center_redis:disconnect()
-end
-
-function user_info:hdelData(key1,key2)
-    local center_redis = self:getRedis()
-    center_redis:hdel(key1,key2)  
-    center_redis:disconnect()
-end
-
-function user_info:hsetData(key1,key2,value)
-    local center_redis = self:getRedis()
-    print("key1,key2,value --->",key1,key2,value)
-    center_redis:hset(key1,key2,value)  
-    center_redis:disconnect()
-end
-
-function user_info:hgetData(key1,key2)
-    local center_redis = self:getRedis()
-    local data = center_redis:hget(key1,key2)
-    center_redis:disconnect()
-    return data
-end
-
-
-function user_info:getRedis()
-    return redis_manager:connectCenterRedis()
-end
 
 return user_info

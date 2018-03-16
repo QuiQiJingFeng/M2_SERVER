@@ -13,10 +13,10 @@ end
 skynet.start(function()
 	print("Server start")
 
-	if not skynet.getenv "daemon" then
-		-- local console = skynet.newservice("console")
-	end
 	skynet.uniqueservice("debug_console",8000)
+	skynet.uniqueservice("static_data")
+	skynet.uniqueservice("redis_center")
+
 
 	skynet.uniqueservice("logind")
 

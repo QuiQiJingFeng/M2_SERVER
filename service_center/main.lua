@@ -17,7 +17,14 @@ skynet.start(function()
 
 	skynet.uniqueservice("debug_console",9000)
 
-	skynet.uniqueservice("room_manager")
+	skynet.uniqueservice("static_data")
+
+	skynet.uniqueservice("redis_center")
+
+	skynet.uniqueservice("room_manager") 
+	
+
+
 
 	bindCluster()
 

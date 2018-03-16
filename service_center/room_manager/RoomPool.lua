@@ -1,51 +1,45 @@
 local skynet = require "skynet"
-
+local sharedata = require "skynet.sharedata"
 local Room = require "Room"
-local redis_manager = require "redis_manager"
-local CENTER_REDIS
-local INIT_NUM = 100
+local server_info = sharedata.query("server_info")
 
+local INIT_NUM = 100
+local REDIS_DB = 2
 local RoomPool = {}
 
 function RoomPool:init()
-    CENTER_REDIS = redis_manager:connectCenterRedis()
     --空闲的房间列表
     self.unused_list = {}
     --正在使用的房间列表
     self.used_list = {}
-    --预分配一组空闲的房间
-    self:preAllocRoom()
+end
+
+function RoomPool:getUnusedRandomId()
+	local pre_id = math.random(1,9)
+	local last_id = string.format("%05d",math.random(0,99999)) 
+	local random_id = tonumber(pre_id..last_id)
+
+	local ret = skynet.call(".redis_center","lua","SISMEMBER",REDIS_DB,"room_pool",random_id)
+	if ret == 1 then
+		return self:getUnusedRandomId()
+	else
+		skynet.call(".redis_center","lua","SADD",REDIS_DB,"room_pool",random_id)
+		return random_id
+	end
 end
 
 -----------------------------内部方法 BEGIN-----------------------
 --申请一个房间
 function RoomPool:allocRoom(room_id)
-	if not room_id then
-		room_id = CENTER_REDIS:incrby("room_id_generator",1)
-	end
-	local node_name = skynet.getenv("node_name")
+	local room_id = self:getUnusedRandomId()
+	local node_name = server_info.node_name
 	local room = Room.new(room_id,node_name)
 	local service_id = skynet.newservice("game")
 	room:setServiceId(service_id)
-	table.insert(self.unused_list,room)
 
 	return room
 end
 
---预申请一部分房间
-function RoomPool:preAllocRoom()
-	--每次Center服启动的时候,重新设置room_id_generator
-    CENTER_REDIS:set("room_id_generator",INIT_NUM)
-	for id = 1,INIT_NUM do
-		self:allocRoom(id)
-	end
-end
-
---绑定房间ID 和 服务器地址
-function RoomPool:bindRoomIdToServer(room_id)
-	local node_name = skynet.getenv("node_name")
-	CENTER_REDIS:hset("room_list",room_id,node_name)
-end
 -----------------------------内部方法 END-----------------------
 
 
@@ -55,25 +49,29 @@ function RoomPool:getUnusedRoom()
 	local room
 	if #self.unused_list > 0 then
 		room = table.remove(self.unused_list,1)
-		table.insert(self.used_list,room)
 	else
 		room = self:allocRoom()
 	end
-	--将房间绑定到服务器地址
-	self:bindRoomIdToServer(room:get("room_id"))
+	table.insert(self.used_list,room)
+
+	--将房间号加到房间列表中,并且和服务器名称绑定到一起
+	local room_id = room:get("room_id")
+	local node_name = server_info.node_name
+	skynet.call(".redis_center","lua","HSET",REDIS_DB,"room_list",room_id,node_name)
+
 	return room
 end
 
---清理指定的房间
-function RoomPool:cleanRoom(room_id)
-	for idx,room in ipairs(self.used_list) do
-		if room:get("room_id") == room_id then
-			local room = table.remove(self.used_list,idx)
-			local service_id = room:get("service_id")
-			skynet.call(service_id,"lua","clear")
-			table.insert(self.unused_list,room)
-			break
-		end
+--销毁指定的房间
+function RoomPool:distroyRoom(room_id)
+	local room = self:getRoomByRoomID(room_id)
+	if room then
+		local room = table.remove(self.used_list,idx)
+		table.insert(self.unused_list,room)
+		--将房间号从房间列表中删除
+		local service_id = room:get("service_id")
+		skynet.call(service_id,"lua","clear")
+		skynet.call(".redis_center","lua","HDEL",REDIS_DB,"room_list",room_id)
 	end
 end
 

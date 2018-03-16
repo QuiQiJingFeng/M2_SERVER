@@ -154,10 +154,13 @@ constant["NET_RESULT"] = {
 	SIT_ALREADY_HAS = "sit_already_has",
 	NOSUPPORT_COMMAND = "nosupport_command",
 	NO_CARD = "no_card",
+	NO_BIND_ROOM_ID = "no_bind_room_id",
+	CALL_CENTER_FAIL = "call_center_fail",
+	INVALID_PARAMATER = "invalid_paramater",
 
 }
 
- 
+constant["DEBUG"] = true
 
 
 return constant

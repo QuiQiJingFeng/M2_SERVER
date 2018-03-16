@@ -20,6 +20,7 @@ function CMD.gameCMD(data)
 	return game:gameCMD(data)
 end
 
+--当房间被销毁的时候,需要清理游戏的数据
 function CMD.clear()
 	game:clear()
 end
