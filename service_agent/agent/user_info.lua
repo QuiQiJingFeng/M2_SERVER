@@ -90,7 +90,6 @@ function user_info:safeClusterCall(node_name,service_name,func,...)
 end
 
 function user_info:send(data_content)
-    -- print("S2C->",cjson.encode(data_content))
     -- 转换为protobuf编码
     local success, data, err = pcall(pbc.encode, "S2C", data_content)
     if not success or err then
@@ -113,14 +112,32 @@ end
 
 function user_info:getTargetNodeByRoomId(room_id)
     local room_db_index = 2
-    print("FYD===>>>room_id>",room_id)
     local center_node = skynet.call(".redis_center","lua","HGET",room_db_index,"room_list",room_id)
     return center_node
 end
 
 
-function user_info:leaveRoom()
+function user_info:userDisconnect()
+    local room_id = self:get("room_id")
+    local user_id = self:get("user_id")
+    if not room_id then
+        return
+    end
 
+    local center_node = self:getTargetNodeByRoomId(room_id)
+    if not center_node then
+        --如果房间已经解散,则清掉玩家身上的房间号
+        local db_index = 1
+        skynet.call(".redis_center","lua","HDEL",db_index,self.user_info_key,"room_id")
+        return
+    end
+
+    --通知center服 有玩家掉线
+    local data = {room_id = room_id,user_id = user_id}
+    local success,result = self:safeClusterCall(center_node,".room_manager","userDisconnect",data)
+    if success and result then
+        skynet.call(".redis_center","lua","HDEL",db_index,self.user_info_key,"room_id")
+    end
 end
 
 

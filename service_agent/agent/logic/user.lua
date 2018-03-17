@@ -41,9 +41,7 @@ function user:createRoom(req_msg)
 	for k,v in pairs(data) do
 		req_msg[k] = v
 	end
-	print("游戏服:user 调用room_manager createRoom方法")
-	print("center_node="..center_node)
-	print("req_msg = "..cjson.encode(req_msg))
+
 	local success,result,room_id = user_info:safeClusterCall(center_node,".room_manager","createRoom",req_msg)
 	if not success then
 		return NET_EVENT.CREATE_ROOM,{result = NET_RESULT.FAIL}

@@ -5,7 +5,6 @@ local ALL_CARDS = constant.ALL_CARDS
 local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
 local GAME_CMD = constant.GAME_CMD
 local NET_RESULT = constant.NET_RESULT
-local PLAYER_STATE = constant.PLAYER_STATE
 local ZJ_MODE = constant.ZJ_MODE
 local PUSH_EVENT = constant.PUSH_EVENT
 local GANG_TYPE = constant.GANG_TYPE
@@ -27,6 +26,15 @@ function game:clear()
 	game.__newindex = game_meta
 end
 
+function game:userDisconnect(data)
+	local user_id = data.user_id
+	local player = self.room:getPlayerByUserId(user_id)
+	if not player then
+		return
+	end
+	player.isconnect = false
+end
+
 --洗牌  FisherYates洗牌算法
 --算法的思想是每次从未选中的数字中随机挑选一个加入排列，时间复杂度为O(n)
 function game:fisherYates()
@@ -46,6 +54,9 @@ end
 
 --游戏结束
 function game:gameOver(type)
+	--通知room_manager服务游戏结束
+	skynet.call(".room_manager","lua","gameOver",self.room:get("room_id"))
+
 	--游戏结束 计算玩家的积分
 	if type == GAME_OVER_TYPE.NORMAL then
 		--TODO
