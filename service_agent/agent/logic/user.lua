@@ -35,7 +35,6 @@ function user:createRoom(req_msg)
 
 	local data = user_info:getValues("user_id","user_name","user_pic")
 	data.node_name = user_info.node_name
-	data.service_id = user_info.service_id
 	data.user_ip = user_info.user_ip
 
 	for k,v in pairs(data) do
@@ -48,6 +47,8 @@ function user:createRoom(req_msg)
 	end
 
 	user_info:set("room_id",room_id)
+	--记录下玩家所有已经创建的列表
+	user_info:pushNewRoomCord(room_id)
 
 	return NET_EVENT.CREATE_ROOM,{result = NET_RESULT.SUCCESS}
 end
@@ -67,7 +68,6 @@ function user:joinRoom(req_msg)
 
 	local data = user_info:getValues("user_id","user_name","user_pic")
 	data.node_name = user_info.node_name
-	data.service_id = user_info.service_id
 	data.user_ip = user_info.user_ip
 
 	for k,v in pairs(data) do

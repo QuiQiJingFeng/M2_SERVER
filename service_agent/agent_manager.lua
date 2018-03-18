@@ -41,7 +41,21 @@ local function disconnect_fd(fd)
             table.insert(AGENT_POOL, agent_item.service_id)
         end
     end
+end
 
+--推送消息
+function CMD.pushEvent(user_id,event_name,event_msg)
+    local fd = USER_MAP[user_id]
+    if not fd then
+        return "NOT_ONLINE"
+    end
+    local agent_item = AGENT_MAP[fd]
+    if not agent_item then
+        log.warningf("没有找到fd对应的agent_item")
+    end
+
+    skynet.call(agent_item.service_id,"lua","push",event_name,event_msg)
+    return "SUCCESS"
 end
 
 local function generate_standby_agents()

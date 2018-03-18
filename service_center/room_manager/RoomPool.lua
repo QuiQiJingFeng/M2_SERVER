@@ -24,11 +24,6 @@ function RoomPool:checkExpireRoom()
 		local room = self.used_list[i]
 		local sit_down_num = room:get("sit_down_num")
 		--如果房间没人,则30分钟后销毁房间
-		if sit_down_num == 0 then
-			room:set("expire_time",now + 30*60)
-		else
-			room:set("expire_time",nil)
-		end
 		local expire_time = room:get("expire_time")
 		if expire_time and now > expire_time then
 			room:distroy()

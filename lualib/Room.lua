@@ -46,11 +46,10 @@ function Room:init(room_id,node_name)
 	self:set("sit_down_num",0)
 	--当前出牌值
 	self:set("cur_card",nil)
-	--点击重新开始的人数
-	self:set("restart_num",0)
 	--房间的状态
 	self:set("state",constant.ROOM_STATE.GAME_PREPARE)
-
+	local now = skynet.time()
+	room:set("expire_time",now + 30*60)
 	--将房间号加到房间列表中,并且和服务器名称绑定到一起
 	skynet.call(".redis_center","lua","HSET",REDIS_DB,"room_list",room_id,node_name)
 end
@@ -64,6 +63,8 @@ function Room:setInfo(info)
 	self:set("is_open_voice",info.is_open_voice)
 	self:set("is_open_gps",info.is_open_gps)
 	self:set("other_setting",info.other_setting)
+	--记录下最初的回合数
+	self:set("origin_round",info.round)
 end
 
 --设置游戏房间地址 
@@ -100,8 +101,6 @@ function Room:addPlayer(info)
 	player.user_ip = info.user_ip
 	--玩家所在游戏服的地址
 	player.node_name = info.node_name
-	--玩家服务的地址
-	player.service_id = info.service_id
 	--积分
 	player.score = 0
 	
@@ -182,11 +181,17 @@ function Room:updatePlayerProperty(user_id,name,value)
 end
 
 --像游戏服推送消息
-function Room:pushEvent(node_name,service_id,msg_name,msg_data)
-	local success = xpcall(cluster.call, debug.traceback, node_name, service_id, "push", msg_name, msg_data)
+function Room:pushEvent(node_name,user_id,msg_name,msg_data)
+
+	local success,result = xpcall(cluster.call, debug.traceback, node_name, ".agent_manager", "push", msg_name, msg_data)
 	if not success then
 		log.infof("向游戏服[%s]推送消息[%s]失败\n内容如下:\n%s",cjson.encode(msg_data))
-	end	
+	end
+
+	if result == "NOT_ONLINE" then
+		--FYD
+		log.infof("玩家[%s]不在线",user_id)
+	end
 end
 
 --广播消息
@@ -194,8 +199,7 @@ function Room:broadcastAllPlayers(msg_name,msg_data)
 	for _,player in ipairs(self.property.players) do
 		if player.isconnect then
 			local node_name = player.node_name
-			local service_id = player.service_id
-			self:pushEvent(node_name,service_id,msg_name,msg_data)
+			self:pushEvent(node_name,player.user_id,msg_name,msg_data)
 		end
 	end
 end
@@ -204,8 +208,7 @@ end
 function Room:sendMsgToPlyaer(player,msg_name,msg_data)
 	if player.isconnect then
 		local node_name = player.node_name
-		local service_id = player.service_id
-		self:pushEvent(node_name,service_id,msg_name,msg_data)
+		self:pushEvent(node_name,player.user_id,msg_name,msg_data)
 	end
 end
 

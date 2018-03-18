@@ -10,10 +10,11 @@ local constant = require "constant"
 local PUSH_EVENT = constant["PUSH_EVENT"]
 local DB_INDEX = 1
 local Map = require "Map"
+local List = require "List"
 
 local user_info = {}
 local property = {}
-
+local room_list = {}
 function user_info:init(info)
 	self.fd = info.fd
 	self.secret = info.secret
@@ -21,7 +22,6 @@ function user_info:init(info)
     self.user_info_key = "info:"..info.user_id
     self.session_id = 0
     self.node_name = skynet.getenv("node_name")
-    self.service_id = skynet.self()
     
     property.user_id = info.user_id
     property.user_name = info.user_name
@@ -30,6 +30,9 @@ function user_info:init(info)
     property.gold_num = 0
     
     property = Map.new(DB_INDEX,self.user_info_key,property)
+    --记录玩家已经创建的房间列表
+    room_list = List.new(DB_INDEX,self.user_info_key..":".."room_list")
+
     --登陆成功之后,推送玩家信息
     local data = {}
     data.user_id = info.user_id
@@ -37,8 +40,13 @@ function user_info:init(info)
     data.user_pic = info.user_pic
     data.user_ip = info.ip
     data.gold_num = property.gold_num
-
+    data.room_list = room_list:getValues()
+    
     self:send({[PUSH_EVENT.PUSH_USER_INFO] = data})
+end
+
+function user_info:pushNewRoomCord(room_id)
+    room_list:push(room_id)
 end
 
 function user_info:clear()
