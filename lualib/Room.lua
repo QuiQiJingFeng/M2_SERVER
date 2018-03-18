@@ -49,7 +49,7 @@ function Room:init(room_id,node_name)
 	--房间的状态
 	self:set("state",constant.ROOM_STATE.GAME_PREPARE)
 	local now = skynet.time()
-	room:set("expire_time",now + 30*60)
+	self:set("expire_time",now + 30*60)
 	--将房间号加到房间列表中,并且和服务器名称绑定到一起
 	skynet.call(".redis_center","lua","HSET",REDIS_DB,"room_list",room_id,node_name)
 end
@@ -183,7 +183,7 @@ end
 --像游戏服推送消息
 function Room:pushEvent(node_name,user_id,msg_name,msg_data)
 
-	local success,result = xpcall(cluster.call, debug.traceback, node_name, ".agent_manager", "push", msg_name, msg_data)
+	local success,result = xpcall(cluster.call, debug.traceback, node_name, ".agent_manager", "pushEvent",user_id, msg_name, msg_data)
 	if not success then
 		log.infof("向游戏服[%s]推送消息[%s]失败\n内容如下:\n%s",cjson.encode(msg_data))
 	end

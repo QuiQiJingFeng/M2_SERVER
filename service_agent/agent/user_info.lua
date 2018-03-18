@@ -144,6 +144,7 @@ function user_info:userDisconnect()
     local data = {room_id = room_id,user_id = user_id}
     local success,result = self:safeClusterCall(center_node,".room_manager","userDisconnect",data)
     if success and result then
+        local db_index = 1
         skynet.call(".redis_center","lua","HDEL",db_index,self.user_info_key,"room_id")
     end
 end

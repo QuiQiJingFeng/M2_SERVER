@@ -158,14 +158,14 @@ function CMD.sitDown(data)
 	local rsp_msg = {room_id = room_id,sit_list = sit_list}
 	room:broadcastAllPlayers(constant.PUSH_EVENT.PUSH_SIT_DOWN,rsp_msg)
 
-	local sit_down_num = self:get("sit_down_num")
+	local sit_down_num = room:get("sit_down_num")
 	sit_down_num = sit_down_num + 1
-	self:set("sit_down_num",sit_down_num)
+	room:set("sit_down_num",sit_down_num)
 	local seat_num = room:get("seat_num")
 	if seat_num == sit_down_num then
 		local origin_round = room:get("origin_round")
 		local round = room:get("round")
-		if origin_round = round then
+		if origin_round == round then
 			--第一回合开始后,重新设定房间的释放时间
 			local now = skynet.time()
 			room:set("expire_time",now + 12*60*60)

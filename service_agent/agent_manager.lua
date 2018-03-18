@@ -45,6 +45,7 @@ end
 
 --推送消息
 function CMD.pushEvent(user_id,event_name,event_msg)
+    print("pushEvent: user_id=",user_id,"event_name=",event_name)
     local fd = USER_MAP[user_id]
     if not fd then
         return "NOT_ONLINE"

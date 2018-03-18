@@ -334,7 +334,7 @@ function CMD.LSET(id,key,index,value)
 end
 
 --LRANGE key start stop
-function CMD.LRANGE(key,start,stop)
+function CMD.LRANGE(id,key,start,stop)
 	redis_db:SELECT(id)
 	return redis_db:LRANGE(key,start,stop)
 end

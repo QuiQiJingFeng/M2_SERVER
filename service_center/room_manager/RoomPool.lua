@@ -15,7 +15,7 @@ function RoomPool:init()
     self.used_list = {}
 
     --每隔1分钟检查一下失效的房间
-    shield.timeout(60 * 100, utils:handler(self,checkExpireRoom))
+    skynet.timeout(60 * 100, utils:handler(self,self.checkExpireRoom))
 end
 
 function RoomPool:checkExpireRoom()

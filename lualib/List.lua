@@ -1,9 +1,5 @@
 local skynet = require "skynet"
 local List = {}
---list是从0开始索引的,所以这里要做一下处理
-local function loadFromKey(redis,list_key)
-    return skynet.call(".redis_center","lua","LRANGE",db_index,list_key,0,-1)
-end
 
 --设置数据 defaults 必须是一个数组
 function List.new(db_index,list_key)
