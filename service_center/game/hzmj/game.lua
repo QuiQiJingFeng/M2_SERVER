@@ -5,7 +5,6 @@ local ALL_CARDS = constant.ALL_CARDS
 local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
 local GAME_CMD = constant.GAME_CMD
 local NET_RESULT = constant.NET_RESULT
-local PLAYER_STATE = constant.PLAYER_STATE
 local ZJ_MODE = constant.ZJ_MODE
 local PUSH_EVENT = constant.PUSH_EVENT
 local GANG_TYPE = constant.GANG_TYPE
@@ -46,6 +45,9 @@ end
 
 --游戏结束
 function game:gameOver(type)
+	--通知room_manager服务游戏结束
+	skynet.call(".room_manager","lua","gameOver",self.room:get("room_id"))
+
 	--游戏结束 计算玩家的积分
 	if type == GAME_OVER_TYPE.NORMAL then
 		--TODO
@@ -450,8 +452,6 @@ game["GANG"] = function(self,player,data)
 		return NET_RESULT.FAIL
 	end
 	self.waite_operators[player.user_id] = nil
-
-	
 
 	local obj = {value = card,type = gang_type }
 	--记录下已经杠的牌

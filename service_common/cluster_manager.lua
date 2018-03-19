@@ -64,6 +64,7 @@ function CMD.pickNode(node_type)
     if node_map[node_type] then
         local size = #node_map[node_type]
         if size > 0 then
+            --查询redis 查看该node是否被屏蔽
             return node_map[node_type][math.random(size)].node_name
         end
     else

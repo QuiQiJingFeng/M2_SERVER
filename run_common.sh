@@ -1,1 +1,0 @@
-nohup ./skynet service_common/config.lua > service_common/log/print.log 2>&1 &

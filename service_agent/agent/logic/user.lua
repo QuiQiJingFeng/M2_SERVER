@@ -1,9 +1,10 @@
 local skynet = require "skynet"
+local cluster = require "skynet.cluster"
+local log  =require "skynet.log"
 local utils = require "utils"
 local event_handler = require "event_handler"
-local cluster = require "skynet.cluster"
 local user_info = require "user_info"
-
+local cjson = require "cjson"
 local constant = require "constant"
 local NET_EVENT = constant.NET_EVENT
 local NET_RESULT = constant.NET_RESULT
@@ -34,8 +35,8 @@ function user:createRoom(req_msg)
 
 	local data = user_info:getValues("user_id","user_name","user_pic")
 	data.node_name = user_info.node_name
-	data.service_id = user_info.service_id
 	data.user_ip = user_info.user_ip
+	data.fd = user_info.fd
 
 	for k,v in pairs(data) do
 		req_msg[k] = v
@@ -47,6 +48,8 @@ function user:createRoom(req_msg)
 	end
 
 	user_info:set("room_id",room_id)
+	--记录下玩家所有已经创建的列表
+	user_info:pushNewRoomCord(room_id)
 
 	return NET_EVENT.CREATE_ROOM,{result = NET_RESULT.SUCCESS}
 end
@@ -66,8 +69,8 @@ function user:joinRoom(req_msg)
 
 	local data = user_info:getValues("user_id","user_name","user_pic")
 	data.node_name = user_info.node_name
-	data.service_id = user_info.service_id
 	data.user_ip = user_info.user_ip
+	data.fd = user_info.fd
 
 	for k,v in pairs(data) do
 		req_msg[k] = v
@@ -87,7 +90,30 @@ end
 
 --离开房间
 function user:leaveRoom()
-	local result = user_info:leaveRoom()
+    local room_id = user_info:get("room_id")
+    if not room_id then
+        log.warning("FYD=>leaveRoom user not bind room_id")
+        return NET_EVENT.LEAVE_ROOM,{result = NET_RESULT.NO_BIND_ROOM_ID}
+    end
+
+    local center_node = user_info:getTargetNodeByRoomId(room_id)
+    if not center_node then
+    	log.warning("FYD=>leaveRoom room_list hasn't room_id")
+        return NET_EVENT.LEAVE_ROOM,{result = NET_RESULT.NOT_EXIST_ROOM}
+    end
+
+    local user_id = user_info:get("user_id")
+    local data = {room_id = room_id,user_id = user_id}
+    local success,result = user_info:safeClusterCall(center_node,".room_manager","leaveRoom",data)
+
+    if not success then
+    	log.warning("FYD=>leaveRoom call "..center_node.." failed !!")
+    	return NET_EVENT.LEAVE_ROOM,{result = NET_RESULT.CALL_CENTER_FAIL}
+    end
+    local db_index = 1
+    if result == NET_RESULT.SUCCESS then
+	    skynet.call(".redis_center","lua","HDEL",db_index,user_info.user_info_key,"room_id")
+	end
 	return NET_EVENT.LEAVE_ROOM,{result = result}
 end
 
@@ -101,6 +127,7 @@ function user:sitDown(req_msg)
 	print("FDY USER 22222222222222")
 	local center_node = user_info:getTargetNodeByRoomId(room_id)
 	if not center_node then
+		log.warning("FYD=>sitDown room_list hasn't room_id")
 		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.NOT_EXIST_ROOM}  
 	end
 	print("FDY USER 3333333333333")

@@ -34,7 +34,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-˜
+ÿ
 msg/user.protomsg.user"¦
 UserInfo
 user_id (	RuserId
@@ -77,13 +77,14 @@ GameCmdReq
 card (Rcard"6
 
 GameCmdRsp(
-result (2.msg.user.ResultRresult"“
+result (2.msg.user.ResultRresult"°
 PushUserInfo
 user_id (	RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
-gold_num (RgoldNum"Ð
+gold_num (RgoldNum
+	room_list (RroomList"Ð
 RefreshRoomInfo
 room_id (RroomId,
 players (2.msg.user.UserInfoRplayers
@@ -134,7 +135,9 @@ GameCmdRsp(
 	card_list (RcardList"N
 NoticeGameOver
 type (Rtype(
-players (2.msg.user.ItemRplayers*­
+players (2.msg.user.ItemRplayers"2
+NoticePlayersDisconnect
+user_id (	RuserId*Ã
 Result
 success
 fail
@@ -152,12 +155,13 @@ GameCmdRsp(
 sit_already_has
 no_bind_room_id
 call_center_fail
-invalid_paramater*5
+invalid_paramater
+round_not_enough*5
 GangType
 AN_GANG
 	MING_GANG
 	PENG_GANG
-»
+œ
 protocol.protomsg/common.protomsg/login.protomsg/user.proto"ó
 C2S
 
@@ -173,7 +177,8 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"ÿ	
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"à
+
 S2C
 
 session_id (R	sessionId
@@ -200,4 +205,5 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_peng_card¨œ (2.msg.user.NoticePengCardRnoticePengCardD
 notice_gang_card©œ (2.msg.user.NoticeGangCardRnoticeGangCard`
 push_player_operator_stateªœ (2!.msg.user.PushPlayerOperatorStateRpushPlayerOperatorStateD
-notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver
+notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver_
+notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnect

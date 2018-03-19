@@ -29,7 +29,7 @@ end
 
 --断开连接
 function CMD.disconnect()
-    user_info:leaveRoom()
+    user_info:userDisconnect()
 end
 
 -- 请求处理函数

@@ -41,12 +41,10 @@ local MJ_CARDS_TYPE = {
 
 
 
-constant["PLAYER_STATE"] = {
-	UN_SIT_DOWN = 1,	--未入座
-	SIT_DOWN_FINISH = 2, --入座完毕  
-	DEAL_FINISH = 3,	--发牌完毕
-	GAME_PLAYING = 3,	--游戏进行中
-	GAME_OVER = 4		--游戏结束
+constant["ROOM_STATE"] = {
+	GAME_PREPARE = 1,   --游戏准备阶段
+	GAME_PLAYING = 2,	--游戏中
+	GAME_OVER = 3		--游戏结束
 }
 
 constant["PUSH_EVENT"] = {
@@ -61,6 +59,8 @@ constant["PUSH_EVENT"] = {
 	NOTICE_GANG_CARD = "notice_gang_card",--通知有人杠拍了
 	PUSH_OPERATOR_PALYER_STATE = "push_player_operator_state", --通知客户端是否 碰/杠/胡
 	NOTICE_GAME_OVER = "notice_game_over", --本局结束
+	NOTICE_PLAYERS_DISCONNECT = "notice_players_disconnect", --通知玩家有人掉线
+
 
 }
 -----------------------游戏类型配置相关--------------------------
@@ -162,10 +162,13 @@ constant["NET_RESULT"] = {
 	SIT_ALREADY_HAS = "sit_already_has",
 	NOSUPPORT_COMMAND = "nosupport_command",
 	NO_CARD = "no_card",
-
+	NO_BIND_ROOM_ID = "no_bind_room_id",
+	CALL_CENTER_FAIL = "call_center_fail",
+	INVALID_PARAMATER = "invalid_paramater",
+	ROUND_NOT_ENOUGH = "round_not_enough",
 }
 
- 
+constant["DEBUG"] = true
 
 
 return constant
