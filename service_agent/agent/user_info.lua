@@ -42,7 +42,6 @@ function user_info:init(info)
     data.gold_num = property.gold_num
     data.room_list = room_list:getValues()
     
-    print("room_list = ",cjson.encode(data.room_list))
     self:send({[PUSH_EVENT.PUSH_USER_INFO] = data})
 end
 
