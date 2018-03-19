@@ -34,7 +34,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ÿ
+‚
 msg/user.protomsg.user"¦
 UserInfo
 user_id (	RuserId
@@ -102,42 +102,52 @@ GameCmdRsp(
 user_pos (RuserPos"T
 PushSitDown
 room_id (RroomId,
-sit_list (2.msg.user.SitItemRsitList"4
+sit_list (2.msg.user.SitItemRsitList"O
 DealCard
-zpos (Rzpos
-cards (Rcards";
+zpos (Rzpos
+user_pos (RuserPos
+cards (Rcards"V
 PushDrawCard
 user_id (	RuserId
-card (Rcard"2
+card (Rcard
+user_pos (RuserPos"2
 GPItem
 value (Rvalue
-type (Rtype"¢
+type (Rtype"½
 PushPlayCard
-user_id (	RuserId
-	card_list (RcardList-
-	peng_list (2.msg.user.GPItemRpengList-
-	gang_list (2.msg.user.GPItemRgangList"=
+user_id (	RuserId
+user_pos (RuserPos
+	card_list (RcardList-
+	peng_list (2.msg.user.GPItemRpengList-
+	gang_list (2.msg.user.GPItemRgangList"X
 NoticePlayCard
 user_id (	RuserId
-card (Rcard"=
+card (Rcard
+user_pos (RuserPos"X
 NoticePengCard
 user_id (	RuserId
-card (Rcard"n
+card (Rcard
+user_pos (RuserPos"‰
 NoticeGangCard
 user_id (	RuserId
 card (Rcard/
-	gang_type (2.msg.user.GangTypeRgangType"@
+	gang_type (2.msg.user.GangTypeRgangType
+user_pos (RuserPos"[
 PushPlayerOperatorState%
-operator_state (	RoperatorState"W
+operator_state (	RoperatorState
+user_pos (RuserPos"r
 Item
 user_id (	RuserId
 up_score (RupScore
-	card_list (RcardList"N
+	card_list (RcardList
+user_pos (RuserPos"N
 NoticeGameOver
 type (Rtype(
-players (2.msg.user.ItemRplayers"2
+players (2.msg.user.ItemRplayers"M
 NoticePlayersDisconnect
-user_id (	RuserId*Ã
+user_id (	RuserId
+user_pos (RuserPos"
+HandleError*Ã
 Result
 success
 fail
@@ -161,7 +171,7 @@ GameCmdRsp(
 AN_GANG
 	MING_GANG
 	PENG_GANG
-œ
+Ø
 protocol.protomsg/common.protomsg/login.protomsg/user.proto"ó
 C2S
 
@@ -177,8 +187,7 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"à
-
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"œ
 S2C
 
 session_id (R	sessionId
@@ -206,4 +215,5 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_gang_card©œ (2.msg.user.NoticeGangCardRnoticeGangCard`
 push_player_operator_stateªœ (2!.msg.user.PushPlayerOperatorStateRpushPlayerOperatorStateD
 notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver_
-notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnect
+notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnect:
+handle_error‘¿ (2.msg.user.HandleErrorRhandleError
