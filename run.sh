@@ -39,6 +39,6 @@ elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
 fi
 
 nohup ./skynet service_common/config.lua > service_common/log/print.log 2>&1 &
-usleep 10000
+sleep 0.01
 nohup ./skynet service_center/config.lua > service_center/log/print.log 2>&1 &
 nohup ./skynet service_agent/config.lua > service_agent/log/print.log 2>&1 &
