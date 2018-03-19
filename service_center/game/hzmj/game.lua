@@ -453,8 +453,6 @@ game["GANG"] = function(self,player,data)
 	end
 	self.waite_operators[player.user_id] = nil
 
-	
-
 	local obj = {value = card,type = gang_type }
 	--记录下已经杠的牌
 	table.insert(player.card_stack["GANG"],obj)

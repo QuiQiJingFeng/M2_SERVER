@@ -13,22 +13,7 @@ function CMD.createRoom(data)
 	room:setInfo(data)
 	room:addPlayer(data)
 	--筛选数据传递到客户端
-	local filter1 = {"user_id","user_name","user_pic","user_ip","user_pos","is_sit"}
-	local players = room:getPlayerInfo(table.unpack(filter1))
-	local filter2 = {
-						"room_id",
-						"game_type",
-						"round",
-						"pay_type",
-						"seat_num",
-						"is_friend_room",
-						"is_open_voice",
-						"is_open_gps",
-						"other_setting"
-					}
-	local rsp_msg = room:getPropertys(table.unpack(filter2))
-	rsp_msg.players = players
-	room:broadcastAllPlayers(constant.PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+	room:refreshRoomInfo()
 
 	return constant.NET_RESULT.SUCCESS,room:get("room_id")
 end
@@ -44,11 +29,7 @@ function CMD.joinRoom(data)
 
 	room:addPlayer(data)
 
-	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit")
-	local rsp_msg = room:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
-	rsp_msg.players = players
-
-	room:broadcastAllPlayers(constant.PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+	room:refreshRoomInfo()
  
 	return constant.NET_RESULT.SUCCESS,rsp_msg
 end
@@ -78,7 +59,9 @@ function CMD.userDisconnect(data)
 		return false
 	end
 
-	CMD.leaveRoom(data)
+	room:removePlayer(user_id)
+	
+	room:refreshRoomInfo()
 
 	return true
 end
@@ -100,11 +83,7 @@ function CMD.leaveRoom(data)
 
 	room:removePlayer(user_id)
 	
-	local players = room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit")
-	local rsp_msg = room:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
-	rsp_msg.players = players
-
-	room:broadcastAllPlayers(constant.PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+	room:refreshRoomInfo()
 
 	return constant.NET_RESULT.SUCCESS
 end

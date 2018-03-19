@@ -103,6 +103,8 @@ function Room:addPlayer(info)
 	player.node_name = info.node_name
 	--积分
 	player.score = 0
+	--玩家的fd
+	player.fd = info.fd
 	
 	--记录已经碰或者杠的牌
 	player.card_stack = { PENG = {},GANG = {}}
@@ -179,16 +181,25 @@ function Room:updatePlayerProperty(user_id,name,value)
 	return false
 end
 
---像游戏服推送消息
-function Room:pushEvent(node_name,user_id,msg_name,msg_data)
+function Room:refreshRoomInfo()
+	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit")
+	local rsp_msg = self:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
+	rsp_msg.players = players
 
-	local success,result = xpcall(cluster.call, debug.traceback, node_name, ".agent_manager", "pushEvent",user_id, msg_name, msg_data)
+	self:broadcastAllPlayers(constant.PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+end
+
+--像游戏服推送消息
+function Room:pushEvent(node_name,player,msg_name,msg_data)
+	local fd = player.fd
+	local user_id = player.user_id
+
+	local success,result = xpcall(cluster.call, debug.traceback, node_name, ".agent_manager", "pushEvent",fd, msg_name, msg_data)
 	if not success then
 		log.infof("向游戏服[%s]推送消息[%s]失败\n内容如下:\n%s",cjson.encode(msg_data))
 	end
 
 	if result == "NOT_ONLINE" then
-		--FYD
 		log.infof("玩家[%s]不在线",user_id)
 	end
 end
@@ -197,14 +208,14 @@ end
 function Room:broadcastAllPlayers(msg_name,msg_data)
 	for _,player in ipairs(self.property.players) do
 		local node_name = player.node_name
-		self:pushEvent(node_name,player.user_id,msg_name,msg_data)
+		self:pushEvent(node_name,player,msg_name,msg_data)
 	end
 end
 
 --向某个人发送消息
 function Room:sendMsgToPlyaer(player,msg_name,msg_data)
 	local node_name = player.node_name
-	self:pushEvent(node_name,player.user_id,msg_name,msg_data)
+	self:pushEvent(node_name,player,msg_name,msg_data)
 end
 
 --清理房间

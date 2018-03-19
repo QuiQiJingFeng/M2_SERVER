@@ -36,6 +36,7 @@ function user:createRoom(req_msg)
 	local data = user_info:getValues("user_id","user_name","user_pic")
 	data.node_name = user_info.node_name
 	data.user_ip = user_info.user_ip
+	data.fd = user_info.fd
 
 	for k,v in pairs(data) do
 		req_msg[k] = v
@@ -69,6 +70,7 @@ function user:joinRoom(req_msg)
 	local data = user_info:getValues("user_id","user_name","user_pic")
 	data.node_name = user_info.node_name
 	data.user_ip = user_info.user_ip
+	data.fd = user_info.fd
 
 	for k,v in pairs(data) do
 		req_msg[k] = v

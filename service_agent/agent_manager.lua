@@ -44,15 +44,11 @@ local function disconnect_fd(fd)
 end
 
 --推送消息
-function CMD.pushEvent(user_id,event_name,event_msg)
-    print("pushEvent: user_id=",user_id,"event_name=",event_name)
-    local fd = USER_MAP[user_id]
-    if not fd then
-        return "NOT_ONLINE"
-    end
+function CMD.pushEvent(fd,event_name,event_msg)
+    print("pushEvent: fd=",fd,"event_name=",event_name)
     local agent_item = AGENT_MAP[fd]
     if not agent_item then
-        log.warningf("没有找到fd对应的agent_item")
+        return "NOT_ONLINE"
     end
 
     skynet.call(agent_item.service_id,"lua","push",event_name,event_msg)
