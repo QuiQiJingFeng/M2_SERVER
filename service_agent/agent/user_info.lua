@@ -68,6 +68,10 @@ function user_info:get(key)
     return property[key]
 end
 
+function user_info:delKey(key)
+    property:delKey(key)
+end
+
 --获取多项属性
 function user_info:getValues(...)
     local values = {}
@@ -145,7 +149,7 @@ function user_info:userDisconnect()
     local success,result = self:safeClusterCall(center_node,".room_manager","userDisconnect",data)
     if success and result then
         local db_index = 1
-        skynet.call(".redis_center","lua","HDEL",db_index,self.user_info_key,"room_id")
+        self:delKey("room_id")
     end
 end
 

@@ -112,7 +112,7 @@ function user:leaveRoom()
     end
     local db_index = 1
     if result == NET_RESULT.SUCCESS then
-	    skynet.call(".redis_center","lua","HDEL",db_index,user_info.user_info_key,"room_id")
+	    user_info:delKey("room_id")
 	end
 	return NET_EVENT.LEAVE_ROOM,{result = result}
 end

@@ -44,6 +44,11 @@ function Map.new(db_index,hash_key,defaults)
         end
     end
 
+    function property:delKey(key)
+        values[key] = nil
+        skynet.call(".redis_center","lua","HDEL",db_index,hash_key,key)
+    end
+
     setmetatable(property,meta)
     meta.__index = values
     meta.__newindex = function(table,key,value)
