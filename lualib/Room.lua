@@ -110,7 +110,6 @@ function Room:addPlayer(info)
 	table.insert(self.property.players,player)
 	player.user_pos = #self.property.players
 	player.is_sit = false
-	player.isconnect = true
 end
 
 --获取房间的属性
@@ -197,19 +196,15 @@ end
 --广播消息
 function Room:broadcastAllPlayers(msg_name,msg_data)
 	for _,player in ipairs(self.property.players) do
-		if player.isconnect then
-			local node_name = player.node_name
-			self:pushEvent(node_name,player.user_id,msg_name,msg_data)
-		end
+		local node_name = player.node_name
+		self:pushEvent(node_name,player.user_id,msg_name,msg_data)
 	end
 end
 
 --向某个人发送消息
 function Room:sendMsgToPlyaer(player,msg_name,msg_data)
-	if player.isconnect then
-		local node_name = player.node_name
-		self:pushEvent(node_name,player.user_id,msg_name,msg_data)
-	end
+	local node_name = player.node_name
+	self:pushEvent(node_name,player.user_id,msg_name,msg_data)
 end
 
 --清理房间

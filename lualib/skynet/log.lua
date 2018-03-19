@@ -35,7 +35,7 @@ function log.infof(...)
     log.info(format(...))
 end
 function log.warningf(...)
-    log.waring(format(...))
+    log.warning(format(...))
 end
 function log.errorf(...)
     log.error(format(...))

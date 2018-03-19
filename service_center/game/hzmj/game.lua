@@ -26,15 +26,6 @@ function game:clear()
 	game.__newindex = game_meta
 end
 
-function game:userDisconnect(data)
-	local user_id = data.user_id
-	local player = self.room:getPlayerByUserId(user_id)
-	if not player then
-		return
-	end
-	player.isconnect = false
-end
-
 --洗牌  FisherYates洗牌算法
 --算法的思想是每次从未选中的数字中随机挑选一个加入排列，时间复杂度为O(n)
 function game:fisherYates()

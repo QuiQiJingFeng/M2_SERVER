@@ -25,10 +25,6 @@ function CMD.clear()
 	game:clear()
 end
 
-function CMD.userDisconnect(data)
-	game:userDisconnect()
-end
-
 skynet.start(function()
     skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
         local f = assert(CMD[cmd])

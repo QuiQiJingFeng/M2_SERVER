@@ -68,13 +68,11 @@ function CMD.userDisconnect(data)
 	if not player then
 		return true
 	end
-	player.isconnect = false
 
 	local state = room:get("state")
 	if state == constant.ROOM_STATE.GAME_PLAYING then
 		--此时不会清掉玩家绑定的房间号
 		log.warningf("玩家[%s]掉线,但是房间[%d]在游戏当中",user_id,room_id)
-		skynet.call(room:get("service_id"),"lua","userDisconnect",data)
 		--如果在游戏中 还需要通知其他玩家 有玩家掉线
 		room:broadcastAllPlayers(constant.PUSH_EVENT.NOTICE_PLAYERS_DISCONNECT,{user_id=user_id})
 		return false
