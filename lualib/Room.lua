@@ -110,7 +110,23 @@ function Room:addPlayer(info)
 	player.card_stack = { PENG = {},GANG = {}}
 	player.handle_cards = {}
 	table.insert(self.property.players,player)
-	player.user_pos = #self.property.players
+
+
+	local already_pos = {}
+	for _,obj in ipairs(self.property.players) do
+		already_pos[obj.user_pos] = true
+	end
+	local unused_pos = nil
+	for pos=1,self:get("seat_num") do
+		if not already_pos[pos] then
+			unused_pos = pos
+			break
+		end
+	end
+
+
+
+	player.user_pos = unused_pos
 	player.is_sit = false
 end
 
