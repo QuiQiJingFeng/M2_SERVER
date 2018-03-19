@@ -114,7 +114,9 @@ function Room:addPlayer(info)
 
 	local already_pos = {}
 	for _,obj in ipairs(self.property.players) do
-		already_pos[obj.user_pos] = true
+		if obj.user_pos then
+			already_pos[obj.user_pos] = true
+		end
 	end
 	local unused_pos = nil
 	for pos=1,self:get("seat_num") do
