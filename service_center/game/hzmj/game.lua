@@ -52,7 +52,7 @@ function game:gameOver(type)
 	if type == GAME_OVER_TYPE.NORMAL then
 		--TODO
 	end
-	local info = self.room:getPlayerInfo("user_id","score","card_list")
+	local info = self.room:getPlayerInfo("user_id","score","card_list","user_pos")
 	local data = {type = type,players = info}
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_GAME_OVER,data)
 end
@@ -129,7 +129,7 @@ function game:start()
 
 		local player = self.room:getPlayerByPos(index)
 		player.card_list = cards
-		local rsp_msg = {zpos = self.zpos,cards = cards}
+		local rsp_msg = {zpos = self.zpos,cards = cards,user_id=user_id,user_pos=player.user_pos}
 		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
 	end
 
@@ -206,7 +206,7 @@ end
 function game:noticePushPlayCard(user_id)
 	local players = self.room:get("players")
 	for i,player in ipairs(players) do
-		local rsp_msg = {user_id=user_id}
+		local rsp_msg = {user_id=user_id,user_pos=player.user_pos}
 		if player.user_id == user_id then
 			rsp_msg.card_list = player.card_list
 			rsp_msg.peng_list = player.card_stack["PENG"]
@@ -231,7 +231,7 @@ function game:drawCard(player)
 
 	--通知摸牌
 	for _,obj in ipairs(self.room:get("players")) do
-		local data = {user_id = user_id}
+		local data = {user_id = user_id,user_pos=player.user_pos}
 		if obj.user_id == user_id then
 			data.card = card
 		end
@@ -287,7 +287,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	self.cur_card = data.card
 
 	local user_id = player.user_id
-	local data = {user_id=user_id,card = data.card}
+	local data = {user_id=user_id,card = data.card,user_pos=player.user_pos}
 	--通知所有人 A 已经出牌
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PLAY_CARD,data)
 
@@ -319,10 +319,10 @@ game["PLAY_CARD"] = function(self,player,data)
 	end
 	
 	if num == 2 then  --碰
-		self.room:sendMsgToPlyaer(check_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state="PENG"})
+		self.room:sendMsgToPlyaer(check_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state="PENG",user_pos=check_player.user_pos})
 		self.waite_operators[check_player.user_id] = "PENG"
 	elseif num == 3 then  --杠
-		self.room:sendMsgToPlyaer(check_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state="GANG"})
+		self.room:sendMsgToPlyaer(check_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state="GANG",user_pos=check_player.user_pos})
 		self.waite_operators[check_player.user_id] = "GANG"
 	else
 		next_pos = user_pos + 1
@@ -367,7 +367,7 @@ game["PENG"] = function(self,player,data)
 	end
 
 	--通知所有人,有人碰了
-	local data = {user_id=player.user_id,card = card}
+	local data = {user_id=player.user_id,card = card,user_pos=player.user_pos}
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PENG_CARD,data)
 
 	--通知玩家出牌
@@ -472,7 +472,7 @@ game["GANG"] = function(self,player,data)
 	end
 
 	--通知所有人,有人杠了
-	local data = {user_id = player.user_id,card = card,type=gang_type}
+	local data = {user_id = player.user_id,card = card,type=gang_type,user_pos=player.user_pos}
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_GANG_CARD,data)
 
 	--如果不是碰杠,则不用检查是否有人胡牌
@@ -501,7 +501,7 @@ game["GANG"] = function(self,player,data)
 	if #hu_list > 1 then
 		for _,hu_player in ipairs(hu_list) do
 			--通知客户端当前可以胡牌
-	   		self.room:sendMsgToPlyaer(hu_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state = "HU"})
+	   		self.room:sendMsgToPlyaer(hu_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state = "HU",user_pos=hu_player.user_pos})
 			self.waite_operators[player.user_id] = "HU"
 		end
 	else
