@@ -119,6 +119,13 @@ function game:start()
 	--2、发牌
 	local deal_num = 13 --红中麻将发13张牌
 	local players = self.room:get("players")
+
+	local random_nums = {}
+	for i=1,2 do
+		local num = math.random(1,6)
+		table.insert(random_nums,num)
+	end
+
 	for index=1,self.room:get("sit_down_num") do
 		local cards = {}
 		for j=1,deal_num do
@@ -134,14 +141,8 @@ function game:start()
 		rsp_msg.cards = cards
 		rsp_msg.user_id = user_id
 		rsp_msg.user_pos = player.user_pos
-		local random_nums = {}
-		for i=1,2 do
-			local num = math.random(1,6)
-			table.insert(random_nums,num)
-		end
 		rsp_msg.random_nums = random_nums
 		rsp_msg.cur_round = self.room:get("cur_round")
-		rsp_msg.surplus_card_num = #self.card_list
 
 		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
 	end

@@ -39,7 +39,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-∂
+å
 msg/user.protomsg.user"Ö
 RoomSetting
 	game_type (RgameType
@@ -99,15 +99,14 @@ GameCmdRsp(
 user_pos (RuserPos"T
 PushSitDown
 room_id (RroomId,
-sit_list (2.msg.user.SitItemRsitList"∑
+sit_list (2.msg.user.SitItemRsitList"ç
 DealCard
 zpos (Rzpos
 user_pos (RuserPos
 cards (Rcards
 random_nums (R
 randomNums
-	cur_round (RcurRound(
-surplus_card_num (RsurplusCardNum"V
+	cur_round (RcurRound"V
 PushDrawCard
 user_id (	RuserId
 card (Rcard

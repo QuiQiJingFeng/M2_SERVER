@@ -177,24 +177,21 @@ end
 
 --游戏命令 
 function user:gameCmd(data)
-	local room_id = user_info:getCurrentRoomId()
+	local room_id = user_info:get("room_id")
 	if not room_id then  
-		return NET_EVENT.GAME_CMD,{result = NET_RESULT.NOT_EXIST_ROOM}
+		return "game_cmd",{result = "not_in_room"}
 	end
- 
-	local center_node = user_info:getTargetNodeByRoomId(room_id)
-	if not center_node then
-		return NET_EVENT.GAME_CMD,{result = NET_RESULT.NOT_EXIST_ROOM}  
-	end
+	local room_info = Map.new(ROOM_DB,"room:"..room_id)
 
+	local center_node = room_info.node_name
 	data.user_id = user_info:get("user_id")
 	data.room_id = room_id
 	local success,result = user_info:safeClusterCall(center_node,".room_manager","gameCMD",data)
 	if not success then
-		return NET_EVENT.SIT_DOWN,{result = NET_RESULT.FAIL}
+		return "game_cmd",{result = "server_error"}
 	end
 
-	return NET_EVENT.GAME_CMD,{result=result}
+	return "game_cmd",{result=result}
 end
 
 
