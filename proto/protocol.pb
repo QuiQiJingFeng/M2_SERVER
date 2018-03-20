@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Ñ
+Ð
 msg/user.protomsg.user"…
 RoomSetting
 	game_type (RgameType
@@ -140,21 +140,21 @@ GameCmdRsp(
 cards (Rcards
 random_nums (R
 randomNums
-	cur_round (RcurRound"†
+	cur_round (RcurRound"V
 PushDrawCard
 user_id (	RuserId
 card (Rcard
-user_pos (RuserPos.
-operator (2.msg.user.OperatorRoperator"2
+user_pos (RuserPos"2
 GPItem
 value (Rvalue
-type (Rtype"½
+type (Rtype"í
 PushPlayCard
 user_id (	RuserId
 user_pos (RuserPos
 	card_list (RcardList-
 	peng_list (2.msg.user.GPItemRpengList-
-	gang_list (2.msg.user.GPItemRgangList"X
+	gang_list (2.msg.user.GPItemRgangList.
+operator (2.msg.user.OperatorRoperator"X
 NoticePlayCard
 user_id (	RuserId
 card (Rcard
