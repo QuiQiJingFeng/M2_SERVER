@@ -61,9 +61,8 @@ constant["PUSH_EVENT"] = {
 	NOTICE_GAME_OVER = "notice_game_over", --本局结束
 	NOTICE_PLAYERS_DISCONNECT = "notice_players_disconnect", --通知玩家有人掉线
 	HANDLE_ERROR = "handle_error", --错误处理
-
-
 }
+
 -----------------------游戏类型配置相关--------------------------
 
 --通用常量配置

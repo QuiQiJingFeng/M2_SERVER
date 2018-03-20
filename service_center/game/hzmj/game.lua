@@ -193,7 +193,6 @@ end
 function game:removeHandleCard(player,card,num)
 	num = num or 1
 	local indexs = {}
-	print("card = >",card)
 
 	for idx,value in ipairs(player.card_list) do
 		if value == card then

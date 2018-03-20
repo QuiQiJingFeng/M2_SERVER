@@ -134,9 +134,9 @@ function CMD.gameOver(room_id)
 	local round = room:get("round")
 	if cur_round == 1 then
 		local cost = round * constant["ROUND_COST"]
-		["ROOM_OWNER_COST"] = 1;  --房主出资
-		["AMORTIZED_COST"] = 2;   --平摊
-		["WINNER_COST"] = 3;      --赢家出资
+		-- ["ROOM_OWNER_COST"] = 1;  --房主出资
+		-- ["AMORTIZED_COST"] = 2;   --平摊
+		-- ["WINNER_COST"] = 3;      --赢家出资
 	end
 
 	room:set("state",constant.ROOM_STATE.GAME_OVER)
