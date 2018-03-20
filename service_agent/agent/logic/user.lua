@@ -28,7 +28,7 @@ function user:createRoom(req_msg)
 	end
 
 	local cost = round * constant["ROUND_COST"] * -1
-	local enough = user_info:updateGoldNum(cost)
+	local enough = user_info:checkGoldNum(cost)
 	if not enough then
 		return "create_room",{result = "gold_not_enough"}
 	end

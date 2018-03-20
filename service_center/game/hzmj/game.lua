@@ -45,6 +45,10 @@ end
 
 --游戏结束
 function game:gameOver(type)
+	--第一局结束之后,清算金币
+
+
+
 	--通知room_manager服务游戏结束
 	skynet.call(".room_manager","lua","gameOver",self.room:get("room_id"))
 
@@ -217,15 +221,16 @@ function game:removeHandleCard(player,card,num)
 end
 
 --通知玩家出牌
-function game:noticePushPlayCard(user_id)
+function game:noticePushPlayCard(splayer,operator)
 	local players = self.room:get("players")
 	for i,player in ipairs(players) do
-		local rsp_msg = {user_id=user_id,user_pos=player.user_pos}
-		if player.user_id == user_id then
+		local rsp_msg = {user_id=splayer.user_id,user_pos=splayer.user_pos}
+		if player.user_id == splayer.user_id then
 			rsp_msg.card_list = player.card_list
 			rsp_msg.peng_list = player.card_stack["PENG"]
 			rsp_msg.gang_list = player.card_stack["GANG"]
 		end
+		rsp_msg.operator = operator
 		self.room:sendMsgToPlyaer(player,PUSH_EVENT.PUSH_PLAY_CARD,rsp_msg)
 	end
 end
@@ -253,7 +258,7 @@ function game:drawCard(player)
 	end
 
 	--通知玩家出牌了
-	self:noticePushPlayCard(player.user_id)
+	self:noticePushPlayCard(player,"MUO")
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 end
@@ -385,7 +390,7 @@ game["PENG"] = function(self,player,data)
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PENG_CARD,data)
 
 	--通知玩家出牌
-	self:noticePushPlayCard(player.user_id)
+	self:noticePushPlayCard(player,"PENG")
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 

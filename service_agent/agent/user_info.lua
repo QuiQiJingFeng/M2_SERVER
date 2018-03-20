@@ -42,6 +42,12 @@ function user_info:init(info)
     property.room_ids = {}
 end
 
+
+function user_info:checkGoldNum(num)
+    local total = tonumber(self:get("gold_num"))
+    return total >= num
+end
+
 function user_info:updateGoldNum(num)
     local total = tonumber(self:get("gold_num"))
     if total >= num then

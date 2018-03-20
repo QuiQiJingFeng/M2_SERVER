@@ -106,7 +106,6 @@ function CMD.sitDown(data)
 			--第一回合开始后,重新设定房间的释放时间
 			local now = skynet.time()
 			room:set("expire_time",now + 12*60*60)
-
 		end
 		--开始游戏之后局数+1
 		room:set("cur_round",cur_round+1)
@@ -131,15 +130,15 @@ end
 --游戏结束 更新房间的状态
 function CMD.gameOver(room_id)
 	local room = RoomPool:getRoomByRoomID(room_id)
-	--更新游戏的局数
+	local cur_round = room:get("cur_round")
 	local round = room:get("round")
-	local origin_round = room:get("origin_round")
-	--如果第一局结束 结算金币
-	if origin_round == round then
-		--TODO
+	if cur_round == 1 then
+		local cost = round * constant["ROUND_COST"]
+		["ROOM_OWNER_COST"] = 1;  --房主出资
+		["AMORTIZED_COST"] = 2;   --平摊
+		["WINNER_COST"] = 3;      --赢家出资
 	end
 
-	room:set("round",round - 1)
 	room:set("state",constant.ROOM_STATE.GAME_OVER)
 	local players = room:get("players")
 	for i,player in ipairs(players) do
