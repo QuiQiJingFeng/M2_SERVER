@@ -10,6 +10,36 @@ msg.common"
 Result
 success
 fail
+—
+msg/ddz.protomsg.ddz"0
+ReqPointDemand
+
+userDemand (R
+userDemand"_
+ReqSendCard
+nowType (RnowType
+nowValue (RnowValue
+cardList (RcardList"W
+ServerPointDemand
+	userExtra (R	userExtra$
+userNowDemand (RuserNowDemand"l
+ServerSendCard
+	userExtra (R	userExtra
+userCard (RuserCard 
+userCardNum (RuserCardNum"Q
+NoticePointDemand
+	userExtra (R	userExtra
+
+userDemand (R
+userDemand"M
+NoticeMainPaleyer
+	userExtra (R	userExtra
+baseCard (RbaseCard"€
+NoticeSendCard
+	userExtra (R	userExtra
+nowType (RnowType
+nowValue (RnowValue
+cardList (RcardList
 Ô
 msg/login.proto	msg.login"§
 LoginReq3
@@ -39,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Œ
+Ñ
 msg/user.protomsg.user"…
 RoomSetting
 	game_type (RgameType
@@ -66,11 +96,15 @@ SitDownReq
 pos (Rpos"6
 
 SitDownRsp(
-result (2.msg.user.ResultRresult":
+result (2.msg.user.ResultRresult"®
 
 GameCmdReq
 command (	Rcommand
-card (Rcard"6
+card (Rcard 
+demandPoint (RdemandPoint
+nowType (RnowType
+nowValue (RnowValue
+cardList (RcardList"6
 
 GameCmdRsp(
 result (2.msg.user.ResultRresult"°
@@ -106,11 +140,12 @@ GameCmdRsp(
 cards (Rcards
 random_nums (R
 randomNums
-	cur_round (RcurRound"V
+	cur_round (RcurRound"†
 PushDrawCard
 user_id (	RuserId
 card (Rcard
-user_pos (RuserPos"2
+user_pos (RuserPos.
+operator (2.msg.user.OperatorRoperator"2
 GPItem
 value (Rvalue
 type (Rtype"½
@@ -167,13 +202,16 @@ auth_faild
 sit_already_has
 round_not_enough
 pos_has_player
-already_sit*5
+already_sit*
+Operator
+MUO
+PENG*5
 GangType
 AN_GANG
 	MING_GANG
 	PENG_GANG
-‹
-protocol.protomsg/common.protomsg/login.protomsg/user.proto"ª
+„
+protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ª
 C2S
 
 session_id (R	sessionId3
@@ -189,7 +227,7 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"˜
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"‚
 S2C
 
 session_id (R	sessionId
@@ -220,4 +258,9 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver_
 notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnectC
 update_resource±ê (2.msg.user.UpdateResourceRupdateResource:
-handle_error‘¿ (2.msg.user.HandleErrorRhandleError
+handle_error‘¿ (2.msg.user.HandleErrorRhandleErrorA
+ServerSendCard­œ (2.msg.ddz.ServerSendCardRServerSendCardJ
+NoticePointDemand®œ (2.msg.ddz.NoticePointDemandRNoticePointDemandJ
+NoticeMainPaleyer¯œ (2.msg.ddz.NoticeMainPaleyerRNoticeMainPaleyerA
+NoticeSendCard°œ (2.msg.ddz.NoticeSendCardRNoticeSendCardJ
+ServerPointDemand±œ (2.msg.ddz.ServerPointDemandRServerPointDemand
