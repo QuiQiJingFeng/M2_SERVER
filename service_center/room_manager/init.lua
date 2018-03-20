@@ -15,7 +15,7 @@ function CMD.createRoom(data)
 	--筛选数据传递到客户端
 	room:refreshRoomInfo()
 
-	return constant.NET_RESULT.SUCCESS,room:get("room_id")
+	return "success",room:get("room_id")
 end
 
 --加入房间
@@ -24,14 +24,128 @@ function CMD.joinRoom(data)
 	local room_id = data.room_id
 	local room = RoomPool:getRoomByRoomID(room_id)
 	if not room then
-		return constant.NET_RESULT.NOT_EXIST_ROOM,{}
+		return "not_exist_room"
 	end
 
 	room:addPlayer(data)
 
 	room:refreshRoomInfo()
  
-	return constant.NET_RESULT.SUCCESS,rsp_msg
+	return constant.NET_RESULT.SUCCESS
+end
+
+--离开房间
+function CMD.leaveRoom(data)
+	local room_id = data.room_id
+	local user_id = data.user_id
+	local room = RoomPool:getRoomByRoomID(room_id)
+	if not room then
+		return "not_exist_room"
+	end
+	local state = room:get("state")
+	if state == constant.ROOM_STATE.GAME_PLAYING then
+		return "current_in_game"
+	end
+
+	room:removePlayer(user_id)
+	room:refreshRoomInfo()
+
+	return "success"
+end
+
+--坐下
+function CMD.sitDown(data)
+	local room_id = data.room_id
+	local user_id = data.user_id
+	local pos = data.pos
+	local room = RoomPool:getRoomByRoomID(room_id)
+	if pos > room:get("seat_num") then
+		return "paramater_error"
+	end
+
+	local round = room:get("round")
+	if round <= 0 then
+		return "round_not_enough"
+	end
+	local player = room:getPlayerByUserId(user_id)
+	local obj = room:getPlayerByPos(pos)
+	--如果该位置有人(不是自己的话）则不能入座
+	if obj and obj.user_id ~= player.user_id then
+		return "pos_has_player"
+	end
+
+	--如果已经是准备状态了
+	if player.is_sit then
+		return "already_sit"
+	end
+
+	
+	player.is_sit = true
+
+	room:updatePlayerProperty(user_id,"user_pos",pos)
+	
+	--推送
+	local sit_list = room:getPlayerInfo("user_id","user_pos","is_sit")
+	for i=#sit_list,1,-1 do
+		local obj = sit_list[i]
+		if not obj.is_sit then
+			table.remove(sit_list,i)
+		end
+		obj.is_sit = nil
+	end
+	local rsp_msg = {room_id = room_id,sit_list = sit_list}
+	room:broadcastAllPlayers("push_sit_down",rsp_msg)
+
+	local sit_down_num = room:get("sit_down_num")
+	sit_down_num = sit_down_num + 1
+	room:set("sit_down_num",sit_down_num)
+	local seat_num = room:get("seat_num")
+	if seat_num == sit_down_num then
+		local cur_round = room:get("cur_round")
+		if cur_round == 0 then
+			--第一回合开始后,重新设定房间的释放时间
+			local now = skynet.time()
+			room:set("expire_time",now + 12*60*60)
+
+		end
+		--开始游戏之后局数+1
+		room:set("cur_round",cur_round+1)
+		--所有人都坐下之后 开始游戏
+		room:set("state",constant.ROOM_STATE.GAME_PLAYING)
+		skynet.call(room:get("service_id"),"lua","startGame",room:getAllInfo())
+	end
+
+	return "success"
+end
+
+--FYD
+--游戏指令
+function CMD.gameCMD(data)
+	local user_id = data.user_id
+	local room_id = data.room_id
+	local room = RoomPool:getRoomByRoomID(room_id)
+	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
+	return result
+end
+
+--游戏结束 更新房间的状态
+function CMD.gameOver(room_id)
+	local room = RoomPool:getRoomByRoomID(room_id)
+	--更新游戏的局数
+	local round = room:get("round")
+	local origin_round = room:get("origin_round")
+	--如果第一局结束 结算金币
+	if origin_round == round then
+		--TODO
+	end
+
+	room:set("round",round - 1)
+	room:set("state",constant.ROOM_STATE.GAME_OVER)
+	local players = room:get("players")
+	for i,player in ipairs(players) do
+		player.is_sit = nil
+	end
+	self:set("sit_down_num",0)
 end
 
 --玩家断开连接 游戏服根据返回结果决定是否清掉玩家身上绑定的房间ID
@@ -64,127 +178,6 @@ function CMD.userDisconnect(data)
 	room:refreshRoomInfo()
 
 	return true
-end
-
---离开房间
-function CMD.leaveRoom(data)
-	local room_id = data.room_id
-	local user_id = data.user_id
-	local room = RoomPool:getRoomByRoomID(room_id)
-	if not room then
-		log.warningf("玩家[%s]离开房间[%d],但是没有找到房间号",user_id,room_id)
-		return constant.NET_RESULT.NOT_EXIST_ROOM
-	end
-	local state = room:get("state")
-	if state == constant.ROOM_STATE.GAME_PLAYING then
-		log.warningf("当前正在游戏中,玩家[%s]无法离开房间[%d]",user_id,room_id)
-		return constant.NET_RESULT.FAIL
-	end
-
-	room:removePlayer(user_id)
-	
-	room:refreshRoomInfo()
-
-	return constant.NET_RESULT.SUCCESS
-end
-
---是否可以返回房间
-function CMD.canBackRoom(data)
-
-end
-
---坐下
-function CMD.sitDown(data)
-	local room_id = data.room_id
-	local user_id = data.user_id
-	local pos = data.pos
-	local room = RoomPool:getRoomByRoomID(room_id)
-	if pos > room:get("seat_num") then
-		return constant.NET_RESULT.INVALID_PARAMATER
-	end
-
-	local round = room:get("round")
-	if round <= 0 then
-		return NET_RESULT.ROUND_NOT_ENOUGH
-	end
-	local player = room:getPlayerByUserId(user_id)
-	local obj = room:getPlayerByPos(pos)
-	--如果该位置有人(不是自己的话）则不能入座
-	if obj and obj.user_id ~= player.user_id then
-		return constant.NET_RESULT.SIT_ALREADY_HAS
-	end
-	--如果已经是准备状态了
-	if player.is_sit then
-		return constant.NET_RESULT.SUCCESS
-	end
-
-	
-	player.is_sit = true
-
-	room:updatePlayerProperty(user_id,"user_pos",pos)
-	
-	--推送
-	local sit_list = room:getPlayerInfo("user_id","user_pos","is_sit")
-	for i=#sit_list,1,-1 do
-		local obj = sit_list[i]
-		if not obj.is_sit then
-			table.remove(sit_list,i)
-		end
-		obj.is_sit = nil
-	end
-	local rsp_msg = {room_id = room_id,sit_list = sit_list}
-	room:broadcastAllPlayers(constant.PUSH_EVENT.PUSH_SIT_DOWN,rsp_msg)
-
-	local sit_down_num = room:get("sit_down_num")
-	sit_down_num = sit_down_num + 1
-	room:set("sit_down_num",sit_down_num)
-	local seat_num = room:get("seat_num")
-	if seat_num == sit_down_num then
-		local origin_round = room:get("origin_round")
-		local round = room:get("round")
-		if origin_round == round then
-			--第一回合开始后,重新设定房间的释放时间
-			local now = skynet.time()
-			room:set("expire_time",now + 12*60*60)
-		end
-		--所有人都坐下之后 开始游戏
-		room:set("state",constant.ROOM_STATE.GAME_PLAYING)
-		skynet.call(room:get("service_id"),"lua","startGame",room:getAllInfo())
-	end
-
-	return constant.NET_RESULT.SUCCESS
-end
-
---游戏指令
-function CMD.gameCMD(data)
-
-	local user_id = data.user_id
-	local room_id = data.room_id
-	local room = RoomPool:getRoomByRoomID(room_id)
-	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
-	return result
-end
-
---游戏结束 更新房间的状态
-function CMD.gameOver(room_id)
-	local room = RoomPool:getRoomByRoomID(room_id)
-	--更新游戏的局数
-	local round = room:get("round")
-	local origin_round = room:get("origin_round")
-	--如果第一局结束 结算金币
-	if origin_round == round then
-		--TODO
-	end
-
-	room:set("round",round - 1)
-	room:set("state",constant.ROOM_STATE.GAME_OVER)
-	local players = room:get("players")
-	for i,player in ipairs(players) do
-		player.is_sit = nil
-	end
-	self:set("sit_down_num",0)
-
-
 end
 
 skynet.start(function()

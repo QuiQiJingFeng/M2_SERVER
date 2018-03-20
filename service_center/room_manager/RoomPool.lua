@@ -1,100 +1,108 @@
 local skynet = require "skynet"
 local sharedata = require "skynet.sharedata"
-local Room = require "Room"
 local server_info = sharedata.query("server_info")
+local Room = require "Room"
 local utils = require "utils"
-
-local INIT_NUM = 100
 local REDIS_DB = 2
 local RoomPool = {}
 
-function RoomPool:init()
-    --空闲的房间列表
-    self.unused_list = {}
-    --正在使用的房间列表
-    self.used_list = {}
-
-    --每隔1分钟检查一下失效的房间
-    skynet.timeout(60 * 100, utils:handler(self,self.checkExpireRoom))
-end
-
-function RoomPool:checkExpireRoom()
-	local now = skynet.time()
-	for i=#self.used_list,1,-1 do
-		local room = self.used_list[i]
-		local sit_down_num = room:get("sit_down_num")
-		--如果房间没人,则30分钟后销毁房间
-		local expire_time = room:get("expire_time")
-		if expire_time and now > expire_time then
-			room:distroy()
-			table.remove(self.used_list,i)
-			table.insert(self.unused_list,room)
-		end
-	end
-end
-
-function RoomPool:distroyRoom(room_id)
-	for i=#self.used_list,1,-1 do
-		local room = self.used_list[i]
-		if room_id == room:get("room_id") then
-			room:distroy()
-			table.remove(self.used_list,i)
-			table.insert(self.unused_list,room)
-			break
-		end
-	end
-end
-
-function RoomPool:getUnusedRandomId()
+--获取一个唯一的房间号ID
+local function getUnusedRandomId()
 	local pre_id = math.random(1,9)
 	local last_id = string.format("%05d",math.random(0,99999)) 
 	local random_id = tonumber(pre_id..last_id)
 
 	local ret = skynet.call(".redis_center","lua","SISMEMBER",REDIS_DB,"room_pool",random_id)
 	if ret == 1 then
-		return self:getUnusedRandomId()
+		return getUnusedRandomId()
 	else
 		skynet.call(".redis_center","lua","SADD",REDIS_DB,"room_pool",random_id)
 		return random_id
 	end
 end
 
------------------------------内部方法 BEGIN-----------------------
---申请一个房间
-function RoomPool:allocRoom(room_id)
-	local room_id = self:getUnusedRandomId()
+function RoomPool:init()
+    --空闲的房间列表
+    self.unused_list = {}
+    --正在使用的房间map
+    self.used_map = {}
+
+    self:recovery()
+
+    --每隔1分钟检查一下失效的房间
+    self:checkExpireRoom()
+end
+
+function RoomPool:checkExpireRoom()
+	local cord_list = {}
+	local now = skynet.time()
+	for room_id,room in pairs(self.used_map) do
+		local expire_time = room:get("expire_time")
+		if expire_time and now > expire_time then
+			table.insert(cord_list,room_id)
+		end
+	end
+
+	for _,room_id in ipairs(cord_list) do
+		self:distroyRoom(room_id)
+	end
+
+	--每隔1分钟检查一下失效的房间
+    skynet.timeout(60 * 100, utils:handler(self,self.checkExpireRoom))
+end
+
+--恢复已有的房间
+function RoomPool:recovery()
+    local room_keys = skynet.call(".redis_center","lua","GetRoomKeysForNodeName",REDIS_DB,server_info.node_name)
+    for _,room_key in pairs(room_keys) do
+    	local room = Room.recover(room_key)
+    	local service_id = skynet.newservice("game")
+    	room:set("service_id",service_id)
+    	print("恢复房间 id = ",room:get("room_id"))
+    	self.used_map[room:get("room_id")] = room
+    end
+end
+
+--销毁房间
+function RoomPool:distroyRoom(room_id)
+	local room = self.used_map[room_id]
+	self.used_map[room_id] = nil
+	table.insert(self.unused_list,room)
+	room:distroy()
+	skynet.call(".redis_center","lua","SREM",REDIS_DB,"room_pool",room_id)
+end
+
+function RoomPool:getRoomByRoomID(room_id)
+	return self.used_map[room_id]
+end
+
+function RoomPool:allocRoom()
+	local room_id = getUnusedRandomId()
 	local node_name = server_info.node_name
-	local room = Room.new(room_id,node_name)
 	local service_id = skynet.newservice("game")
-	room:setServiceId(service_id)
+	local room = Room.new(room_id,node_name,service_id)
 
 	return room
 end
 
------------------------------内部方法 END-----------------------
-
-
------------------------------外部接口 BEGIN---------------------------
 --获取一个空闲的空房间
 function RoomPool:getUnusedRoom()
 	local room
 	if #self.unused_list > 0 then
-		room = table.remove(self.unused_list,1)
+		local index 
+		for idx,_ in pairs(self.unused_list) do
+			index = idx
+			break
+		end
+		room = table.remove(self.unused_list,index)
+		local room_id = getUnusedRandomId()
+		room:reuse(room_id)
 	else
 		room = self:allocRoom()
 	end
-	table.insert(self.used_list,room)
+
+	self.used_map[room:get("room_id")] = room
 	return room
 end
 
---通过room_id 来获取room
-function RoomPool:getRoomByRoomID(room_id)
-	for _,room in ipairs(self.used_list) do
-		if room:get("room_id") == room_id then
-			return room
-		end
-	end
-end
------------------------------外部接口 END
----------------------------
 return RoomPool

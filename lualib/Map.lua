@@ -1,5 +1,6 @@
 local skynet = require "skynet"
 local utils = require "utils"
+local cjson = require "cjson"
 
 local Map = {}
 
@@ -14,30 +15,44 @@ local function loadFromKey(temp)
     return data
 end
 
-function Map.new(db_index,hash_key,defaults)
+function Map.new(db_index,hash_key)
 
     local temp = skynet.call(".redis_center","lua","HGETALL",db_index,hash_key)
     local data = loadFromKey(temp)
 
     local property = {}
     local meta = {}
-    local values = utils:mergeNewTable(defaults,data)
-
-    local args = {}
-    for k,v in pairs(values) do
-        table.insert(args,k)
-        table.insert(args,v)
-    end
-    if #args > 1 then
-        skynet.call(".redis_center","lua","HMSET",db_index,hash_key,table.unpack(args))
+    local values = {}
+    for k,v in pairs(data) do
+        local value = string.sub (v,1,-6)
+        local format = string.sub(v,-5)
+        if format == "__M__" then
+            values[k] = cjson.decode(value)
+        elseif format == "__F__" then
+            values[k] = tonumber(value)
+        elseif format == "__B__" then
+            values[k] = value == "true" and true or false
+        elseif format == "__S__" then
+            values[k] = value
+        end
     end
 
     function property:updateValues(data)
-        utils:mergeToTable(values,data)
         local args = {}
         for k,v in pairs(data) do
+            values[k] = v
+            local value = v
+            if type(value) == "table" then
+                value = cjson.encode(value).."__M__"
+            elseif type(value) == "boolean" then
+                value = (value and "true" or "false") .. "__B__"
+            elseif type(value) == "number" then
+                value = tostring(value).."__F__"
+            elseif type(value) == "string" then
+                value = value .. "__S__"
+            end
             table.insert(args,k)
-            table.insert(args,v)
+            table.insert(args,value)
         end
         if #args > 1 then
             skynet.call(".redis_center","lua","HMSET",db_index,hash_key,table.unpack(args))
@@ -49,10 +64,24 @@ function Map.new(db_index,hash_key,defaults)
         skynet.call(".redis_center","lua","HDEL",db_index,hash_key,key)
     end
 
+    function property:getValues()
+        return values
+    end
+
     setmetatable(property,meta)
     meta.__index = values
-    meta.__newindex = function(table,key,value)
-        values[key] = value
+    meta.__newindex = function(table,key,v)
+        values[key] = v
+        local value = v
+        if type(value) == "table" then
+            value = cjson.encode(value).."__M__"
+        elseif type(value) == "boolean" then
+            value = (value and "true" or "false") .. "__B__"
+        elseif type(value) == "number" then
+            value = tostring(value).."__F__"
+        elseif type(value) == "string" then
+            value = value .. "__S__"
+        end
         skynet.call(".redis_center","lua","HSET",db_index,hash_key,key,value)
     end
 

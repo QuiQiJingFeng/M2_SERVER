@@ -129,7 +129,20 @@ function game:start()
 
 		local player = self.room:getPlayerByPos(index)
 		player.card_list = cards
-		local rsp_msg = {zpos = self.zpos,cards = cards,user_id=user_id,user_pos=player.user_pos}
+		local rsp_msg = {}
+		rsp_msg.zpos = self.zpos
+		rsp_msg.cards = cards
+		rsp_msg.user_id = user_id
+		rsp_msg.user_pos = player.user_pos
+		local random_nums = {}
+		for i=1,2 do
+			local num = math.random(1,6)
+			table.insert(random_nums,num)
+		end
+		rsp_msg.random_nums = random_nums
+		rsp_msg.cur_round = self.room:get("cur_round")
+		rsp_msg.surplus_card_num = #self.card_list
+
 		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
 	end
 

@@ -3,6 +3,7 @@ local cluster = require "skynet.cluster"
 local constant = require "constant"
 local log = require "skynet.log"
 local cjson = require "cjson"
+local Map = require "Map"
 
 local ZJ_MODE = constant["ZJ_MODE"]
 local ALL_GAME_NUMS = constant["ALL_GAME_NUMS"]
@@ -12,65 +13,142 @@ local ALL_DEAL_NUM = constant["ALL_DEAL_NUM"]
 local ALL_COMMAND = constant["ALL_COMMAND"]
 local OPERATER = constant["OPERATER"]
 local PUSH_EVENT = constant["PUSH_EVENT"]
-
+local ROOM_STATE = constant.ROOM_STATE
 local RECOVER_GAME_TYPE = constant["RECOVER_GAME_TYPE"]
 local REDIS_DB = 2
 local Room = {}
 
 Room.__index = Room
 
-function Room.new(room_id,node_name)
-	local new_room = { property = {}}
+function Room.new(room_id,node_name,service_id)
+	local room_key = "room:"..room_id
+	local new_room = { property = Map.new(REDIS_DB,room_key)}
 	setmetatable(new_room, Room)
 	new_room.__index = Room
-	new_room:init(room_id,node_name)
+	new_room:init(room_id,node_name,service_id)
 
 	return new_room
 end
+
 --使用数据重建房间,因为虚拟机之间只能传递数据,所以需要重新构建
 function Room.rebuild(property)
-	local new_room = { property = property}
+	local room_id = property.room_id
+	local room_key = "room:"..room_id
+	local new_room = { property = Map.new(REDIS_DB,room_key)}
+	new_room.property:updateValues(property)
 	setmetatable(new_room, Room)
 	new_room.__index = Room
 	return new_room
 end
 
-function Room:init(room_id,node_name)
-	--房间ID
-	self:set("room_id",room_id)
-	--房间所在的服务器地址
-	self:set("node_name",node_name)
-	--房间中的玩家列表
-	self:set("players",{})
-	--坐下的人数
-	self:set("sit_down_num",0)
-	--当前出牌值
-	self:set("cur_card",nil)
-	--房间的状态
-	self:set("state",constant.ROOM_STATE.GAME_PREPARE)
-	local now = skynet.time()
-	self:set("expire_time",now + 30*60)
-	--将房间号加到房间列表中,并且和服务器名称绑定到一起
-	skynet.call(".redis_center","lua","HSET",REDIS_DB,"room_list",room_id,node_name)
+--从数据库恢复房间
+function Room.recover(room_key)
+	local new_room = { property = Map.new(REDIS_DB,room_key)}
+	setmetatable(new_room, Room)
+	new_room.__index = Room
+
+	return new_room
+end
+
+
+--重用房间
+function Room:reuse(room_id)
+	local node_name = self.property.node_name
+	local service_id = self.property.service_id
+	local room_key = "room:"..room_id
+	self.property = Map.new(REDIS_DB,room_key)
+	self:init(room_id,node_name,service_id)
+end
+
+function Room:init(room_id,node_name,service_id)
+	local info = {}
+	info.room_id = room_id                      --房间ID
+	info.node_name = node_name					--房间所在的服务器地址
+	info.service_id = service_id 				--房间服务地址
+	info.players = {}							--房间中的玩家列表
+	info.sit_down_num = 0						--坐下的人数
+	info.cur_card = nil							--当前出牌值
+	info.state = ROOM_STATE.GAME_PREPARE		--房间的状态
+	info.expire_time = skynet.time() + 30*60	--房间的解散时间
+	self.property:updateValues(info)
 end
 
 function Room:setInfo(info)
-	self:set("game_type",info.game_type)
-	self:set("round",info.round)
-	self:set("pay_type",info.pay_type)
-	self:set("seat_num",info.seat_num)
-	self:set("is_friend_room",info.is_friend_room)
-	self:set("is_open_voice",info.is_open_voice)
-	self:set("is_open_gps",info.is_open_gps)
-	self:set("other_setting",info.other_setting)
-	--记录下最初的回合数
-	self:set("origin_round",info.round)
+	local data = {}
+	data.owner_id = info.user_id                --房间创建人
+	data.game_type = info.game_type             --游戏类型
+	data.round = info.round                     --房间回合数
+	data.pay_type = info.pay_type				--资费类型
+	data.seat_num = info.seat_num               --座位的数量
+	data.is_friend_room = info.is_friend_room   --是否是好友房
+	data.is_open_voice = info.is_open_voice     --是否开启声音
+	data.is_open_gps = info.is_open_gps         --是否开启GPS
+	data.other_setting = info.other_setting     --其他设置
+	data.cur_round = 0          				--当前回合数
+	self.property:updateValues(data)
 end
 
---设置游戏房间地址 
-function Room:setServiceId(service_id)
-	self.property.service_id = service_id
+--获取房间的属性
+function Room:get(property_name)
+	return self.property[property_name]
 end
+
+--设置房间的属性
+function Room:set(property_name,value)
+	self.property[property_name] = value
+end
+
+--添加玩家
+function Room:addPlayer(info)
+	local player = {}
+	player.user_id = info.user_id                --玩家的ID
+	player.user_name = info.user_name            --玩家的名称
+	player.user_pic = info.user_pic              --玩家头像的url
+	player.user_ip = info.user_ip                --玩家IP
+	player.node_name = info.node_name            --玩家所在游戏服的地址
+	player.score = 0                             --积分
+	player.cur_score = 0                         --当前局的积分
+	player.fd = info.fd                          --玩家的fd
+	player.gold_num = info.gold_num				 --玩家的金币数量
+	
+	--记录已经碰或者杠的牌
+	player.card_stack = { PENG = {},GANG = {}}
+	player.handle_cards = {}
+	table.insert(self.property.players,player)
+
+	local already_pos = {}
+	for _,obj in ipairs(self.property.players) do
+		if obj.user_pos then
+			already_pos[obj.user_pos] = true
+		end
+	end
+	local unused_pos = nil
+	for pos=1,self:get("seat_num") do
+		if not already_pos[pos] then
+			unused_pos = pos
+			break
+		end
+	end
+
+	player.user_pos = unused_pos
+	player.is_sit = false
+
+	self:set("players",self.property.players)
+end
+
+--删除玩家
+function Room:removePlayer(user_id)
+	for index,player in ipairs(self.property.players) do
+		if player.user_id == user_id then
+			table.remove(self.property.players,index)
+			local sit_down_num = self:get("sit_down_num")
+			self:set("sit_down_num",sit_down_num-1)
+			self:set("players",self.property.players)
+			break
+		end
+	end
+end
+
 
 function Room:getPlayerByPos(pos)
 	for _,player in ipairs(self.property.players) do
@@ -88,58 +166,7 @@ function Room:getPlayerByUserId(user_id)
 	end
 end
 
---添加玩家
-function Room:addPlayer(info)
-	local player = {}
-	--玩家的ID
-	player.user_id = info.user_id
-	--玩家的名称
-	player.user_name = info.user_name
-	--玩家头像的url
-	player.user_pic = info.user_pic
-	--玩家IP
-	player.user_ip = info.user_ip
-	--玩家所在游戏服的地址
-	player.node_name = info.node_name
-	--积分
-	player.score = 0
-	--玩家的fd
-	player.fd = info.fd
-	
-	--记录已经碰或者杠的牌
-	player.card_stack = { PENG = {},GANG = {}}
-	player.handle_cards = {}
-	table.insert(self.property.players,player)
 
-
-	local already_pos = {}
-	for _,obj in ipairs(self.property.players) do
-		if obj.user_pos then
-			already_pos[obj.user_pos] = true
-		end
-	end
-	local unused_pos = nil
-	for pos=1,self:get("seat_num") do
-		if not already_pos[pos] then
-			unused_pos = pos
-			break
-		end
-	end
-
-
-
-	player.user_pos = unused_pos
-	player.is_sit = false
-end
-
---获取房间的属性
-function Room:get(property_name)
-	return self.property[property_name]
-end
-
-function Room:set(property_name,value)
-	self.property[property_name] = value
-end
 
 function Room:getPropertys(...)
 	local args = {...}
@@ -150,7 +177,7 @@ function Room:getPropertys(...)
 	return info
 end
 
---获取所有玩家的 ID 名称 头像 状态数据
+--获取所有玩家的信息
 function Room:getPlayerInfo(...)
 	local filters = {...}
 	local info = {}
@@ -165,30 +192,10 @@ function Room:getPlayerInfo(...)
 end
 
 function Room:getAllInfo()
-	return self.property
+	return self.property:getValues()
 end
 
-function Room:getOtherPlayer(except_user_id)
-	local players = {}
-	for _,player in ipairs(self.property.players) do
-		if player.user_id ~= except_user_id then
-			table.insert(players,player)
-		end
-	end
-	return players
-end
-
-function Room:removePlayer(user_id)
-	for index,player in ipairs(self.property.players) do
-		if player.user_id == user_id then
-			table.remove(self.property.players,index)
-			local sit_down_num = self:get("sit_down_num")
-			self:set("sit_down_num",sit_down_num-1)
-			break
-		end
-	end
-end
-
+--更新玩家的属性
 function Room:updatePlayerProperty(user_id,name,value)
 	for index,player in ipairs(self.property.players) do
 		if player.user_id == user_id then
@@ -199,20 +206,23 @@ function Room:updatePlayerProperty(user_id,name,value)
 	return false
 end
 
+--FYD
 function Room:refreshRoomInfo()
-	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit")
-	local rsp_msg = self:getPropertys("room_id","game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
+	local rsp_msg = {}
+	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score")
+	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
+	rsp_msg.room_setting = room_setting
+	rsp_msg.room_id = self:get("room_id")
 	rsp_msg.players = players
 
-	self:broadcastAllPlayers(constant.PUSH_EVENT.REFRESH_ROOM_INFO,rsp_msg)
+	self:broadcastAllPlayers("refresh_room_info",rsp_msg)
 end
 
 --像游戏服推送消息
 function Room:pushEvent(node_name,player,msg_name,msg_data)
 	local fd = player.fd
 	local user_id = player.user_id
-
-	local success,result = xpcall(cluster.call, debug.traceback, node_name, ".agent_manager", "pushEvent",fd, msg_name, msg_data)
+	local success,result = pcall(cluster.call,node_name, ".agent_manager", "pushEvent",fd, msg_name, msg_data)
 	if not success then
 		log.infof("向游戏服[%s]推送消息[%s]失败\n内容如下:\n%s",cjson.encode(msg_data))
 	end
@@ -241,8 +251,10 @@ function Room:distroy()
 	local room_id = self:get("room_id")
 	local service_id = self:get("service_id")
 	local node_name = self:get("node_name")
-	--删除掉房间列表中的房间号
-	skynet.call(".redis_center","lua","HDEL",REDIS_DB,"room_list",room_id)
+
+	local room_key = "room:"..room_id
+	--删除掉房间信息
+	skynet.call(".redis_center","lua","DEL",REDIS_DB,room_key)
 	--清理房间服务的数据
 	skynet.call(service_id,"lua","clear")
 	--还原初始的属性

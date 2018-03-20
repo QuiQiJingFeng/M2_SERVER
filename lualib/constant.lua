@@ -60,6 +60,7 @@ constant["PUSH_EVENT"] = {
 	PUSH_OPERATOR_PALYER_STATE = "push_player_operator_state", --通知客户端是否 碰/杠/胡
 	NOTICE_GAME_OVER = "notice_game_over", --本局结束
 	NOTICE_PLAYERS_DISCONNECT = "notice_players_disconnect", --通知玩家有人掉线
+	HANDLE_ERROR = "handle_error", --错误处理
 
 
 }
@@ -169,6 +170,13 @@ constant["NET_RESULT"] = {
 }
 
 constant["DEBUG"] = true
+
+
+
+
+constant["ACCOUNT_DB"] = 0
+constant["ROUND_COST"] = 20
+
 
 
 return constant

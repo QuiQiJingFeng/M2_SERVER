@@ -7,8 +7,7 @@ local redis = require "skynet.db.redis"
 require "skynet.manager"
 local utils = require "utils"
 local constant = require "constant"
-local NET_EVENT = constant.NET_EVENT
-local NET_RESULT = constant.NET_RESULT
+local ACCOUNT_DB = constant.ACCOUNT_DB
 
 local CMD = {}
 local SOCKET = {}
@@ -22,11 +21,17 @@ local SECRET_STATE = {
 local AGENT_MAP = {}
 local USER_MAP = {}
 
-local CENTER_REDIS
-
 local AGENT_POOL = {}
 
 local agent_manager = {}
+
+local function pushEvent(fd,event_name,event_msg)
+    local agent_item = AGENT_MAP[fd]
+    if agent_item then
+        skynet.call(agent_item.service_id,"lua","push",event_name,event_msg)
+    end
+end
+
 local function disconnect_fd(fd)
     local agent_item = AGENT_MAP[fd]
     AGENT_MAP[fd] = nil
@@ -45,13 +50,11 @@ end
 
 --推送消息
 function CMD.pushEvent(fd,event_name,event_msg)
-    print("pushEvent: fd=",fd,"event_name=",event_name)
     local agent_item = AGENT_MAP[fd]
     if not agent_item then
         return "NOT_ONLINE"
     end
-
-    skynet.call(agent_item.service_id,"lua","push",event_name,event_msg)
+    pushEvent(fd,event_name,event_msg)
     return "SUCCESS"
 end
 
@@ -126,7 +129,8 @@ function SOCKET.open(fd, addr)
     req_msg["v2"] = crypt.base64encode(crypt.dhexchange(agent_item.serverkey))
 
     --连接建立之后 首先要交换密钥 向客户端发送密钥
-    send(fd, {[NET_EVENT.HANDSHAKE] = req_msg})
+
+    send(fd, {["handshake"] = req_msg})
 
     AGENT_MAP[fd] = agent_item
 end
@@ -136,6 +140,7 @@ function SOCKET.data(fd, data)
     if not agent_item then
         --如果AGENT_MAP中没有该fd,但是又走到了这里,说明出了错误
         log.info("agent map has not this fd ",fd)
+        send(fd,"handle_error",{result="server_error"})
         disconnect_fd(fd)
         return
     end
@@ -155,8 +160,9 @@ function SOCKET.data(fd, data)
     end
     --如果状态等于WAIT_CLIENT_KEY 说明密钥交换还没完毕
     if agent_item.state == SECRET_STATE.WAIT_CLIENT_KEY then
-        if rawget(data_content, NET_EVENT.HANDSHAKE) then
-            local req_msg = data_content[NET_EVENT.HANDSHAKE]
+
+        if rawget(data_content, "handshake") then
+            local req_msg = data_content["handshake"]
             local clientkey = crypt.base64decode(req_msg["v1"])
             --客户端的key 和 服务端本地存储的key 生成最终的密钥key
             local secret = crypt.dhsecret(clientkey, agent_item.serverkey)
@@ -166,6 +172,7 @@ function SOCKET.data(fd, data)
                 agent_item.secret = secret
                 agent_item.state = SECRET_STATE.CONFIRM_SUCCESS
             else
+                send(fd,"handle_error",{result="key_exchange_failed"},secret)
                 --如果密钥交换失败,则断开其连接
                 disconnect_fd(fd)
             end
@@ -173,8 +180,8 @@ function SOCKET.data(fd, data)
         end
     --如果状态等于CONFIRM_SUCCESS 说明密钥交换完毕 可以进行正常的数据通讯
     elseif agent_item.state == SECRET_STATE.CONFIRM_SUCCESS then
-        if rawget(data_content, NET_EVENT.LOGIN) then
-            local req_msg = data_content[NET_EVENT.LOGIN]
+        if rawget(data_content, "login") then
+            local req_msg = data_content["login"]
 
             local login_type = req_msg.login_type
             local account = req_msg.account
@@ -185,22 +192,12 @@ function SOCKET.data(fd, data)
             local rsp_msg = {}
             
             local login_result = skynet.call(".logind","lua","login",login_type,account,token)
+            rsp_msg.result = login_result and "success" or "auth_faild"
 
-            rsp_msg.result = login_result and NET_RESULT.SUCCESS or NET_RESULT.AUTH_FAIL
             if login_result then
-                local user_id = CENTER_REDIS:get(login_type..":"..account)
-                if not user_id then
-                    
-
-                    local max_id = CENTER_REDIS:incrby("user_id_generator", 1)
-                    user_id = utils:createUserid(max_id)
-                    CENTER_REDIS:set(login_type..":"..account,user_id)
-                end
-
-
+                local user_key = login_type..":"..account
                 local reconnect_token = crypt.base64encode(crypt.randomkey() .. crypt.randomkey())
-                CENTER_REDIS:hset("info:"..user_id, "reconnect_token", reconnect_token)
-
+                local user_id = skynet.call(".redis_center","lua","ProcessLogin",ACCOUNT_DB,user_key,reconnect_token)
                 rsp_msg.reconnect_token = reconnect_token
 
                 agent_item.user_id = user_id
@@ -214,6 +211,8 @@ function SOCKET.data(fd, data)
 
                 --绑定fd 之前先检查之前的fd是否存在并且断开
                 if USER_MAP[user_id] then
+                    --通知客户端被顶号
+                    pushEvent(fd,"handle_error",{result="other_player_login"})
                     disconnect_fd(USER_MAP[user_id])
                 end
                 USER_MAP[user_id] = fd
@@ -223,35 +222,35 @@ function SOCKET.data(fd, data)
                 agent_item.service_id = unused_agent
 
                 local ip = agent_item.ip
-                local data = {fd = fd, secret = secret, user_id = user_id,ip = ip}
-                data.user_name = user_name
-                data.user_pic = user_pic
+                local data = {fd = fd, secret = secret, user_id = user_id,user_ip = ip,user_name = user_name,user_pic = user_pic}
                 --通知该service重新加载数据
                 skynet.call(agent_item.service_id, "lua", "start", data)
             end
-            send(fd, { ["session_id"] = data_content.session_id, [NET_EVENT.LOGIN] = rsp_msg }, secret)
+            send(fd, { ["session_id"] = data_content.session_id, ["login"] = rsp_msg }, secret)
 
-        elseif rawget(data_content, NET_EVENT.RECONNECT) then
-            local req_msg = data_content[NET_EVENT.RECONNECT]
+        elseif rawget(data_content, "reconnect") then
+            local req_msg = data_content["reconnect"]
 
             local user_id = req_msg.user_id
             local token = req_msg.token
 
             local rsp_msg = {}
-            rsp_msg.result = NET_RESULT.FAIL
+            rsp_msg.result = "fail"
+            local info_key = "info:"..user_id
+            local filed = "reconnect_token"
 
-            if CENTER_REDIS:hget("info:"..user_id, "reconnect_token") == token then
-                local reconnect_token = crypt.base64encode(crypt.randomkey() .. crypt.randomkey())
-                CENTER_REDIS:hset("info:"..user_id, "reconnect_token", reconnect_token)
-                rsp_msg.result = NET_RESULT.SUCCESS
-                rsp_msg.reconnect_token = reconnect_token
+            local new_token = crypt.base64encode(crypt.randomkey() .. crypt.randomkey())
+            local result = skynet.call(".redis_center","lua","ProcessReconnect",ACCOUNT_DB,info_key,filed,token,new_token)
+            if result then
+                rsp_msg.result = "success"
+                rsp_msg.reconnect_token = new_token
             end
 
-            send(fd, { ["session_id"] = data_content.session_id, [NET_EVENT.RECONNECT] = rsp_msg }, secret)
-        elseif rawget(data_content, NET_EVENT.LOGOUT) then 
+            send(fd, { ["session_id"] = data_content.session_id, ["reconnect"] = rsp_msg }, secret)
+        elseif rawget(data_content, "logout") then 
             local rsp_msg = {}
-            rsp_msg.result = NET_RESULT.SUCCESS
-            send(fd, { ["session_id"] = data_content.session_id, [NET_EVENT.LOGOUT] = rsp_msg }, secret)
+            rsp_msg.result = "success"
+            send(fd, { ["session_id"] = data_content.session_id, ["logout"] = rsp_msg }, secret)
         elseif agent_item.service_id then
             skynet.send(agent_item.service_id, "lua", "request", data_content)
         else
@@ -289,9 +288,6 @@ skynet.start(function()
         port = 8888,
         nodelay = true,
     })
-
-    local redis_manager = require "redis_manager"
-    CENTER_REDIS = redis_manager:connectCenterRedis()
 
     skynet.register ".agent_manager"
 end)

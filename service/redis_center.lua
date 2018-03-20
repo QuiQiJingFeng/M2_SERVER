@@ -3,6 +3,8 @@ require "skynet.manager"
 local redis = require "skynet.db.redis"
 local log = require "skynet.log"
 local sharedata = require "skynet.sharedata"
+local utils = require "utils"
+local cjson = require "cjson"
 
 local redis_list = {}
 local REDIS_INDEX = 1
@@ -16,6 +18,16 @@ local CMD = {}
 function CMD.DEL(id,key)
 	redis_db:SELECT(id)
 	return redis_db:DEL(key)
+end
+
+function CMD.GET(id,key)
+	redis_db:SELECT(id)
+	return redis_db:GET(key)
+end
+
+function CMD.SET(id,key,value)
+	redis_db:SELECT(id)
+	return redis_db:SET(key,value)
 end
 
 ------------------------------------------------------------
@@ -338,6 +350,52 @@ function CMD.LRANGE(id,key,start,stop)
 	redis_db:SELECT(id)
 	return redis_db:LRANGE(key,start,stop)
 end
+
+
+----------------------CUSTOM-------
+
+function CMD.GetRoomKeysForNodeName(id,node_name)
+	redis_db:SELECT(id)
+	local room_keys = {}
+ 	--room_list:room:user_id
+	local filter = "room:*"
+	local all_keys = redis_db:keys(filter)
+	for _,room_info_key in ipairs(all_keys) do
+		local name = redis_db:HGET(room_info_key,"node_name") or {}
+		--获取所有在node_name机器上创建的房间
+		if name == node_name.."__S__" then
+			table.insert(room_keys,room_info_key)
+		end
+	end
+	return room_keys
+end
+
+--获取user_id，如果没有则新建一个
+function CMD.ProcessLogin(id,user_key,reconnect_token)
+	redis_db:select(id)
+	local user_id = redis_db:GET(user_key)
+	if not user_id then
+		local max_id = redis_db:incrby("user_id_generator", 1)
+        user_id = utils:createUserid(max_id)
+        redis_db:set(user_key,user_id)
+	end
+	redis_db:hset("info:"..user_id, "reconnect_token", reconnect_token)
+
+	return user_id
+end
+
+--
+function CMD.ProcessReconnect(id,info_key,filed,client_token,new_token)
+	redis_db:select(id)
+	local server_token = redis_db:hget(info_key,filed)
+	if server_token ~= client_token then
+		return false
+	end
+
+ 	redis_db:hset(info_key,"reconnect_token",new_token)
+ 	return true
+end
+
 
 local function updateIndex()
 	REDIS_INDEX = REDIS_INDEX + 1

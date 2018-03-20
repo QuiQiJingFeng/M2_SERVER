@@ -22,9 +22,6 @@ skynet.start(function()
 	skynet.uniqueservice("redis_center")
 
 	skynet.uniqueservice("room_manager") 
-	
-
-
 
 	bindCluster()
 

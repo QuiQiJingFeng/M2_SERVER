@@ -3,15 +3,13 @@ local netpack = require "skynet.netpack"
 local socket = require "skynet.socket"
 local crypt = require "skynet.crypt"
 local log = require "skynet.log"
-local redis = require "skynet.db.redis"
 local pbc = require "protobuf"
 local cjson = require "cjson"
+local config_manager = require "config_manager"
 
-local CENTER_REDIS
+
 local CMD = {}
-
-local user_info = require("user_info")
-
+local user_info = require "user_info"
 local event_handler = require "event_handler"
 local logic = {}
 
@@ -29,7 +27,7 @@ end
 
 --断开连接
 function CMD.disconnect()
-    user_info:userDisconnect()
+    user_info:disconnect()
 end
 
 -- 请求处理函数
@@ -97,7 +95,7 @@ skynet.start(function()
     end)
 
     init_logic()
-
+    config_manager:init()
     -- 初始化protobuf协议
     pbc.register_file(skynet.getenv("protobuf"))
 end)
