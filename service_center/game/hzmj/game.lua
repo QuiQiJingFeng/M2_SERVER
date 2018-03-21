@@ -281,7 +281,7 @@ function game:start()
 	end
 	
 	for i,player in ipairs(players) do
-		self.waite_operators[player.user_id] = "WAIT_DEAL_FINISH"
+		self.waite_operators[player.user_pos] = "WAIT_DEAL_FINISH"
 	end
 end
 
@@ -368,17 +368,17 @@ function game:drawCard(player)
 	local operator = 1
 	self:noticePushPlayCard(player,operator)
 
-	self.waite_operators[player.user_id] = "WAIT_PLAY_CARD"
+	self.waite_operators[player.user_pos] = "WAIT_PLAY_CARD"
 end
 
 --发牌完毕
 game["DEAL_FINISH"] = function(self,player)
 
-	local user_id = player.user_id
-	if self.waite_operators[user_id] ~= "WAIT_DEAL_FINISH" then
+	local user_pos = player.user_pos
+	if self.waite_operators[user_pos] ~= "WAIT_DEAL_FINISH" then
 		return "invaild_operator"
 	end
-	self.waite_operators[user_id] = nil
+	self.waite_operators[user_pos] = nil
 	--计算剩余的数量
 	local num = 0
 	for k,v in pairs(self.waite_operators) do
@@ -395,7 +395,7 @@ end
 
 --出牌
 game["PLAY_CARD"] = function(self,player,data)
-	if self.waite_operators[player.user_id] ~= "WAIT_PLAY_CARD" then
+	if self.waite_operators[player.user_pos] ~= "WAIT_PLAY_CARD" then
 		return "invaild_operator"
 	end
 
@@ -409,7 +409,7 @@ game["PLAY_CARD"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	self.waite_operators[player.user_id] = nil
+	self.waite_operators[player.user_pos] = nil
 
 	local user_id = player.user_id
 	local data = {user_id = user_id,card = data.card,user_pos = player.user_pos}
@@ -446,10 +446,10 @@ game["PLAY_CARD"] = function(self,player,data)
 	
 	if num == 2 then  --碰
 		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_state="PENG",user_pos=check_player.user_pos})
-		self.waite_operators[check_player.user_id] = "WAIT_PENG"
+		self.waite_operators[check_player.user_pos] = "WAIT_PENG"
 	elseif num == 3 then  --杠
 		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_state="GANG",user_pos=check_player.user_pos})
-		self.waite_operators[check_player.user_id] = "WAIT_GANG"
+		self.waite_operators[check_player.user_pos] = "WAIT_GANG"
 	else
 		next_pos = user_pos + 1
 		if next_pos > self.room:get("seat_num") then
@@ -472,10 +472,10 @@ end
 
 --碰
 game["PENG"] = function(self,player,data)
-	if self.waite_operators[player.user_id] ~= "WAIT_PENG" then
+	if self.waite_operators[player.user_pos] ~= "WAIT_PENG" then
 		return "invaild_operator"
 	end
-	self.waite_operators[player.user_id] = nil
+	self.waite_operators[player.user_pos] = nil
 	
 	local card = self.cur_play_card
 	if not self:checkPeng(player,card) then
@@ -501,7 +501,7 @@ game["PENG"] = function(self,player,data)
 	local operator = 2
 	self:noticePushPlayCard(player,operator)
 
-	self.waite_operators[player.user_id] = "WAIT_PLAY_CARD"
+	self.waite_operators[player.user_pos] = "WAIT_PLAY_CARD"
 
 	return "success"
 end
@@ -573,14 +573,14 @@ game["GANG"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	local operate = self.waite_operators[player.user_id]
+	local operate = self.waite_operators[player.user_pos]
 	--如果操作是等待出牌,并且可以进行暗杠,则可以进去
 	if operate == "WAIT_PLAY_CARD" and gang_type == GANG_TYPE.AN_GANG then
 	elseif operate ~= "WAIT_PENG" then
 		return "invaild_operator"
 	end
 
-	self.waite_operators[player.user_id] = nil
+	self.waite_operators[player.user_pos] = nil
 
 	local obj = {value = card,gang_type = gang_type,type=TYPE.GANG}
 	local num = 0
@@ -613,7 +613,7 @@ game["GANG"] = function(self,player,data)
 
 	--通知所有人,有人杠了
 	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
-	
+
 	self.room:broadcastAllPlayers("notice_gang_card",data)
 
 	if gang_type ~= GANG_TYPE.PENG_GANG then
@@ -641,7 +641,7 @@ game["GANG"] = function(self,player,data)
 		for _,hu_player in ipairs(hu_list) do
 			--通知客户端当前可以胡牌
 	   		self.room:sendMsgToPlyaer(hu_player,"push_player_operator_state",{operator_state = "HU",user_pos = hu_player.user_pos,user_id=hu_player.user_id})
-			self.waite_operators[player.user_id] = "WAIT_HU"
+			self.waite_operators[player.user_pos] = "WAIT_HU"
 		end
 	else
 	    --杠了之后再摸一张牌
@@ -653,11 +653,34 @@ end
 
 --过
 game["GUO"] = function(self,player,data)
-	local operate = self.waite_operators[player.user_id]
+	local operate = self.waite_operators[player.user_pos]
 	if not operate then
 		return "invaild_operator"
 	end
-	self.waite_operators[player.user_id] = nil
+	self.waite_operators[player.user_pos] = nil
+
+	--检测是否有延迟胡牌的情况
+	local positions = {}
+	for pos,v in pairs(self.waite_operators) do
+		table.insert(positions,pos)
+	end
+
+	if #positions >= 1 then
+		table.sort(positions,function(a,b) 
+			return a < b
+		end)
+		local next_pos = positions[1]
+		if self.waite_operators[next_pos] == "DELAY_HU" then
+			local player = self.room:getPlayerByPos(next_pos)
+			local is_hu,tempResult = self:checkHu(player)
+			if is_hu then
+				--延迟胡牌不可能是自摸胡牌,所以这里填写WAIT_HU
+				self:gameOver(player,GAME_OVER_TYPE.NORMAL,"WAIT_HU",tempResult)
+			end
+			return "success"
+		end
+	end
+		
 	--下一家出牌
 	local next_pos = self.cur_play_user.user_pos + 1
 	if next_pos > self.room:get("seat_num") then
@@ -671,11 +694,27 @@ end
 
 --胡牌
 game["HU"] = function(self,player,data)
-	local operate = self.waite_operators[player.user_id]
+	local operate = self.waite_operators[player.user_pos]
 	if not (operate == "WAIT_PLAY_CARD" or operate == "WAIT_HU") then
 		return "invaild_operator"
 	end
-	self.waite_operators[player.user_id] = nil
+
+	local positions = {}
+	for pos,v in pairs(self.waite_operators) do
+		table.insert(positions,pos)
+	end
+	if # positions > 1 then
+		table.sort(positions,function(a,b) 
+				return a < b
+			end)
+		if positions[1] ~= player.user_pos then
+			--延迟胡牌
+			self.waite_operators[player.user_pos] = "DELAY_HU"
+			return "success"
+		end
+	end
+
+	self.waite_operators[player.user_pos] = nil
 
 	local is_hu,tempResult = self:checkHu(player)
 	if is_hu then
@@ -695,7 +734,7 @@ game["BACK_ROOM"] = function(self,player,data)
 	rsp_msg.room_setting = room_setting
 	rsp_msg.card_list = player.card_list
 	rsp_msg.players = players_info
-	rsp_msg.operator = self.waite_operators[player.user_id]
+	rsp_msg.operator = self.waite_operators[player.user_pos]
 
 	self.room:set("fd",data.fd)
 
