@@ -96,7 +96,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 				--明杠 赢放杠者3*底分
 				player.cur_score = player.cur_score + self.base_score * 3
 				for _,obj in ipairs(players) do
-					if obj.from == obj.user_id then
+					if obj.from == obj.user_pos then
 						obj.cur_score = obj.cur_score - self.base_score * 3
 					end
 				end
@@ -482,7 +482,7 @@ game["PENG"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	local obj = {value = card,from = self.cur_play_user.user_id,type=TYPE.PENG}
+	local obj = {value = card,from = self.cur_play_user.user_pos,type=TYPE.PENG}
 	--记录下已经碰的牌
 	table.insert(player.card_stack,obj)
 
@@ -585,14 +585,22 @@ game["GANG"] = function(self,player,data)
 	local obj = {value = card,gang_type = gang_type,type=TYPE.GANG}
 	local num = 0
 	if gang_type == GANG_TYPE.AN_GANG then
-		obj.form = player.user_id
+		obj.form = player.user_pos
 		num = 4
 	elseif gang_type == GANG_TYPE.MING_GANG then
-		obj.form = self.cur_play_user.user_id
+		obj.form = self.cur_play_user.user_pos
 		num = 3
 	elseif gang_type == GANG_TYPE.PENG_GANG then
-		obj.form = player.user_id
+		obj.form = player.user_pos
 		num = 1
+		--如果是碰杠,则更改碰变成杠
+		for _,obj in ipairs(player.card_stack) do
+			if obj.value == card and obj.type == TYPE.PENG then
+				obj.type = TYPE.GANG
+				obj.gang_type = GANG_TYPE.PENG_GANG
+				break
+			end
+		end
 	end
 	--记录下已经杠的牌
 	table.insert(player.card_stack,obj)
