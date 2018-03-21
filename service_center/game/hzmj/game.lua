@@ -193,19 +193,20 @@ end
 function game:removeHandleCard(player,card,num)
 	num = num or 1
 	local indexs = {}
-
-	for idx,value in ipairs(player.card_list) do
+	for i=#player.card_list,1,-1 do
+		local value = player.card_list[i]
 		if value == card then
-			table.insert(indexs,idx)
+			table.insert(indexs,i)
 		end
 	end
 
 	if #indexs < num then
 		return false
 	end
-	for i,index in ipairs(indexs) do
+
+	for i,idx in ipairs(indexs) do
 		if i <= num then
-			table.remove(player.card_list,index)
+			table.remove(player.card_list,idx)
 			local card_type = math.floor(card / 10) + 1
 			local card_value = card % 10
 			local handle_cards = player.handle_cards
