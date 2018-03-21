@@ -7,7 +7,9 @@ local redis = require "skynet.db.redis"
 require "skynet.manager"
 local utils = require "utils"
 local constant = require "constant"
+local Map = require "Map"
 local ACCOUNT_DB = constant.ACCOUNT_DB
+local USER_DB = 1
 
 local CMD = {}
 local SOCKET = {}
@@ -268,6 +270,9 @@ function CMD.updateResource(user_id,resource_name,num)
     local agent_item = USER_MAP[user_id]
     if not agent_item then
         --如果玩家不在线,则直接修改redis中的数据
+        local info_key = "info:"..user_id
+        local property = Map.new(USER_DB,info_key)
+        property.gold_num = property.gold_num + num
     else
         skynet.call(agent_item.service_id,updateResource,resource_name,num)
     end

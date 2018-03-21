@@ -26,7 +26,6 @@ function user_info:init(info)
     data.user_id = info.user_id
     data.user_name = info.user_name
     data.user_pic = info.user_pic
-    data.gold_num = 100000
 
     local info_key = "info:"..info.user_id
     property = Map.new(USER_DB,info_key)
@@ -34,6 +33,10 @@ function user_info:init(info)
 
     if not property.room_ids then
         property.room_ids = {}
+    end
+
+    if not property.gold_num then
+        property.gold_num = 10000
     end
 
     local will_remove = {}
@@ -63,6 +66,7 @@ function user_info:init(info)
     self:set("room_ids",property.room_ids)
 
     --登陆成功之后,推送玩家信息
+    data.gold_num = property.gold_num
     local push_msg = data
     --TODO FYD 玩家创建的房间信息列表,房间的状态,所以在房间信息中应该以用户ID 做为key
     push_msg.room_list = room_list
@@ -76,18 +80,16 @@ function user_info:checkGoldNum(num)
     return total >= num
 end
 
-function user_info:updateGoldNum(num)
-    local total = tonumber(self:get("gold_num"))
-    if total >= num then
-        total = total + num
-        self:set("gold_num",total)
-
-        local send_data = {["update_resource"] = {gold_num=gold_num}}
-        self:send(send_data)
-
-        return true
+--更新资源数量
+function user_info:updateResource(resource_name,num)
+    local total = self:get(resource_name)
+    if not total then
+        return
     end
-    return false
+    total = total + num
+    self:set(resource_name,total)
+    local send_data = {["update_resource"] = {resource_name=total}}
+    self:send(send_data)
 end
 
 function user_info:get(key)

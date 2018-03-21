@@ -20,6 +20,7 @@ function user:init()
     event_handler:on("game_cmd",utils:handler(self,user.gameCmd))
 end
 
+
 --创建房间
 function user:createRoom(req_msg)
 	local room_setting = req_msg.room_setting
@@ -28,7 +29,15 @@ function user:createRoom(req_msg)
 		return "create_room",{result = "paramater_error"}
 	end
 
-	local cost = round * constant["ROUND_COST"] * -1
+	local pay_type = room_setting.pay_type
+	local cost
+	--如果是房主出资 或者是赢家出资则判断资金是否足够
+	if pay_type == constant["PAY_TYPE"]["ROOM_OWNER_COST"] or pay_type == constant["PAY_TYPE"]["WINNER_COST"] then
+		cost = round * constant["ROUND_COST"] * -1
+	elseif pay_type == constant["PAY_TYPE"]["AMORTIZED_COST"] then
+		local seat_num = room_setting.seat_num
+		cost = (math.floor(round * constant["ROUND_COST"])/seat_num) - 1
+	end
 	local enough = user_info:checkGoldNum(cost)
 	if not enough then
 		return "create_room",{result = "gold_not_enough"}
@@ -95,6 +104,21 @@ function user:joinRoom(req_msg)
 	if not room_info.room_id then
 		return "join_room",{result="not_exist_room"}
 	end
+
+	local pay_type = room_setting.pay_type
+	local cost
+	--如果是赢家出 或者是平摊 则判断资金是否足够
+	if pay_type == constant["PAY_TYPE"]["WINNER_COST"] then
+		cost = round * constant["ROUND_COST"] * -1
+	elseif pay_type == constant["PAY_TYPE"]["AMORTIZED_COST"] then
+		local seat_num = room_setting.seat_num
+		cost = (math.floor(round * constant["ROUND_COST"])/seat_num) - 1
+	end
+	local enough = user_info:checkGoldNum(cost)
+	if not enough then
+		return "create_room",{result = "gold_not_enough"}
+	end
+
 
 	local center_node = room_info.node_name
 	local data = user_info:getPropertys("user_id","user_name","user_pic","user_ip","gold_num")
