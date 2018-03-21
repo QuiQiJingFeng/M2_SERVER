@@ -26,6 +26,9 @@ local AGENT_POOL = {}
 local agent_manager = {}
 
 local function pushEvent(fd,event_name,event_msg)
+   local cjson = require "cjson"
+   print("event_name = ",event_name)
+   print("msg = ",cjson.encode(event_msg))
     local agent_item = AGENT_MAP[fd]
     if agent_item then
         skynet.call(agent_item.service_id,"lua","push",event_name,event_msg)
@@ -50,7 +53,8 @@ end
 
 --推送消息
 function CMD.pushEvent(fd,event_name,event_msg)
-    local agent_item = AGENT_MAP[fd]
+     print("event_name",event_name)
+     local agent_item = AGENT_MAP[fd]
     if not agent_item then
         return "NOT_ONLINE"
     end
@@ -259,6 +263,16 @@ function SOCKET.data(fd, data)
     end
 end
 
+--更新资源数量
+function CMD.updateResource(user_id,resource_name,num)
+    local agent_item = USER_MAP[user_id]
+    if not agent_item then
+        --如果玩家不在线,则直接修改redis中的数据
+    else
+        skynet.call(agent_item.service_id,updateResource,resource_name,num)
+    end
+
+end
 
 function CMD.debugProto(user_id,proto_name,proto_msg)
     local fd = USER_MAP[user_id]

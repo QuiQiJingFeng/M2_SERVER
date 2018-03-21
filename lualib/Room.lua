@@ -67,7 +67,6 @@ function Room:init(room_id,node_name,service_id)
 	info.service_id = service_id 				--房间服务地址
 	info.players = {}							--房间中的玩家列表
 	info.sit_down_num = 0						--坐下的人数
-	info.cur_card = nil							--当前出牌值
 	info.state = ROOM_STATE.GAME_PREPARE		--房间的状态
 	info.expire_time = skynet.time() + 30*60	--房间的解散时间
 	self.property:updateValues(info)
@@ -111,7 +110,8 @@ function Room:addPlayer(info)
 	player.fd = info.fd                          --玩家的fd
 	player.gold_num = info.gold_num				 --玩家的金币数量
 	
-	--记录已经碰或者杠的牌
+	--记录已经碰或者杠的牌 记录下碰谁的牌
+	--item = {card=card,from=user_id}
 	player.card_stack = { PENG = {},GANG = {}}
 	player.handle_cards = {}
 	table.insert(self.property.players,player)
@@ -251,6 +251,21 @@ function Room:distroy()
 	local room_id = self:get("room_id")
 	local service_id = self:get("service_id")
 	local node_name = self:get("node_name")
+
+	local cur_round = self:get("cur_round")
+	local round = self:get("round")
+	--赢家出资,如果在房间要释放掉的时候仍然没有结算,则积分高的掏钱
+	local cost = round * constant["ROUND_COST"]
+	local pay_type = self.room:get("pay_type")
+	if pay_type == constant.PAY_TYPE.WINNER_COST then
+		local players = self.room:get("players")
+		table.sort(players,function(a,b) 
+				return a.score > b.score
+			end)
+
+		local target = players[1]
+		cluster.call(target.node_name,".agent_manager","updateResource",target.user_id,"gold_num",-1*cost)
+	end
 
 	local room_key = "room:"..room_id
 	--删除掉房间信息

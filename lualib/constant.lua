@@ -82,10 +82,6 @@ constant["OTHER_SETTING"] = {
 	}
 }
 
-constant["GAME_OVER_TYPE"] = {
-	["NORMAL"] = 1; --正常胡牌
-	["FLOW"] = 2;	--流局
-}
 -----------------------游戏选择配置-------------------
 --所有的游戏类型
 constant["ALL_GAME_TYPE"] = {
@@ -140,13 +136,6 @@ constant["NET_EVENT"] = {
 	LEAVE_ROOM = "leave_room",
 	GAME_CMD = "game_cmd",
 }
-
-constant["GANG_TYPE"] = {
-	AN_GANG = 1,
-	MING_GANG = 2;
-	PENG_GANG = 3;
-}
-
 
 constant["GAME_CMD"] = {
 	DEAL_FINISH = "DEAL_FINISH",	--发牌完毕

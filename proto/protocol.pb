@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ù
+å
 msg/user.protomsg.user"Ö
 RoomSetting
 	game_type (RgameType
@@ -170,22 +170,25 @@ randomNums
 user_pos (RuserPos"[
 PushPlayerOperatorState%
 operator_state (	RoperatorState
-user_pos (RuserPos"r
+user_pos (RuserPos"ä
 Item
 user_id (	RuserId
-up_score (RupScore
-	card_list (RcardList
-user_pos (RuserPos"N
-NoticeGameOver
-type (Rtype(
-players (2.msg.user.ItemRplayers"M
+user_pos (RuserPos
+	cur_score (RcurScore
+score (Rscore
+	card_list (RcardList"v
+NoticeGameOver
+	over_type (RoverType(
+players (2.msg.user.ItemRplayers
+
+award_list (R	awardList"M
 NoticePlayersDisconnect
 user_id (	RuserId
 user_pos (RuserPos"%
 HandleError
 result (	Rresult"+
 UpdateResource
-gold_num (RgoldNum*ú
+gold_num (RgoldNum* 
 Result
 success
 paramater_error
@@ -202,7 +205,9 @@ auth_faild
 sit_already_has
 round_not_enough
 pos_has_player
-already_sit*5
+already_sit
+invaild_operator
+no_support_command*5
 GangType
 AN_GANG
 	MING_GANG

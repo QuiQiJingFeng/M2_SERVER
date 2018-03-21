@@ -7,10 +7,18 @@ local GAME_CMD = constant.GAME_CMD
 local NET_RESULT = constant.NET_RESULT
 local ZJ_MODE = constant.ZJ_MODE
 local PUSH_EVENT = constant.PUSH_EVENT
-local GANG_TYPE = constant.GANG_TYPE
-local GAME_OVER_TYPE = constant.GAME_OVER_TYPE
 local cjson = require "cjson"
 local judgecard = require "hzmj.judgecard"
+
+local GANG_TYPE = {
+	AN_GANG = 1,
+	MING_GANG = 2;
+	PENG_GANG = 3;
+}
+local GAME_OVER_TYPE = {
+	["NORMAL"] = 1; --正常胡牌
+	["FLOW"] = 2;	--流局
+}
 
 local game = {}
 
@@ -37,28 +45,116 @@ function game:fisherYates()
 		self.card_list[i] = self.card_list[j]
 		self.card_list[j] = temp
 	end
-
-	-- if constant["DEBUG"] then
-	-- 	self.card_list = require("hzmj/conf")
-	-- end
 end
 
 --游戏结束
-function game:gameOver(type)
-	--第一局结束之后,清算金币
-
-
-
+function game:gameOver(player,over_type,operate,tempResult)
 	--通知room_manager服务游戏结束
 	skynet.call(".room_manager","lua","gameOver",self.room:get("room_id"))
 
-	--游戏结束 计算玩家的积分
-	if type == GAME_OVER_TYPE.NORMAL then
-		--TODO
+	local award_list = {}
+	if over_type == GAME_OVER_TYPE.NORMAL then
+		local players = self.room:get("players")
+		local count = self.room:get("seat_num") - 1
+		--如果是自摸胡  赢每个玩家2*底分
+		if operate == "WAIT_PLAY_CARD" then
+			player.cur_score = player.cur_score + self.base_score * 2 * count
+			for _,obj in ipairs(players) do
+				if player.user_id ~= obj.user_id then
+					obj.cur_score = obj.cur_score - self.base_score * 2
+				end
+			end
+		end
+
+		--摸到四张红中胡牌，赢每个玩家2*底分；
+		if tempResult.iHuiNum == 4 then
+			player.cur_score = player.cur_score + self.base_score * 2 * count
+			for _,obj in ipairs(players) do
+				if player.user_id ~= obj.user_id then
+					obj.cur_score = obj.cur_score - self.base_score * 2
+				end
+			end
+		end
+
+		--计算杠的积分
+		for _,obj in ipairs(player.card_stack["GANG"]) do
+			if obj.type == GANG_TYPE.AN_GANG then
+				--暗杠，赢每个玩家2*底分；
+				player.cur_score = player.cur_score + self.base_score * 2 * count
+				for _,obj in ipairs(players) do
+					if player.user_id ~= obj.user_id then
+						obj.cur_score = obj.cur_score - self.base_score * 2
+					end
+				end
+			elseif obj.type == GANG_TYPE.MING_GANG then
+				--明杠 赢放杠者3*底分
+				player.cur_score = player.cur_score + self.base_score * 3
+				for _,obj in ipairs(players) do
+					if obj.from == obj.user_id then
+						obj.cur_score = obj.cur_score - self.base_score * 3
+					end
+				end
+			elseif obj.type == GANG_TYPE.PENG_GANG then
+				--自己摸的明杠(公杠) 三家出，赢每个玩家1*底分；
+				player.cur_score = player.cur_score + self.base_score * 1 * count
+				for _,obj in ipairs(players) do
+					if player.user_id ~= obj.user_id then
+						obj.cur_score = obj.cur_score - self.base_score * 1
+					end
+				end
+			end
+		end
+
+ 		--胡七对 赢每个玩家2*底分
+		if tempResult.iChiNum + tempResult.iPengNum == 0 then
+			player.cur_score = player.cur_score + self.base_score * 2 * count
+			for _,obj in ipairs(players) do
+				if player.user_id ~= obj.user_id then
+					obj.cur_score = obj.cur_score - self.base_score * 2
+				end
+			end
+		end
+
+		local award_num = self.award_num
+		--每一张码 赢每个玩家2*底分
+		if tempResult.iHuiNum == 0 then
+			--如果没有红中,则额外奖励两张码
+			award_num = award_num + 2
+		end
+
+		--奖码列表
+		for i=1,award_num do
+			local card = self.card_list[i]
+			if card then
+				table.insert(award_list,card)
+			end
+		end
+		local num = 0
+		for _,card in ipairs(award_list) do
+			local card_value = card % 10
+			--红中的值是35,所以这里就不单独写了
+			if card_value == 1 or card_value == 5 or card_value == 9 then
+				num = num + 1
+			end
+		end
+		if num > 0 then
+			player.cur_score = player.cur_score + self.base_score * 2 * 2 * num * count 
+			for _,obj in ipairs(players) do
+				if player.user_id ~= obj.user_id then
+					obj.cur_score = obj.cur_score - self.base_score * 2 * 2 * num
+				end
+			end
+		end
+
+		--更新玩家的总积分
+		for i,obj in ipairs(players) do
+			obj.score = obj.score + obj.cur_score
+		end
 	end
-	local info = self.room:getPlayerInfo("user_id","score","card_list","user_pos")
-	local data = {type = type,players = info}
-	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_GAME_OVER,data)
+
+	local info = self.room:getPlayerInfo("user_id","score","card_list","user_pos","cur_score")
+	local data = {over_type = over_type,players = info,award_list=award_list}
+	self.room:broadcastAllPlayers("notice_game_over",data)
 end
 
 --检测流局
@@ -98,8 +194,10 @@ function game:init(room_info)
 	self.convert = self.other_setting[5]
 
 	self.waite_operators = {}
-	--当前出牌的位置
-	self.cur_pos = nil
+	--当前出牌人
+	self.cur_play_user = nil
+	--当前出的牌
+	self.cur_play_card = nil
 end
 
 --更新庄家的位置
@@ -118,6 +216,10 @@ end
 function game:start()
 	--1、更新庄家的位置
 	self:updateZpos()
+
+	if constant["DEBUG"] then
+		self.card_list = require("hzmj/conf")
+	end
 
 	local players = self.room:get("players")
 	--2、发牌
@@ -148,7 +250,7 @@ function game:start()
 		rsp_msg.random_nums = random_nums
 		rsp_msg.cur_round = self.room:get("cur_round")
 
-		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
+		self.room:sendMsgToPlyaer(player,"deal_card",rsp_msg)
 	end
 
 	--3、将card按类别和数字存储
@@ -173,13 +275,12 @@ function game:start()
 	end
 	
 	for i,player in ipairs(players) do
-		self.waite_operators[player.user_id] = "DEAL_FINISH"
+		self.waite_operators[player.user_id] = "WAIT_DEAL_FINISH"
 	end
 end
 
 --增加手牌
 function game:addHandleCard(player,card)
-
 	table.insert(player.card_list,card)
 	local card_type = math.floor(card / 10) + 1
 	local card_value = card % 10
@@ -231,7 +332,7 @@ function game:noticePushPlayCard(splayer,operator)
 			rsp_msg.gang_list = player.card_stack["GANG"]
 		end
 		rsp_msg.operator = operator
-		self.room:sendMsgToPlyaer(player,PUSH_EVENT.PUSH_PLAY_CARD,rsp_msg)
+		self.room:sendMsgToPlyaer(player,"push_play_card",rsp_msg)
 	end
 end
 
@@ -254,22 +355,23 @@ function game:drawCard(player)
 		if obj.user_id == user_id then
 			data.card = card
 		end
-		self.room:sendMsgToPlyaer(obj,PUSH_EVENT.PUSH_DRAW_CARD,data)
+
+		self.room:sendMsgToPlyaer(obj,"push_draw_card",data)
 	end
 
 	--通知玩家出牌了
 	local operator = 1
 	self:noticePushPlayCard(player,operator)
 
-	self.waite_operators[player.user_id] = "PLAY_CARD"
+	self.waite_operators[player.user_id] = "WAIT_PLAY_CARD"
 end
 
 --发牌完毕
 game["DEAL_FINISH"] = function(self,player)
 
 	local user_id = player.user_id
-	if self.waite_operators[user_id] ~= "DEAL_FINISH" then
-		return NET_RESULT.FAIL
+	if self.waite_operators[user_id] ~= "WAIT_DEAL_FINISH" then
+		return "invaild_operator"
 	end
 	self.waite_operators[user_id] = nil
 	--计算剩余的数量
@@ -283,41 +385,40 @@ game["DEAL_FINISH"] = function(self,player)
 		local zplayer = self.room:getPlayerByPos(self.zpos)
 		self:drawCard(zplayer)
 	end
-	return NET_RESULT.SUCCESS
+	return "success"
 end
 
 --出牌
 game["PLAY_CARD"] = function(self,player,data)
-	if self.waite_operators[player.user_id] ~= "PLAY_CARD" then
-		return NET_RESULT.FAIL
+	if self.waite_operators[player.user_id] ~= "WAIT_PLAY_CARD" then
+		return "invaild_operator"
 	end
 
 	if not data.card then
-		return NET_RESULT.FAIL
+		return "paramater_error"
 	end
 
 	--减少A玩家的手牌
 	local result = self:removeHandleCard(player,data.card)
 	if not result then
-		return NET_RESULT.NO_CARD
+		return "invaild_operator"
 	end
+
 	self.waite_operators[player.user_id] = nil
 
- 	self.room:set("cur_card",data.card)
-	self.cur_card = data.card
-
 	local user_id = player.user_id
-	local data = {user_id=user_id,card = data.card,user_pos=player.user_pos}
+	local data = {user_id = user_id,card = data.card,user_pos = player.user_pos}
 	--通知所有人 A 已经出牌
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PLAY_CARD,data)
 
-	self.cur_pos = player.user_pos
+	--记录下当前出牌人和当前出的牌
+	self.cur_play_user = player
+	self.cur_play_card = data.card
 
 	local card_type = math.floor(data.card / 10) + 1
 	local card_value = data.card % 10
 	--因为红中麻将只能 抢杠胡(碰杠,先碰,然后自摸一个)和自摸胡,所以这里不用判断胡牌
 	--只需要判断是否碰、杠 并且有且最多只有一个人会碰、杠
-
 
 	local num = 0
 	local check_player = nil
@@ -326,7 +427,6 @@ game["PLAY_CARD"] = function(self,player,data)
 		if pos > self.room:get("seat_num") then
 			pos = 1
 		end
-		print('FYD++++++>POS = ',pos)
 		check_player = self.room:getPlayerByPos(pos)
 		local handle_cards = check_player.handle_cards
 
@@ -339,11 +439,11 @@ game["PLAY_CARD"] = function(self,player,data)
 	end
 	
 	if num == 2 then  --碰
-		self.room:sendMsgToPlyaer(check_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state="PENG",user_pos=check_player.user_pos})
-		self.waite_operators[check_player.user_id] = "PENG"
+		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_state="PENG",user_pos=check_player.user_pos})
+		self.waite_operators[check_player.user_id] = "WAIT_PENG"
 	elseif num == 3 then  --杠
-		self.room:sendMsgToPlyaer(check_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state="GANG",user_pos=check_player.user_pos})
-		self.waite_operators[check_player.user_id] = "GANG"
+		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_state="GANG",user_pos=check_player.user_pos})
+		self.waite_operators[check_player.user_id] = "WAIT_GANG"
 	else
 		next_pos = user_pos + 1
 		if next_pos > self.room:get("seat_num") then
@@ -354,7 +454,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	end
 
 
-	return NET_RESULT.SUCCESS
+	return "success"
 end
 
 function game:checkPeng(player,card)
@@ -366,43 +466,44 @@ end
 
 --碰
 game["PENG"] = function(self,player,data)
-	if self.waite_operators[player.user_id] ~= "PENG" then
-		return NET_RESULT.FAIL
+	if self.waite_operators[player.user_id] ~= "WAIT_PENG" then
+		return "invaild_operator"
 	end
 	self.waite_operators[player.user_id] = nil
 	
-	local card = self.room:get("cur_card")
+	local card = self.cur_play_card
 	if not self:checkPeng(player,card) then
-		return NET_RESULT.FAIL
+		return "invaild_operator"
 	end
 
-	local obj = {value = card}
+	local obj = {value = card,from = self.cur_play_user.user_id}
 	--记录下已经碰的牌
 	table.insert(player.card_stack["PENG"],obj)
 
 	--移除手牌
 	local result = self:removeHandleCard(player,card,2)
 	if not result then
-		return NET_RESULT.FAIL
+		return "server_error"
 	end
 
 	--通知所有人,有人碰了
 	local data = {user_id=player.user_id,card = card,user_pos=player.user_pos}
-	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PENG_CARD,data)
+
+	self.room:broadcastAllPlayers("notice_peng_card",data)
 
 	--通知玩家出牌
 	local operator = 2
 	self:noticePushPlayCard(player,operator)
 
-	self.waite_operators[player.user_id] = "PLAY_CARD"
+	self.waite_operators[player.user_id] = "WAIT_PLAY_CARD"
 
-	return NET_RESULT.SUCCESS
+	return "success"
 end
 
 function game:checkGang(player,card)
-	--1、暗杠 手牌拥有四张牌
-	--2、明杠 手牌拥有三张,加上别人出的一张
-	--3、碰杠 手牌拥有1张
+	--1、暗杠 手牌拥有四张牌				  =>暗杠
+	--2、明杠 手牌拥有三张,加上别人出的一张     =>别人放的杠
+	--3、碰杠 手牌拥有1张                    =>自己摸的明杠
 	local result
 	local card_type = math.floor(card / 10) + 1
 	local card_value = card % 10
@@ -455,7 +556,7 @@ function game:checkHu(player)
 		}
 	}
 	tempResult.iHuiCard = 35
-	return judgecard:JudgeIfHu2(player.handle_cards, tempResult, self.seven_pairs);
+	return judgecard:JudgeIfHu2(player.handle_cards, tempResult, self.seven_pairs),tempResult
 end
 
 --杠
@@ -463,47 +564,49 @@ game["GANG"] = function(self,player,data)
 	local card = data.card
 	local gang_type = self:checkGang(player,card)
 	if not gang_type then
-		return NET_RESULT.FAIL
+		return "invaild_operator"
 	end
 
 	local operate = self.waite_operators[player.user_id]
 	--如果操作是等待出牌,并且可以进行暗杠,则可以进去
-	if operate == "PLAY_CARD" and gang_type == GANG_TYPE.AN_GANG then
-	elseif operate ~= "GANG" then
-		return NET_RESULT.FAIL
+	if operate == "WAIT_PLAY_CARD" and gang_type == GANG_TYPE.AN_GANG then
+	elseif operate ~= "WAIT_PENG" then
+		return "invaild_operator"
 	end
+
 	self.waite_operators[player.user_id] = nil
 
-	local obj = {value = card,type = gang_type }
+	local obj = {value = card,type = gang_type}
+	local num = 0
+	if gang_type == GANG_TYPE.AN_GANG then
+		obj.form = player.user_id
+		num = 4
+	elseif gang_type == GANG_TYPE.MING_GANG then
+		obj.form = self.cur_play_user.user_id
+		num = 3
+	elseif gang_type == GANG_TYPE.PENG_GANG then
+		obj.form = player.user_id
+		num = 1
+	end
 	--记录下已经杠的牌
 	table.insert(player.card_stack["GANG"],obj)
 
-	local num = 0
-	if gang_type == GANG_TYPE.AN_GANG then
-		num = 4
-	elseif gang_type == GANG_TYPE.MING_GANG then
-		num = 3
-	elseif gang_type == GANG_TYPE.PENG_GANG then
-		num = 1
-	end
 	--移除手牌
 	local result = self:removeHandleCard(player,card,num)
 	if not result then
-		return NET_RESULT.FAIL
+		return "server_error"
 	end
 
 	--通知所有人,有人杠了
-	local data = {user_id = player.user_id,card = card,type=gang_type,user_pos=player.user_pos}
+	local data = {user_id = player.user_id,card = card,gang_type = gang_type,user_pos = player.user_pos}
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_GANG_CARD,data)
 
-	--如果不是碰杠,则不用检查是否有人胡牌
 	if gang_type ~= GANG_TYPE.PENG_GANG then
 		--杠了之后再摸一张牌
 		self:drawCard(player)
-		return NET_RESULT.SUCCESS
+		return "success"
 	end
-
-	--检查是否有人胡这张牌
+	--如果是碰杠,则需要检查是否有人胡这张牌
 	local hu_list = {}
 	local players = self.room:get("players")
 	for _,temp_player in ipairs(players) do
@@ -522,40 +625,40 @@ game["GANG"] = function(self,player,data)
 	if #hu_list > 1 then
 		for _,hu_player in ipairs(hu_list) do
 			--通知客户端当前可以胡牌
-	   		self.room:sendMsgToPlyaer(hu_player,PUSH_EVENT.PUSH_OPERATOR_PALYER_STATE,{operator_state = "HU",user_pos=hu_player.user_pos})
-			self.waite_operators[player.user_id] = "HU"
+	   		self.room:sendMsgToPlyaer(hu_player,"push_player_operator_state",{operator_state = "HU",user_pos = hu_player.user_pos})
+			self.waite_operators[player.user_id] = "WAIT_HU"
 		end
 	else
 	    --杠了之后再摸一张牌
 		self:drawCard(player)
 	end
 
-	return NET_RESULT.SUCCESS
+	return "success"
 end
 
 --过
 game["GUO"] = function(self,player,data)
 	local operate = self.waite_operators[player.user_id]
 	if not operate then
-		return NET_RESULT.FAIL
+		return "invaild_operator"
 	end
 	self.waite_operators[player.user_id] = nil
 	--下一家出牌
-	local next_pos = self.cur_pos + 1
+	local next_pos = self.cur_play_user.user_pos + 1
 	if next_pos > self.room:get("seat_num") then
 		next_pos = 1
 	end
 	local next_player = self.room:getPlayerByPos(next_pos)
 	self:drawCard(next_player)
-	return NET_RESULT.SUCCESS
+	return "success"
 end
 
 
 --胡牌
 game["HU"] = function(self,player,data)
 	local operate = self.waite_operators[player.user_id]
-	if not (operate == "PLAY_CARD" or operate == "HU") then
-		return NET_RESULT.FAIL
+	if not (operate == "WAIT_PLAY_CARD" or operate == "WAIT_HU") then
+		return "invaild_operator"
 	end
 	self.waite_operators[player.user_id] = nil
 
@@ -563,7 +666,7 @@ game["HU"] = function(self,player,data)
 	if is_hu then
 		self:gameOver(player,GAME_OVER_TYPE.NORMAL,operate,tempResult)
 	end
-	return NET_RESULT.SUCCESS
+	return "success"
 end
 
 function game:gameCMD(data)
@@ -571,12 +674,11 @@ function game:gameCMD(data)
 	local command = data.command
 	local func = game[command]
 	if not func then
-		return NET_RESULT.NOSUPPORT_COMMAND
+		return "no_support_command"
 	end
 
 	local player = self.room:getPlayerByUserId(user_id)
-	local result = func(game,player,data)
-	return result
+	return func(game,player,data)
 end
 
 return game

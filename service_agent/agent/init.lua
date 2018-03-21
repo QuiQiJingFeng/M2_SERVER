@@ -83,6 +83,12 @@ function CMD.debugProto(proto_name,proto_msg)
     return cjson.encode({rsp_name,rsp_msg})
 end
 
+--更新资源数量
+function CMD.updateResource(resource_name,num)
+    user_info:updateGoldNum(num)
+    print("这里需要推送客户端资源数量发生变化")
+end
+
 local function init_logic()
     local user = require("logic.user")
     user:init()

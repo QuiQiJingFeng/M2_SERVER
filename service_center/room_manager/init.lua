@@ -134,9 +134,22 @@ function CMD.gameOver(room_id)
 	local round = room:get("round")
 	if cur_round == 1 then
 		local cost = round * constant["ROUND_COST"]
-		-- ["ROOM_OWNER_COST"] = 1;  --房主出资
-		-- ["AMORTIZED_COST"] = 2;   --平摊
-		-- ["WINNER_COST"] = 3;      --赢家出资
+		local pay_type = self.room:get("pay_type")
+		if pay_type == constant.PAY_TYPE.ROOM_OWNER_COST then
+			--房主出资
+			local owner_id = self.room:get("owner_id")
+			local player = self.room:getPlayerByUserId(owner_id)
+			--更新玩家的金币数量
+			cluster.call(player.node_name,".agent_manager","updateResource",owner_id,"gold_num",-1*cost)
+		elseif pay_type == constant.PAY_TYPE.AMORTIZED_COST then
+			--平摊
+			local seat_num = self.room:get("seat_num")
+			local per_cost = math.floor(cost / seat_num)
+			local players = self.room:get("players")
+			for i,v in ipairs(players) do
+				cluster.call(player.node_name,".agent_manager","updateResource",player.user_id,"gold_num",-1*per_cost)
+			end
+		end   
 	end
 
 	room:set("state",constant.ROOM_STATE.GAME_OVER)
