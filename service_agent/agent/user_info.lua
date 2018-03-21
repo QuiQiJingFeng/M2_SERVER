@@ -36,7 +36,7 @@ function user_info:init(info)
     end
 
     if not property.gold_num then
-        property.gold_num = 10000
+        property.gold_num = 100
     end
 
     local will_remove = {}
@@ -77,7 +77,7 @@ end
 
 function user_info:checkGoldNum(num)
     local total = tonumber(self:get("gold_num"))
-    return total >= num
+    return total + num > 0
 end
 
 --更新资源数量

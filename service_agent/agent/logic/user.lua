@@ -48,7 +48,6 @@ function user:createRoom(req_msg)
 	--否则无法创建房间
 	local room_id = user_info:get("room_id")
 	if room_id then
-		
 		local room_info = Map.new(ROOM_DB,"room:"..room_id)
 		--如果房间已经被解散
 		if not room_info.room_id then
@@ -105,8 +104,10 @@ function user:joinRoom(req_msg)
 		return "join_room",{result="not_exist_room"}
 	end
 
-	local pay_type = room_setting.pay_type
-	local cost
+	local round = room_info.round
+	local pay_type = room_info.pay_type
+	local seat_num = room_info.seat_num
+	local cost = 0
 	--如果是赢家出 或者是平摊 则判断资金是否足够
 	if pay_type == constant["PAY_TYPE"]["WINNER_COST"] then
 		cost = round * constant["ROUND_COST"] * -1
@@ -116,7 +117,7 @@ function user:joinRoom(req_msg)
 	end
 	local enough = user_info:checkGoldNum(cost)
 	if not enough then
-		return "create_room",{result = "gold_not_enough"}
+		return "join_room",{result = "gold_not_enough"}
 	end
 
 

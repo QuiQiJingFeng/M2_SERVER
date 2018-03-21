@@ -163,7 +163,7 @@ constant["DEBUG"] = true
 
 
 constant["ACCOUNT_DB"] = 0
-constant["ROUND_COST"] = 20
+constant["ROUND_COST"] = 5
 
 
 
