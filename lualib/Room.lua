@@ -256,9 +256,9 @@ function Room:distroy()
 	local round = self:get("round")
 	--赢家出资,如果在房间要释放掉的时候仍然没有结算,则积分高的掏钱
 	local cost = round * constant["ROUND_COST"]
-	local pay_type = self.room:get("pay_type")
+	local pay_type = self:get("pay_type")
 	if pay_type == constant.PAY_TYPE.WINNER_COST then
-		local players = self.room:get("players")
+		local players = self:get("players")
 		table.sort(players,function(a,b) 
 				return a.score > b.score
 			end)

@@ -16,6 +16,7 @@ function user:init()
     event_handler:on("sit_down",utils:handler(self,user.sitDown))
     event_handler:on("finish_deal",utils:handler(self,user.finishDeal))
     event_handler:on("leave_room",utils:handler(self,user.leaveRoom))
+    event_handler:on("go_back_room",utils:handler(self,user.goBackRoom))
     event_handler:on("game_cmd",utils:handler(self,user.gameCmd))
 end
 
@@ -182,10 +183,15 @@ function user:gameCmd(data)
 		return "game_cmd",{result = "not_in_room"}
 	end
 	local room_info = Map.new(ROOM_DB,"room:"..room_id)
-
+	--如果房间已经被解散
+	if not room_info.room_id then
+		user_info:set("room_id",nil)
+		return "game_cmd",{result = "not_exist_room"}
+	end
 	local center_node = room_info.node_name
 	data.user_id = user_info:get("user_id")
 	data.room_id = room_id
+	data.fd = user_info.fd
 	local success,result = user_info:safeClusterCall(center_node,".room_manager","gameCMD",data)
 	if not success then
 		return "game_cmd",{result = "server_error"}

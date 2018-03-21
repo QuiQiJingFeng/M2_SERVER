@@ -409,7 +409,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	local user_id = player.user_id
 	local data = {user_id = user_id,card = data.card,user_pos = player.user_pos}
 	--通知所有人 A 已经出牌
-	
+
 	self.room:broadcastAllPlayers("notice_play_card",data)
 
 	--记录下当前出牌人和当前出的牌
@@ -626,7 +626,7 @@ game["GANG"] = function(self,player,data)
 	if #hu_list > 1 then
 		for _,hu_player in ipairs(hu_list) do
 			--通知客户端当前可以胡牌
-	   		self.room:sendMsgToPlyaer(hu_player,"push_player_operator_state",{operator_state = "HU",user_pos = hu_player.user_pos})
+	   		self.room:sendMsgToPlyaer(hu_player,"push_player_operator_state",{operator_state = "HU",user_pos = hu_player.user_pos,user_id=hu_player.user_id})
 			self.waite_operators[player.user_id] = "WAIT_HU"
 		end
 	else
@@ -667,6 +667,30 @@ game["HU"] = function(self,player,data)
 	if is_hu then
 		self:gameOver(player,GAME_OVER_TYPE.NORMAL,operate,tempResult)
 	end
+	return "success"
+end
+
+--返回房间
+game["BACK_ROOM"] = function(self,player,data)
+
+	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
+	
+	--push_all_room_info
+	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","card_stack")
+	for i,info in ipairs(players_info) do
+		info.peng_list = info.card_stack["PENG"]
+		info.gang_list = info.card_stack["GANG"]
+		info.card_stack = nil
+	end
+	local rsp_msg = {}
+	rsp_msg.room_setting = room_setting
+	rsp_msg.card_list = player.card_list
+	rsp_msg.players = players_info
+	rsp_msg.operator = self.waite_operators[player.user_id]
+
+	self.room:set("fd",data.fd)
+
+	self.room:sendMsgToPlyaer(player,"push_all_room_info",rsp_msg)
 	return "success"
 end
 

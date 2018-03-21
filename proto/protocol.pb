@@ -69,8 +69,21 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
- 
-msg/user.protomsg.user"…
+ª
+msg/user.protomsg.user"F
+GPItem
+value (Rvalue
+type (Rtype
+from (	Rfrom"×
+UserInfo
+user_id (	RuserId
+	user_name (	RuserName
+user_pic (	RuserPic
+user_ip (	RuserIp
+user_pos (RuserPos
+is_sit (RisSit
+gold_num (RgoldNum
+score (Rscore"…
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -114,16 +127,7 @@ GameCmdRsp(
 user_pic (	RuserPic
 user_ip (	RuserIp
 gold_num (RgoldNum
-	room_list (RroomList"×
-UserInfo
-user_id (	RuserId
-	user_name (	RuserName
-user_pic (	RuserPic
-user_ip (	RuserIp
-user_pos (RuserPos
-is_sit (RisSit
-gold_num (RgoldNum
-score (Rscore"’
+	room_list (RroomList"’
 RefreshRoomInfo
 room_id (RroomId,
 players (2.msg.user.UserInfoRplayers8
@@ -144,11 +148,7 @@ randomNums
 PushDrawCard
 user_id (	RuserId
 card (Rcard
-user_pos (RuserPos"F
-GPItem
-value (Rvalue
-type (Rtype
-from (	Rfrom"Ù
+user_pos (RuserPos"Ù
 PushPlayCard
 user_id (	RuserId
 user_pos (RuserPos
@@ -168,10 +168,11 @@ randomNums
 user_id (	RuserId
 card (Rcard/
 	gang_type (2.msg.user.GangTypeRgangType
-user_pos (RuserPos"[
+user_pos (RuserPos"t
 PushPlayerOperatorState%
 operator_state (	RoperatorState
-user_pos (RuserPos"Š
+user_pos (RuserPos
+user_id (	RuserId"Š
 Item
 user_id (	RuserId
 user_pos (RuserPos
@@ -185,7 +186,25 @@ randomNums
 award_list (R	awardList"M
 NoticePlayersDisconnect
 user_id (	RuserId
-user_pos (RuserPos"%
+user_pos (RuserPos"·
+
+PlayerInfo
+user_id (	RuserId
+	user_name (	RuserName
+user_pic (	RuserPic
+user_ip (	RuserIp
+user_pos (RuserPos
+is_sit (RisSit
+gold_num (RgoldNum
+score (Rscore-
+	peng_list	 (2.msg.user.GPItemRpengList-
+	gang_list
+ (2.msg.user.GPItemRgangList"´
+PushAllRoomInfo8
+room_setting (2.msg.user.RoomSettingRroomSetting
+	card_list (RcardList.
+players (2.msg.user.PlayerInfoRplayers
+operator (	Roperator"%
 HandleError
 result (	Rresult"+
 UpdateResource
@@ -213,7 +232,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-„
+Í
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ª
 C2S
 
@@ -230,7 +249,7 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"‚
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"Ë
 S2C
 
 session_id (R	sessionId
@@ -259,7 +278,8 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_gang_card©œ (2.msg.user.NoticeGangCardRnoticeGangCard`
 push_player_operator_stateªœ (2!.msg.user.PushPlayerOperatorStateRpushPlayerOperatorStateD
 notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver_
-notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnectC
+notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnectG
+push_all_room_infoÝ (2.msg.user.PushAllRoomInfoRpushAllRoomInfoC
 update_resource±ê (2.msg.user.UpdateResourceRupdateResource:
 handle_error‘¿ (2.msg.user.HandleErrorRhandleErrorA
 ServerSendCard­œ (2.msg.ddz.ServerSendCardRServerSendCardJ

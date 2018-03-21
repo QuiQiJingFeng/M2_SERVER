@@ -53,6 +53,17 @@ function CMD.leaveRoom(data)
 	return "success"
 end
 
+function CMD.goBackRoom(data)
+	local user_id = data.user_id
+	local room_id = data.room_id
+	local room = RoomPool:getRoomByRoomID(room_id)
+	if not room then
+		return "not_exist_room",{}
+	end
+
+	local data = skynet.call(room:get("service_id"),"lua","goBackRoom",data)
+end
+
 --坐下
 function CMD.sitDown(data)
 	local room_id = data.room_id
@@ -124,6 +135,14 @@ function CMD.gameCMD(data)
 	local room_id = data.room_id
 	local room = RoomPool:getRoomByRoomID(room_id)
 	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
+
+	local command = data.command
+	if command == "BACK_ROOM" and result == "success" then
+		local fd = data.fd
+		local room = RoomPool:getRoomByRoomID(room_id)
+		--如果是返回房间,需要更新fd
+		room:set("fd",fd)
+	end
 	return result
 end
 
