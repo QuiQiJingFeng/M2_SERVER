@@ -310,7 +310,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	--通知所有人 A 已经出牌
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PLAY_CARD,data)
 
-	self.cur_pos = palyer.user_pos
+	self.cur_pos = player.user_pos
 
 	local card_type = math.floor(data.card / 10) + 1
 	local card_value = data.card % 10
