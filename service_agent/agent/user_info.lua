@@ -90,6 +90,7 @@ function user_info:updateResource(resource_name,num)
     self:set(resource_name,total)
     local send_data = {["update_resource"] = {resource_name=total}}
     self:send(send_data)
+    return total
 end
 
 function user_info:get(key)

@@ -264,7 +264,9 @@ function Room:distroy()
 			end)
 
 		local target = players[1]
-		cluster.call(target.node_name,".agent_manager","updateResource",target.user_id,"gold_num",-1*cost)
+		local gold_num = cluster.call(target.node_name,".agent_manager","updateResource",target.user_id,"gold_num",-1*cost)
+		target.gold_num = gold_num
+		self:refreshRoomInfo()
 	end
 
 	local room_key = "room:"..room_id

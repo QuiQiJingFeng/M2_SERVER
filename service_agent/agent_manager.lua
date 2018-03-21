@@ -273,8 +273,9 @@ function CMD.updateResource(user_id,resource_name,num)
         local info_key = "info:"..user_id
         local property = Map.new(USER_DB,info_key)
         property.gold_num = property.gold_num + num
+        return property.gold_num
     else
-        skynet.call(agent_item.service_id,updateResource,resource_name,num)
+        return skynet.call(agent_item.service_id,updateResource,resource_name,num)
     end
 
 end
