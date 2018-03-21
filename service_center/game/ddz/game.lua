@@ -12,7 +12,7 @@ local PUSH_EVENT = constant.PUSH_EVENT
 local GANG_TYPE = constant.GANG_TYPE
 local GAME_OVER_TYPE = constant.GAME_OVER_TYPE
 local cjson = require "cjson"
-local judgecard = require "hzmj.judgecard"
+local judgecard = require "ddz.judgecard"
 
 
 
@@ -117,7 +117,67 @@ function game:init(room_info)
 
 end
 
+--更新地主的位置
+function game:updateZpos()
+	local zpos = nil
 
+	local zj_mode = self.room:get("zj_mode")
+	local sit_down_num = self.room:get("sit_down_num")
+	if not self.zpos then
+		zpos = math.random(1,sit_down_num)
+	else
+		zpos = self.zpos
+	end
+	self.zpos = zpos
+end
+
+function game:start()
+	--1、更新庄家的位置（斗地主流程要改动）
+	self:updateZpos()
+
+	local players = self.room:get("players")
+	--2、发牌
+	local deal_num = 13 --红中麻将发13张牌
+	local players = self.room:get("players")
+	for index=1,self.room:get("sit_down_num") do
+		local cards = {}
+		for j=1,deal_num do
+			--从最后一个开始移除,避免大量的元素位置重排
+			local card = table.remove(self.card_list) 
+			table.insert(cards,card)
+		end
+
+		local player = self.room:getPlayerByPos(index)
+		player.card_list = cards
+		local rsp_msg = {zpos = self.zpos,cards = cards}
+		self.room:sendMsgToPlyaer(player,PUSH_EVENT.DEAL_CARD,rsp_msg)
+	end
+
+	--3、将card按类别和数字存储
+	for _,player in ipairs(players) do
+		local card_list = player.card_list
+
+		local handle_cards = { }
+		for i= 1,4 do
+			handle_cards[i] = {}
+			for j= 1,10 do
+				handle_cards[i][j] = 0
+			end
+		end
+
+		for _,value in ipairs(card_list) do
+			local card_type = math.floor(value / 10) + 1
+			local card_value = value % 10
+			handle_cards[card_type][10] = handle_cards[card_type][10] + 1
+			handle_cards[card_type][card_value] = handle_cards[card_type][card_value] + 1
+		end
+		player.handle_cards = handle_cards
+	end
+	
+	for i,player in ipairs(players) do
+		self.waite_operators[player.user_id] = "DEAL_FINISH"
+	end
+end
 
 
 

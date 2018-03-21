@@ -1,5 +1,5 @@
 local JudgeCard  = {}
-local bit = require("bit")
+-- local bit = require("bit")
 
 JudgeCard.TYPE_SINGLE_CARDS 				= 101			--单牌	  
 JudgeCard.TYPE_PAIR_CARDS 					= 102			--对子	
@@ -91,18 +91,18 @@ function JudgeCard:JudgeCardShape( arg_card,  arg_num, arg_value)
 
 	while card[i] ~= nil and i < 17 do
 		if card[i] == card[i-1] then
-			-- statu = statu | (3 << (i-1)*2)
-			statu = bit:_or(statu, bit:_lshift(3, (i-1)*2))
+			statu = statu | (3 << (i-1)*2)
+			-- statu = bit:_or(statu, bit:_lshift(3, (i-1)*2))
 
 			temp_count = temp_count +1
 		elseif card[i] == (card[i-1] + 1) then
 			-- print(string.format("card[%d] = [%d], card[i-1] = %d", i, card[i], card[i-1]))
-			-- statu = statu | (2 << (i-1)*2)
-			statu = bit:_or(statu, bit:_lshift(2, (i-1)*2))
+			statu = statu | (2 << (i-1)*2)
+			-- statu = bit:_or(statu, bit:_lshift(2, (i-1)*2))
 			temp_count = 1
 		else
-			-- statu = statu | (1 << (i-1)*2)
-			statu = bit:_or(statu, bit:_lshift(1, (i-1)*2))
+			statu = statu | (1 << (i-1)*2)
+			-- statu = bit:_or(statu, bit:_lshift(1, (i-1)*2))
 			temp_count = 1
 		end
 
@@ -192,6 +192,8 @@ function JudgeCard:JudgeCardShape( arg_card,  arg_num, arg_value)
 		return JudgeCard.TYPE_PLANE_THREE_WING_TWO;
 	----------------四个相邻三条带四张单牌--------------
 	elseif statu == -1778651203 or statu == -1761873987 or statu == -1745895691 or statu == -1745895687 or statu == -1711542339 or statu == -1694765123 or statu == -1678786827 or statu == -1678786823 or statu == -1614873643 or statu == -1614873639 or statu == -1614873627 or statu == -1614873623 or statu == -1510215747 or statu == -1493438531 or statu == -1477460235 or statu == -1477460231 or statu == -1443106883 or statu == -1426329667 or statu == -1410351371 or statu == -1410351367 or statu == -1346438187 or statu == -1346438183 or statu == -1346438171 or statu == -1346438167 or statu == -1090785451 or statu == -1090785447 or statu == -1090785435 or statu == -1090785431 or statu == -1090785387 or statu == -1090785383 or statu == -1090785371 or statu == -1090785367 or statu == -68174507 or statu == -68174503 or statu == -68174491 or statu == -68174487 or statu == -68174443 or statu == -68174439 or statu == -68174427 or statu == -68174423 or statu == -68174251 or statu == -68174247 or statu == -68174235 or statu == -68174231 or statu == -68174187 or statu == -68174183 or statu == -68174171 or statu == -68174167 or statu == 1442574269 or statu == 1459351485 or statu == 1475329781 or statu == 1475329785 or statu == 1509683133 or statu == 1526460349 or statu == 1542438645 or statu == 1542438649 or statu == 1606351829 or statu == 1606351833 or statu == 1606351845 or statu == 1606351849 or statu == 1711009725 or statu == 1727786941 or statu == 1743765237 or statu == 1743765241 or statu == 1778118589 or statu == 1794895805 or statu == 1810874101 or statu == 1810874105 or statu == 1874787285 or statu == 1874787289 or statu == 1874787301 or statu == 1874787305 or statu == 2130440021 or statu == 2130440025 or statu == 2130440037 or statu == 2130440041 or statu == 2130440085 or statu == 2130440089 or statu == 2130440101 or statu == 2130440105  then
+
+		-- 4009488317
 
 		return JudgeCard.TYPE_PLANE_FOUR_WING_SIGLE;
 	end

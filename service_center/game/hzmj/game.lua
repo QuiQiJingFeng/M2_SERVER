@@ -96,6 +96,9 @@ function game:init(room_info)
 	self.waite_operators = {}
 	--当前出牌的位置
 	self.cur_pos = nil
+
+	self.iCurGangPlayer = 0
+
 end
 
 --更新庄家的位置
@@ -276,6 +279,8 @@ game["PLAY_CARD"] = function(self,player,data)
 		return NET_RESULT.FAIL
 	end
 
+
+	self.iCurGangPlayer = 0
 	--减少A玩家的手牌
 	local result = self:removeHandleCard(player,data.card)
 	if not result then
@@ -356,6 +361,8 @@ game["PENG"] = function(self,player,data)
 		return NET_RESULT.FAIL
 	end
 
+	self.iCurGangPlayer = 0
+
 	local obj = {value = card}
 	--记录下已经碰的牌
 	table.insert(player.card_stack["PENG"],obj)
@@ -434,7 +441,7 @@ function game:checkHu(player)
 		}
 	}
 	tempResult.iHuiCard = 35
-	return judgecard:JudgeIfHu2(player.handle_cards, tempResult, self.seven_pairs);
+	return judgecard:JudgeIfHu2(player.handle_cards, tempResult, self.seven_pairs), tempResult
 end
 
 --杠
@@ -465,6 +472,8 @@ game["GANG"] = function(self,player,data)
 	elseif gang_type == GANG_TYPE.PENG_GANG then
 		num = 1
 	end
+	self.iCurGangPlayer = player.user_pos
+
 	--移除手牌
 	local result = self:removeHandleCard(player,card,num)
 	if not result then
@@ -509,6 +518,8 @@ game["GANG"] = function(self,player,data)
 		self:drawCard(player)
 	end
 
+
+
 	return NET_RESULT.SUCCESS
 end
 
@@ -532,17 +543,161 @@ end
 
 --胡牌
 game["HU"] = function(self,player,data)
+	
+	local iWinPos = player.user_pos
+
 	local operate = self.waite_operators[player.user_id]
 	if not (operate == "PLAY_CARD" or operate == "HU") then
 		return NET_RESULT.FAIL
 	end
 	self.waite_operators[player.user_id] = nil
+	local players = self.room:get("players")
+
+	--
+	if operate == "PLAY_CARD" then
+		local is_hu, tempResult = self:checkHu(player)
+
+		if is_hu == false then
+			self.room:sendMsgToPlyaer(player,PUSH_EVENT.HANDLE_ERROR,{})
+			return NET_RESULT.FAIL
+		end
+
+		-- 七对
+		local bQiDui = false
+		if tempResult.iChiNum + tempResult.iPengNum == 0 then
+			bQiDui = true
+		end
+
+		local iTempAmount = 2 -- 自摸两分
+
+		--  七对再加上一个自摸
+		if bQiDui then
+			iTempAmount = iTempAmount * 2
+		end
+
+		-- 三家给钱
+		
+		for _,temp_player in ipairs(players) do
+			if temp_player.user_id ~= player.user_id then
+				temp_player.score = temp_player.score + (-1)*iTempAmount * self.base_score
+				player.score = player.score + iTempAmount * self.base_score
+			end
+		end
+	else
+		-- 是自己开杠， 不是抢杠胡
+		if self.iCurGangPlayer > 4 or self.iCurGangPlayer < 1 or self.iCurGangPlayer == player.user_pos then
+			self.room:sendMsgToPlyaer(player,PUSH_EVENT.HANDLE_ERROR,{})
+			print("不是抢杠胡就t出去")
+			return NET_RESULT.FAIL
+		end
+
+		local card = self.room:get("cur_card")
+		--胡牌前,先将这张杠牌加入玩家手牌
+		self:addHandleCard(player,card)
+		local is_hu, tempResult = self:checkHu(player)
+		if not is_hu then
+			self.room:sendMsgToPlyaer(player,PUSH_EVENT.HANDLE_ERROR,{})
+			print("不是抢杠胡就t出去is_hu = ", is_hu)
+			return NET_RESULT.FAIL
+		end
+
+		-- 七对
+		local bQiDui = false
+		if tempResult.iChiNum + tempResult.iPengNum == 0 then
+			bQiDui = true
+		end
+
+
+		local iTempAmount = 1 -- 自摸两分
+
+		--  七对再加上一个自摸
+		if bQiDui then
+			iTempAmount = iTempAmount * 2
+		end
+
+		for i = 1, 4 do 
+			if i == iWinPos then
+				-- 三倍, 出三家的钱
+				players[i][score] = players[i][score] + iTempAmount * self.base_score*(self.room["sit_down_num"]-1)
+			elseif i == self.iCurGangPlayer then
+				players[i][score] = players[i][score] + (-1)*iTempAmount * self.base_score*(self.room["sit_down_num"]-1)
+			end
+		end
+	end
+
+	-- self.award_num
+	-- self.hi_point
+	-- self.convert
+
+	-- 奖码
+	local iAwardNum = 0
+	local iXiFen = 0
+	local award_num = award_num
+	local iZnums = 0
+	-- 统计下红中个数
+	for i, v in pairs(player.card_list) do 
+		if v % 10 == 1 and (v / 10 + 1) == 4 then
+			iZnums = iZnums + 1
+		end
+ 	end 
+
+ 	-- 没有红中就加两个码
+ 	if iZnums == 0 then
+ 		award_num = award_num + 2
+ 	end
+
+	for i = 1, 8 do 
+		while true do
+			if i > award_num then
+				break
+			end
+
+			if self.card_list[i] and self.card_list[i] ~= 0 then
+				local iValue = self.card_list[i] % 10 
+				if iValue == 1 or iValue == 5 or iValue == 9 then
+					iAwardNum = iAwardNum + 1
+				end			
+				break
+			end
+
+			break
+		end
+	end
+
+	-- local  
+	-- if iZnums == 4 and self.hi_point then
+	-- 	iXiFen = 5
+	-- end
+	-- iAwardNum 不中当全中
+	if iAwardNum == 0 and self.convert == 1 then
+		iAwardNum = award_num
+	end
+
+
+
+
+	if iZnums == 4 and self.hi_point then
+		iAwardNum = iAwardNum 
+	end
+	-- 把这几张牌给拷进数组里面
+	-- if self.room["seat_num"]
+	-- 
+	-- if operate == "PLAY_CARD" then
+
+	-- else
+
+	-- end
+
+	-- 奖码数*赢的数（自摸和抢杠胡不一样） --
+	-- local iTempAmount = iAwardNum 
+
+
+
+
+
 
 	--检查是否有人胡这张牌
- 	local card = self.room:get("cur_card")
-	--胡牌前,先将这张杠牌加入玩家手牌
-	self:addHandleCard(player,card)
-	local is_hu = self:checkHu(player)
+ 	
 	--检查完之后,去掉这张牌
 	self:removeHandleCard(player,card,1)
 	if is_hu then
