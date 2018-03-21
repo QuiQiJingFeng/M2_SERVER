@@ -240,7 +240,7 @@ function game:drawCard(player)
 	--检查是否流局
 	local is_flow = self:flowBureau()
 	if is_flow then
-		self.room:gameOver(GAME_OVER_TYPE.FLOW)
+		self:gameOver(player,GAME_OVER_TYPE.FLOW)
 		return 
 	end
 
@@ -559,15 +559,9 @@ game["HU"] = function(self,player,data)
 	end
 	self.waite_operators[player.user_id] = nil
 
-	--检查是否有人胡这张牌
- 	local card = self.room:get("cur_card")
-	--胡牌前,先将这张杠牌加入玩家手牌
-	self:addHandleCard(player,card)
-	local is_hu = self:checkHu(player)
-	--检查完之后,去掉这张牌
-	self:removeHandleCard(player,card,1)
+	local is_hu,tempResult = self:checkHu(player)
 	if is_hu then
-		self.room:gameOver(GAME_OVER_TYPE.NORMAL)
+		self:gameOver(player,GAME_OVER_TYPE.NORMAL,operate,tempResult)
 	end
 	return NET_RESULT.SUCCESS
 end
