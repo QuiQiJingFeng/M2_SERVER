@@ -74,7 +74,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 GPItem
 value (Rvalue
 	gang_type (RgangType
-from (	Rfrom
+from (Rfrom
 type (Rtype"×
 UserInfo
 user_id (	RuserId
