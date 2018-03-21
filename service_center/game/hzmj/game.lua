@@ -493,7 +493,7 @@ game["PENG"] = function(self,player,data)
 	end
 
 	--通知所有人,有人碰了
-	local data = {user_id=player.user_id,card = card,user_pos=player.user_pos}
+	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 
 	self.room:broadcastAllPlayers("notice_peng_card",data)
 
@@ -612,8 +612,9 @@ game["GANG"] = function(self,player,data)
 	end
 
 	--通知所有人,有人杠了
-	local data = {user_id = player.user_id,card = card,gang_type = gang_type,user_pos = player.user_pos}
-	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_GANG_CARD,data)
+	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
+	
+	self.room:broadcastAllPlayers("notice_gang_card",data)
 
 	if gang_type ~= GANG_TYPE.PENG_GANG then
 		--杠了之后再摸一张牌
