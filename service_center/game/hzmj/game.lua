@@ -257,7 +257,8 @@ function game:drawCard(player)
 	end
 
 	--通知玩家出牌了
-	self:noticePushPlayCard(player,"MUO")
+	local operator = 1
+	self:noticePushPlayCard(player,operator)
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 end
@@ -389,7 +390,8 @@ game["PENG"] = function(self,player,data)
 	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PENG_CARD,data)
 
 	--通知玩家出牌
-	self:noticePushPlayCard(player,"PENG")
+	local operator = 2
+	self:noticePushPlayCard(player,operator)
 
 	self.waite_operators[player.user_id] = "PLAY_CARD"
 

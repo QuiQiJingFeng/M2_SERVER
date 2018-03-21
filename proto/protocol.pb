@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-–
+ù
 msg/user.protomsg.user"Ö
 RoomSetting
 	game_type (RgameType
@@ -147,14 +147,14 @@ randomNums
 user_pos (RuserPos"2
 GPItem
 value (Rvalue
-type (Rtype"Ì
+type (Rtype"Ÿ
 PushPlayCard
 user_id (	RuserId
-user_pos (RuserPos
-	card_list (RcardList-
-	peng_list (2.msg.user.GPItemRpengList-
-	gang_list (2.msg.user.GPItemRgangList.
-operator (2.msg.user.OperatorRoperator"X
+user_pos (RuserPos
+operator (Roperator
+	card_list (RcardList-
+	peng_list (2.msg.user.GPItemRpengList-
+	gang_list (2.msg.user.GPItemRgangList"X
 NoticePlayCard
 user_id (	RuserId
 card (Rcard
@@ -202,10 +202,7 @@ auth_faild
 sit_already_has
 round_not_enough
 pos_has_player
-already_sit*
-Operator
-MUO
-PENG*5
+already_sit*5
 GangType
 AN_GANG
 	MING_GANG
