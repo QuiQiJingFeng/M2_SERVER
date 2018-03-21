@@ -44,7 +44,7 @@ local MJ_CARDS_TYPE = {
 constant["ROOM_STATE"] = {
 	GAME_PREPARE = 1,   --游戏准备阶段
 	GAME_PLAYING = 2,	--游戏中
-	GAME_OVER = 3		--游戏结束
+	GAME_OVER = 3,		--游戏结束
 }
 
 constant["PUSH_EVENT"] = {

@@ -111,8 +111,8 @@ function Room:addPlayer(info)
 	player.gold_num = info.gold_num				 --玩家的金币数量
 	
 	--记录已经碰或者杠的牌 记录下碰谁的牌
-	--item = {card=card,from=user_id}
-	player.card_stack = { PENG = {},GANG = {}}
+	--item = {card=card,from=user_id,type=type,gang_type=gang_type}
+	player.card_stack = {}
 	player.handle_cards = {}
 	table.insert(self.property.players,player)
 
@@ -270,6 +270,7 @@ function Room:distroy()
 	local room_key = "room:"..room_id
 	--删除掉房间信息
 	skynet.call(".redis_center","lua","DEL",REDIS_DB,room_key)
+
 	--清理房间服务的数据
 	skynet.call(service_id,"lua","clear")
 	--还原初始的属性

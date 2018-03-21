@@ -12,12 +12,18 @@ local judgecard = require "hzmj.judgecard"
 
 local GANG_TYPE = {
 	AN_GANG = 1,
-	MING_GANG = 2;
-	PENG_GANG = 3;
+	MING_GANG = 2,
+	PENG_GANG = 3,
 }
 local GAME_OVER_TYPE = {
-	["NORMAL"] = 1; --正常胡牌
-	["FLOW"] = 2;	--流局
+	["NORMAL"] = 1, --正常胡牌
+	["FLOW"] = 2,	--流局
+}
+
+local TYPE = {
+	PENG = 1,
+	GANG = 2,
+	CHI = 3,
 }
 
 local game = {}
@@ -77,8 +83,8 @@ function game:gameOver(player,over_type,operate,tempResult)
 		end
 
 		--计算杠的积分
-		for _,obj in ipairs(player.card_stack["GANG"]) do
-			if obj.type == GANG_TYPE.AN_GANG then
+		for _,obj in ipairs(player.card_stack) do
+			if obj.gang_type == GANG_TYPE.AN_GANG then
 				--暗杠，赢每个玩家2*底分；
 				player.cur_score = player.cur_score + self.base_score * 2 * count
 				for _,obj in ipairs(players) do
@@ -86,7 +92,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 						obj.cur_score = obj.cur_score - self.base_score * 2
 					end
 				end
-			elseif obj.type == GANG_TYPE.MING_GANG then
+			elseif obj.gang_type == GANG_TYPE.MING_GANG then
 				--明杠 赢放杠者3*底分
 				player.cur_score = player.cur_score + self.base_score * 3
 				for _,obj in ipairs(players) do
@@ -94,7 +100,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 						obj.cur_score = obj.cur_score - self.base_score * 3
 					end
 				end
-			elseif obj.type == GANG_TYPE.PENG_GANG then
+			elseif obj.gang_type == GANG_TYPE.PENG_GANG then
 				--自己摸的明杠(公杠) 三家出，赢每个玩家1*底分；
 				player.cur_score = player.cur_score + self.base_score * 1 * count
 				for _,obj in ipairs(players) do
@@ -328,8 +334,7 @@ function game:noticePushPlayCard(splayer,operator)
 		local rsp_msg = {user_id=splayer.user_id,user_pos=splayer.user_pos}
 		if player.user_id == splayer.user_id then
 			rsp_msg.card_list = player.card_list
-			rsp_msg.peng_list = player.card_stack["PENG"]
-			rsp_msg.gang_list = player.card_stack["GANG"]
+			rsp_msg.card_stack = player.card_stack
 		end
 		rsp_msg.operator = operator
 		self.room:sendMsgToPlyaer(player,"push_play_card",rsp_msg)
@@ -477,9 +482,9 @@ game["PENG"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	local obj = {value = card,from = self.cur_play_user.user_id}
+	local obj = {value = card,from = self.cur_play_user.user_id,type=TYPE.PENG}
 	--记录下已经碰的牌
-	table.insert(player.card_stack["PENG"],obj)
+	table.insert(player.card_stack,obj)
 
 	--移除手牌
 	local result = self:removeHandleCard(player,card,2)
@@ -515,8 +520,8 @@ function game:checkGang(player,card)
 	elseif num >= 3 then
 		result = GANG_TYPE.MING_GANG
 	elseif num == 1 then
-		for _,obj in ipairs(player.card_stack["PENG"]) do
-			if obj.value == card then
+		for _,obj in ipairs(player.card_stack) do
+			if obj.value == card and obj.type == TYPE.PENG then
 				result = GANG_TYPE.PENG_GANG
 				break
 			end
@@ -577,7 +582,7 @@ game["GANG"] = function(self,player,data)
 
 	self.waite_operators[player.user_id] = nil
 
-	local obj = {value = card,type = gang_type}
+	local obj = {value = card,gang_type = gang_type,type=TYPE.GANG}
 	local num = 0
 	if gang_type == GANG_TYPE.AN_GANG then
 		obj.form = player.user_id
@@ -590,7 +595,7 @@ game["GANG"] = function(self,player,data)
 		num = 1
 	end
 	--记录下已经杠的牌
-	table.insert(player.card_stack["GANG"],obj)
+	table.insert(player.card_stack,obj)
 
 	--移除手牌
 	local result = self:removeHandleCard(player,card,num)
@@ -677,11 +682,6 @@ game["BACK_ROOM"] = function(self,player,data)
 	
 	--push_all_room_info
 	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","card_stack")
-	for i,info in ipairs(players_info) do
-		info.peng_list = info.card_stack["PENG"]
-		info.gang_list = info.card_stack["GANG"]
-		info.card_stack = nil
-	end
 	local rsp_msg = {}
 	rsp_msg.room_setting = room_setting
 	rsp_msg.card_list = player.card_list

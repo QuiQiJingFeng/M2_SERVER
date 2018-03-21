@@ -43,7 +43,7 @@ function CMD.leaveRoom(data)
 		return "not_exist_room"
 	end
 	local state = room:get("state")
-	if state == constant.ROOM_STATE.GAME_PLAYING then
+	if state ~= constant.ROOM_STATE.GAME_PREPARE then
 		return "current_in_game"
 	end
 
@@ -113,15 +113,19 @@ function CMD.sitDown(data)
 	local seat_num = room:get("seat_num")
 	if seat_num == sit_down_num then
 		local cur_round = room:get("cur_round")
-		if cur_round == 0 then
-			--第一回合开始后,重新设定房间的释放时间
-			local now = skynet.time()
-			room:set("expire_time",now + 12*60*60)
-		end
 		--开始游戏之后局数+1
 		room:set("cur_round",cur_round+1)
 		--所有人都坐下之后 开始游戏
 		room:set("state",constant.ROOM_STATE.GAME_PLAYING)
+
+		if cur_round == 1 then
+			--第一回合开始后,重新设定房间的释放时间
+			local now = skynet.time()
+			room:set("expire_time",now + 12*60*60)
+			--推送到客户端,本房间的状态发生改变
+			room:broadcastAllPlayers("update_room_state",{room_id=room:get("room_id"),state = room:get("state")})
+		end
+		
 		skynet.call(room:get("service_id"),"lua","startGame",room:getAllInfo())
 	end
 

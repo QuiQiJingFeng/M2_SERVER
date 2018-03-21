@@ -6,7 +6,9 @@ local crypt = require "skynet.crypt"
 local pbc = require "protobuf"
 local cjson = require "cjson"
 local Map = require "Map"
+local event_handler = require "event_handler"
 local USER_DB = 1
+local ROOM_DB = 2
 local user_info = {}
 local property
 
@@ -30,18 +32,44 @@ function user_info:init(info)
     property = Map.new(USER_DB,info_key)
     property:updateValues(data)
 
+    if not property.room_ids then
+        property.room_ids = {}
+    end
+
+    local will_remove = {}
+    local room_list = {}
+    for _,room_id in ipairs(property.room_ids) do
+        local info = {}
+        local room_key = "room:"..room_id
+        local room_info = Map.new(ROOM_DB,room_key)
+        if not room_info.room_id then
+            table.insert(will_remove,room_id)
+        else
+            info.room_id = room_id
+            info.expire_time = room_info.expire_time
+            info.state = room_info.state
+            table.insert(room_list,info)
+        end
+    end
+
+    for _,room_id in ipairs(will_remove) do
+        for i,id in ipairs(property.room_ids) do
+            if id == room_id then
+                table.remove(property.room_ids,i)
+                break
+            end
+        end
+    end
+    self:set("room_ids",property.room_ids)
+
     --登陆成功之后,推送玩家信息
     local push_msg = data
     --TODO FYD 玩家创建的房间信息列表,房间的状态,所以在房间信息中应该以用户ID 做为key
-    push_msg.room_list = {}
+    push_msg.room_list = room_list
     --玩家登陆之后，检查下room_id对应的房间是否解散,如果解散则删掉room_id
     -- FYD
     self:send({[PUSH_EVENT.PUSH_USER_INFO] = push_msg})
-
-    --创建的房间列表
-    property.room_ids = {}
 end
-
 
 function user_info:checkGoldNum(num)
     local total = tonumber(self:get("gold_num"))
@@ -74,7 +102,6 @@ function user_info:set(key,value)
     end
 end
 
-
 --获取用户的多种属性
 function user_info:getPropertys(...)
 	local info = {}
@@ -90,7 +117,7 @@ function user_info:clear()
 end
 
 function user_info:disconnect()
-
+    event_handler:emit("leave_room")
 end
 
 function user_info:send(data_content)
