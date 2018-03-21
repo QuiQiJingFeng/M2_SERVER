@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Œ
+ 
 msg/user.protomsg.user"…
 RoomSetting
 	game_type (RgameType
@@ -144,10 +144,11 @@ randomNums
 PushDrawCard
 user_id (	RuserId
 card (Rcard
-user_pos (RuserPos"2
+user_pos (RuserPos"F
 GPItem
 value (Rvalue
-type (Rtype"Ù
+type (Rtype
+from (	Rfrom"Ù
 PushPlayCard
 user_id (	RuserId
 user_pos (RuserPos
