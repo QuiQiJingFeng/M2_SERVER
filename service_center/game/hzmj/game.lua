@@ -642,6 +642,7 @@ game["GANG"] = function(self,player,data)
 			--通知客户端当前可以胡牌
 	   		self.room:sendMsgToPlyaer(hu_player,"push_player_operator_state",{operator_state = "HU",user_pos = hu_player.user_pos,user_id=hu_player.user_id})
 			self.waite_operators[player.user_pos] = "WAIT_HU"
+			self.gang_pos = player.user_pos
 		end
 	else
 	    --杠了之后再摸一张牌
@@ -666,18 +667,18 @@ game["GUO"] = function(self,player,data)
 	end
 
 	if #positions >= 1 then
-		table.sort(positions,function(a,b) 
-			return a < b
-		end)
-		local next_pos = positions[1]
-		if self.waite_operators[next_pos] == "DELAY_HU" then
-			local player = self.room:getPlayerByPos(next_pos)
-			local is_hu,tempResult = self:checkHu(player)
-			if is_hu then
-				--延迟胡牌不可能是自摸胡牌,所以这里填写WAIT_HU
-				self:gameOver(player,GAME_OVER_TYPE.NORMAL,"WAIT_HU",tempResult)
+		for i=1,self.room:get("seat_num")-1 do
+			local next_pos = self.gang_pos + 1
+			if positions[next_pos] then  --找到胡牌人中优先级最高的人
+				if positions[next_pos] == "DELAY_HU" then --如果这个人处于延迟胡状态
+					local player = self.room:getPlayerByPos(next_pos)
+					local is_hu,tempResult = self:checkHu(player)
+					if is_hu then
+						--延迟胡牌不可能是自摸胡牌,所以这里填写WAIT_HU
+						self:gameOver(player,GAME_OVER_TYPE.NORMAL,"WAIT_HU",tempResult)
+					end
+				end
 			end
-			return "success"
 		end
 	end
 		
@@ -701,16 +702,18 @@ game["HU"] = function(self,player,data)
 
 	local positions = {}
 	for pos,v in pairs(self.waite_operators) do
-		table.insert(positions,pos)
+		positions[pos] = true
 	end
 	if # positions > 1 then
-		table.sort(positions,function(a,b) 
-				return a < b
-			end)
-		if positions[1] ~= player.user_pos then
-			--延迟胡牌
-			self.waite_operators[player.user_pos] = "DELAY_HU"
-			return "success"
+		for i=1,self.room:get("seat_num")-1 do
+			local next_pos = self.gang_pos + 1
+			if positions[next_pos] then  --找到胡牌人中优先级最高的人,如果当前胡牌人不是这个人
+				if positions[next_pos] ~= player.user_pos then
+					--延迟胡牌
+					self.waite_operators[player.user_pos] = "DELAY_HU"
+					return "success"
+				end
+			end
 		end
 	end
 
