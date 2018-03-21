@@ -409,7 +409,8 @@ game["PLAY_CARD"] = function(self,player,data)
 	local user_id = player.user_id
 	local data = {user_id = user_id,card = data.card,user_pos = player.user_pos}
 	--通知所有人 A 已经出牌
-	self.room:broadcastAllPlayers(PUSH_EVENT.NOTICE_PLAY_CARD,data)
+	
+	self.room:broadcastAllPlayers("notice_play_card",data)
 
 	--记录下当前出牌人和当前出的牌
 	self.cur_play_user = player
