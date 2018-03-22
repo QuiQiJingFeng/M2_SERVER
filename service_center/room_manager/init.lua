@@ -138,15 +138,79 @@ function CMD.gameCMD(data)
 	local user_id = data.user_id
 	local room_id = data.room_id
 	local room = RoomPool:getRoomByRoomID(room_id)
-	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
-
 	local command = data.command
-	if command == "BACK_ROOM" and result == "success" then
+	if command == "DISTROY_ROOM" then
+		local players = room:get("players")
+		if data.alloc then
+			room:set("can_distory",true)
+			local confirm_map = room:get("confirm_map")
+			confirm_map[user_id] = true
+			room:set("confirm_map",confirm_map)
+			for i,player in ipairs(players) do
+				if user_id ~= player.user_id then --通知其他人有人申请解散房间
+					room:sendMsgToPlyaer(player,"notice_other_distroy_room",{})
+				end
+			end
+			return "success"
+		end
+		local can_distory = room:get("can_distory")
+		if not can_distory then
+			return "success"
+		end
+		if data.confirm then
+			local confirm_map = room:get("confirm_map")
+			confirm_map[user_id] = true
+			room:set("confirm_map",confirm_map)
+			--当前玩家的数量
+			local player_num = 0
+			for i,player in ipairs(players) do
+				if not player.disconnect then
+					player_num = player_num + 1
+				end
+			end
+			local num = 0
+			for k,v in pairs(confirm_map) do
+				num = num + 1 --TODO
+			end
+
+			--如果所有人都点了确定
+			if num == player_num then
+				local cur_round = room:get("cur_round")
+				--如果回合数大于1 则发送结算界面
+				if cur_round >= 1 then
+					skynet.call(room:get("service_id"),"lua","gameCMD",data)
+				end
+				room:set("can_distory",false)
+				RoomPool:distroyRoom(room_id)
+			end
+		else
+			local s_player = room:getPlayerByUserId(user_id)
+
+			--如果有人不同意,则通知其他人 谁不同意
+			local players = room:get("players")
+			for i,player in ipairs(players) do
+				if user_id ~= player.user_id then
+					room:sendMsgToPlyaer(player,"notice_other_refuse",{user_id=s_player.user_id,user_pos=s_player.user_pos})
+				end
+			end
+			room:set("confirm_map",{})
+			room:set("can_distory",false)
+		end
+		return "success"
+	end
+
+	if command == "BACK_ROOM" then
 		local fd = data.fd
+		local player = room:getPlayerByUserId(user_id)
+		--重新返回房间将标记重置
+		player.disconnect = false
+		room:set("players",room:get("players"))
 		local room = RoomPool:getRoomByRoomID(room_id)
 		--如果是返回房间,需要更新fd
 		room:set("fd",fd)
 	end
+	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
+	
 	return result
 end
 
@@ -202,19 +266,9 @@ function CMD.userDisconnect(data)
 	if not player then
 		return true
 	end
-
-	local state = room:get("state")
-	if state == constant.ROOM_STATE.GAME_PLAYING then
-		--此时不会清掉玩家绑定的房间号
-		log.warningf("玩家[%s]掉线,但是房间[%d]在游戏当中",user_id,room_id)
-		--如果在游戏中 还需要通知其他玩家 有玩家掉线
-		room:broadcastAllPlayers(constant.PUSH_EVENT.NOTICE_PLAYERS_DISCONNECT,{user_id=user_id})
-		return false
-	end
-
-	room:removePlayer(user_id)
-	
-	room:refreshRoomInfo()
+	player.disconnect = true
+	room:set("players",room:get("players"))
+	room:noticePlayerDisconnect(player)
 
 	return true
 end

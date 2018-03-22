@@ -69,6 +69,8 @@ function Room:init(room_id,node_name,service_id)
 	info.sit_down_num = 0						--坐下的人数
 	info.state = ROOM_STATE.GAME_PREPARE		--房间的状态
 	info.expire_time = skynet.time() + 30*60	--房间的解散时间
+	info.confirm_map = {}                       --同意解散房间的人员字典
+	info.can_distory = false
 	self.property:updateValues(info)
 end
 
@@ -109,7 +111,7 @@ function Room:addPlayer(info)
 	player.cur_score = 0                         --当前局的积分
 	player.fd = info.fd                          --玩家的fd
 	player.gold_num = info.gold_num				 --玩家的金币数量
-	
+	player.disconnect = false                    --玩家是否掉线
 	--记录已经碰或者杠的牌 记录下碰谁的牌
 	--item = {card=card,from=user_id,type=type,gang_type=gang_type}
 	player.card_stack = {}
@@ -222,6 +224,9 @@ end
 function Room:pushEvent(node_name,player,msg_name,msg_data)
 	local fd = player.fd
 	local user_id = player.user_id
+	if player.disconnect then
+		return
+	end
 	local success,result = pcall(cluster.call,node_name, ".agent_manager", "pushEvent",fd, msg_name, msg_data)
 	if not success then
 		log.infof("向游戏服[%s]推送消息[%s]失败\n内容如下:\n%s",cjson.encode(msg_data))
@@ -229,6 +234,8 @@ function Room:pushEvent(node_name,player,msg_name,msg_data)
 
 	if result == "NOT_ONLINE" then
 		log.infof("玩家[%s]不在线",user_id)
+		player.disconnect = true
+		self:noticePlayerDisconnect(player)
 	end
 end
 
@@ -244,6 +251,11 @@ end
 function Room:sendMsgToPlyaer(player,msg_name,msg_data)
 	local node_name = player.node_name
 	self:pushEvent(node_name,player,msg_name,msg_data)
+end
+
+--通知有玩家掉线
+function Room:noticePlayerDisconnect(player)
+	self:broadcastAllPlayers("notice_players_disconnect",{user_id=player.user_id,user_pos=player.user_pos})
 end
 
 --清理房间

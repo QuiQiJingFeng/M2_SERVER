@@ -5,6 +5,7 @@ local socket = require "skynet.socket"
 local crypt = require "skynet.crypt"
 local pbc = require "protobuf"
 local cjson = require "cjson"
+local log = require "skynet.log"
 local Map = require "Map"
 local event_handler = require "event_handler"
 local USER_DB = 1
@@ -120,7 +121,19 @@ function user_info:clear()
 end
 
 function user_info:disconnect()
-    event_handler:emit("leave_room")
+   local proto_name,rsp_msg = event_handler:emit("leave_room")
+    if rsp_msg.result == "current_in_game" then
+        --通知棋局服务器玩家掉线
+        local room_id = self:get("room_id")
+        local room_info = Map.new(ROOM_DB,"room:"..room_id)
+        local center_node = room_info.node_name
+        local user_id = user_info:get("user_id")
+        local data = {room_id = room_id,user_id = user_id}
+        local success,result = user_info:safeClusterCall(center_node,".room_manager","userDisconnect",data)
+        if not success then
+            log.warning("notice center server user disconnect faild")
+        end
+    end
 end
 
 function user_info:send(data_content)

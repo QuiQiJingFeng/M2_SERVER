@@ -18,6 +18,7 @@ local GANG_TYPE = {
 local GAME_OVER_TYPE = {
 	["NORMAL"] = 1, --正常胡牌
 	["FLOW"] = 2,	--流局
+	["DISTROY_ROOM"] = 3,   --房间解散推送结算积分
 }
 
 local TYPE = {
@@ -745,6 +746,13 @@ game["BACK_ROOM"] = function(self,player,data)
 	return "success"
 end
 
+--解散房间
+game["DISTROY_ROOM"] = function(self,player,data)
+	--发送结算积分
+	self:gameOver(player,GAME_OVER_TYPE.DISTROY_ROOM)
+	return "success"
+end
+
 function game:gameCMD(data)
 	local user_id = data.user_id
 	local command = data.command
@@ -754,7 +762,11 @@ function game:gameCMD(data)
 	end
 
 	local player = self.room:getPlayerByUserId(user_id)
-	return func(game,player,data)
+	local result = func(game,player,data)
+	if result == "success" then
+		self.room:set("players",room:get("players"))
+	end
+	return result
 end
 
 return game
