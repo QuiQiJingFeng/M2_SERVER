@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-¿ 
+Ý!
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -214,7 +214,13 @@ card_stack	 (2.msg.user.GPItemR	cardStack"´
 room_setting (2.msg.user.RoomSettingRroomSetting
 	card_list (RcardList.
 players (2.msg.user.PlayerInfoRplayers
-operator (	Roperator"
+operator (	Roperator"Y
+GoldItem
+user_id (	RuserId
+user_pos (RuserPos
+gold_num (RgoldNum"A
+UpdateCostGold/
+	gold_list (2.msg.user.GoldItemRgoldList"
 NoticeOtherDistoryRoom"G
 NoticeOtherRefuse
 user_id (	RuserId
@@ -246,7 +252,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-Â
+‡
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ª
 C2S
 
@@ -263,7 +269,7 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"À
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"…
 S2C
 
 session_id (R	sessionId
@@ -296,6 +302,7 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 push_all_room_infoÝ (2.msg.user.PushAllRoomInfoRpushAllRoomInfo\
 notice_other_distroy_roomÞ (2 .msg.user.NoticeOtherDistoryRoomRnoticeOtherDistroyRoomL
 notice_other_refuseß (2.msg.user.NoticeOtherRefuseRnoticeOtherRefuseC
+update_cost_goldà (2.msg.user.UpdateCostGoldRupdateCostGoldC
 update_resource±ê (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state²ê (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_error‘¿ (2.msg.user.HandleErrorRhandleErrorA

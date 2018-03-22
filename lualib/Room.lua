@@ -215,7 +215,6 @@ end
 --FYD
 function Room:refreshRoomInfo()
 	local rsp_msg = {}
-	self.property:reloadFromDb()
 	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","cur_score")
 	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	rsp_msg.room_setting = room_setting
@@ -284,7 +283,9 @@ function Room:distroy()
 		local player = players[1]
 		local gold_num = cluster.call(player.node_name,".agent_manager","updateResource",player.user_id,"gold_num",-1*cost)
 		player.gold_num = gold_num
-		self:refreshRoomInfo()
+		
+		local gold_list = {{user_id = player.user_id,user_pos = player.user_pos,gold_num=gold_num}}
+		self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
 	end
 
 	local room_key = "room:"..room_id

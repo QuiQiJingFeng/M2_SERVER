@@ -229,17 +229,24 @@ function CMD.gameOver(room_id)
 			--更新玩家的金币数量
 			local gold_num = cluster.call(player.node_name,".agent_manager","updateResource",owner_id,"gold_num",-1*cost)
 			player.gold_num = gold_num
-			room:refreshRoomInfo()
+
+			local gold_list = {{user_id = owner_id,user_pos = player.user_pos,gold_num=gold_num}}
+			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+			
 		elseif pay_type == constant.PAY_TYPE.AMORTIZED_COST then
 			--平摊
 			local seat_num = room:get("seat_num")
 			local per_cost = math.floor(cost / seat_num)
 			local players = room:get("players")
+			local gold_list = {}
 			for i,obj in ipairs(players) do
+				local info = {user_id = obj.user_id,user_pos=obj.user_pos}
 				local gold_num = cluster.call(obj.node_name,".agent_manager","updateResource",obj.user_id,"gold_num",-1*per_cost)
 				obj.gold_num = gold_num
+				info.gold_num = gold_num
+				table.insert(gold_list,info)
 			end
-			room:refreshRoomInfo()
+			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
 		end   
 	end
 
