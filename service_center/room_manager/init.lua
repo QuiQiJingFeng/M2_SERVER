@@ -208,6 +208,8 @@ function CMD.gameCMD(data)
 		local room = RoomPool:getRoomByRoomID(room_id)
 		--如果是返回房间,需要更新fd
 		room:set("fd",fd)
+
+		data.gold_list = room:getPlayerInfo("user_id","gold_num")
 	end
 	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
 

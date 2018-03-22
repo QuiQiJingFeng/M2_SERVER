@@ -742,7 +742,14 @@ game["BACK_ROOM"] = function(self,player,data)
 	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	
 	--push_all_room_info
-	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","card_stack")
+	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack")
+	for i,obj in ipairs(players_info) do
+		for _,info in ipairs(data.gold_list) do
+			if info.user_id == obj.user_id then
+				obj.gold_num = info.gold_num
+			end
+		end
+	end
 	local rsp_msg = {}
 	rsp_msg.room_setting = room_setting
 	rsp_msg.card_list = player.card_list
