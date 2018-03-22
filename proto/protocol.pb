@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-‘
+¢ 
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -110,15 +110,17 @@ SitDownReq
 pos (Rpos"6
 
 SitDownRsp(
-result (2.msg.user.ResultRresult"®
+result (2.msg.user.ResultRresult"Þ
 
 GameCmdReq
 command (	Rcommand
-card (Rcard 
-demandPoint (RdemandPoint
-nowType (RnowType
-nowValue (RnowValue
-cardList (RcardList"6
+card (Rcard
+confirm (Rconfirm
+alloc (Ralloc 
+demandPoint (RdemandPoint
+nowType (RnowType
+nowValue (RnowValue
+cardList (RcardList"6
 
 GameCmdRsp(
 result (2.msg.user.ResultRresult"Z
@@ -176,9 +178,9 @@ card_stack (2.msg.user.GPItemR	cardStack"X
 NoticeGangCard
 user_id (	RuserId
 user_pos (RuserPos$
-item (2.msg.user.GPItemRitem"t
-PushPlayerOperatorState%
-operator_state (	RoperatorState
+item (2.msg.user.GPItemRitem"r
+PushPlayerOperatorState#
+operator_list (	RoperatorList
 user_pos (RuserPos
 user_id (	RuserId"Š
 Item
@@ -211,7 +213,11 @@ card_stack	 (2.msg.user.GPItemR	cardStack"´
 room_setting (2.msg.user.RoomSettingRroomSetting
 	card_list (RcardList.
 players (2.msg.user.PlayerInfoRplayers
-operator (	Roperator"%
+operator (	Roperator"
+NoticeOtherDistoryRoom"G
+NoticeOtherRefuse
+user_id (	RuserId
+user_pos (RuserPos"%
 HandleError
 result (	Rresult"+
 UpdateResource
@@ -239,7 +245,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-–
+Â
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ª
 C2S
 
@@ -256,7 +262,7 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"”
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"À
 S2C
 
 session_id (R	sessionId
@@ -286,7 +292,9 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 push_player_operator_stateªœ (2!.msg.user.PushPlayerOperatorStateRpushPlayerOperatorStateD
 notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver_
 notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnectG
-push_all_room_infoÝ (2.msg.user.PushAllRoomInfoRpushAllRoomInfoC
+push_all_room_infoÝ (2.msg.user.PushAllRoomInfoRpushAllRoomInfo\
+notice_other_distroy_roomÞ (2 .msg.user.NoticeOtherDistoryRoomRnoticeOtherDistroyRoomL
+notice_other_refuseß (2.msg.user.NoticeOtherRefuseRnoticeOtherRefuseC
 update_resource±ê (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state²ê (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_error‘¿ (2.msg.user.HandleErrorRhandleErrorA
