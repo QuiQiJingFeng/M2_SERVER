@@ -16,7 +16,6 @@ function user:init()
     event_handler:on("sit_down",utils:handler(self,user.sitDown))
     event_handler:on("finish_deal",utils:handler(self,user.finishDeal))
     event_handler:on("leave_room",utils:handler(self,user.leaveRoom))
-    event_handler:on("go_back_room",utils:handler(self,user.goBackRoom))
     event_handler:on("game_cmd",utils:handler(self,user.gameCmd))
 end
 

@@ -53,17 +53,6 @@ function CMD.leaveRoom(data)
 	return "success"
 end
 
-function CMD.goBackRoom(data)
-	local user_id = data.user_id
-	local room_id = data.room_id
-	local room = RoomPool:getRoomByRoomID(room_id)
-	if not room then
-		return "not_exist_room",{}
-	end
-
-	local data = skynet.call(room:get("service_id"),"lua","goBackRoom",data)
-end
-
 --坐下
 function CMD.sitDown(data)
 	local room_id = data.room_id
