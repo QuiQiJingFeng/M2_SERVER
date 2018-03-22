@@ -33,11 +33,13 @@ local function pushEvent(fd,event_name,event_msg)
    print("msg = ",cjson.encode(event_msg))
     local agent_item = AGENT_MAP[fd]
     if agent_item then
+        print("service_id = ",agent_item.service_id)
         skynet.call(agent_item.service_id,"lua","push",event_name,event_msg)
     end
 end
 
 local function disconnect_fd(fd)
+    print("disconnect=====")
     local agent_item = AGENT_MAP[fd]
     AGENT_MAP[fd] = nil
     skynet.call(GATE_SERVICE,"lua","kick",fd)
@@ -267,15 +269,19 @@ end
 
 --更新资源数量
 function CMD.updateResource(user_id,resource_name,num)
-    local agent_item = USER_MAP[user_id]
+    print("FYD====>updateResource ",user_id,resource_name,num)
+    local fd = USER_MAP[user_id]
+    local agent_item = AGENT_MAP[fd]
     if not agent_item then
+        print("1111")
         --如果玩家不在线,则直接修改redis中的数据
         local info_key = "info:"..user_id
         local property = Map.new(USER_DB,info_key)
         property.gold_num = property.gold_num + num
         return property.gold_num
     else
-        return skynet.call(agent_item.service_id,updateResource,resource_name,num)
+        print("22222")
+        return skynet.call(agent_item.service_id,"lua","updateResource",resource_name,num)
     end
 
 end

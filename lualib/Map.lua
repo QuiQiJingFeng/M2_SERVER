@@ -68,6 +68,35 @@ function Map.new(db_index,hash_key)
         return values
     end
 
+    function property:getValuesForKey(...)
+        local info = {}
+        local args = {...}
+        for _,key in ipairs(args) do
+            print("KEY   KEYK   ",key)
+            info[key] = values[key]
+        end
+        return info
+    end
+
+    function property:reloadFromDb()
+        local temp = skynet.call(".redis_center","lua","HGETALL",db_index,hash_key)
+        local data = loadFromKey(temp)
+
+        for k,v in pairs(data) do
+            local value = string.sub (v,1,-6)
+            local format = string.sub(v,-5)
+            if format == "__M__" then
+                values[k] = cjson.decode(value)
+            elseif format == "__F__" then
+                values[k] = tonumber(value)
+            elseif format == "__B__" then
+                values[k] = value == "true" and true or false
+            elseif format == "__S__" then
+                values[k] = value
+            end
+        end
+    end
+
     setmetatable(property,meta)
     meta.__index = values
     meta.__newindex = function(table,key,v)

@@ -215,7 +215,8 @@ end
 --FYD
 function Room:refreshRoomInfo()
 	local rsp_msg = {}
-	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score")
+	self.property:reloadFromDb()
+	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","cur_score")
 	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	rsp_msg.room_setting = room_setting
 	rsp_msg.room_id = self:get("room_id")
@@ -274,16 +275,14 @@ function Room:distroy()
 	local cost = round * constant["ROUND_COST"]
 	local pay_type = self:get("pay_type")
 	if cur_round >= 1 and pay_type == constant.PAY_TYPE.WINNER_COST then
-		--因为用到了score这个变量,而这个变量只在game里面更改,所有通过redis来获取
-		--要比直接获取传递方便
-		local info = Map.new("room:"..room_id)
-		local players = info.players
+		--因为用到了score这个变量,而这个变量只在game里面更改 所以这里需要重新拉取下redis
+		self.property:reloadFromDb()
+		local players = self:get("players")
 		table.sort(players,function(a,b) 
 				return a.score > b.score
 			end)
-		local target = players[1]
-		local gold_num = cluster.call(target.node_name,".agent_manager","updateResource",target.user_id,"gold_num",-1*cost)
-		local player = self:getPlayerByUserId(target.user_id)
+		local player = players[1]
+		local gold_num = cluster.call(player.node_name,".agent_manager","updateResource",player.user_id,"gold_num",-1*cost)
 		player.gold_num = gold_num
 		self:refreshRoomInfo()
 	end

@@ -210,7 +210,7 @@ function CMD.gameCMD(data)
 		room:set("fd",fd)
 	end
 	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
-	
+
 	return result
 end
 
@@ -221,20 +221,20 @@ function CMD.gameOver(room_id)
 	local round = room:get("round")
 	if cur_round == 1 then
 		local cost = round * constant["ROUND_COST"]
-		local pay_type = self.room:get("pay_type")
+		local pay_type = room:get("pay_type")
 		if pay_type == constant.PAY_TYPE.ROOM_OWNER_COST then
 			--房主出资
-			local owner_id = self.room:get("owner_id")
-			local player = self.room:getPlayerByUserId(owner_id)
+			local owner_id = room:get("owner_id")
+			local player = room:getPlayerByUserId(owner_id)
 			--更新玩家的金币数量
 			local gold_num = cluster.call(player.node_name,".agent_manager","updateResource",owner_id,"gold_num",-1*cost)
 			player.gold_num = gold_num
 			room:refreshRoomInfo()
 		elseif pay_type == constant.PAY_TYPE.AMORTIZED_COST then
 			--平摊
-			local seat_num = self.room:get("seat_num")
+			local seat_num = room:get("seat_num")
 			local per_cost = math.floor(cost / seat_num)
-			local players = self.room:get("players")
+			local players = room:get("players")
 			for i,obj in ipairs(players) do
 				local gold_num = cluster.call(obj.node_name,".agent_manager","updateResource",obj.user_id,"gold_num",-1*per_cost)
 				obj.gold_num = gold_num
@@ -248,7 +248,7 @@ function CMD.gameOver(room_id)
 	for i,player in ipairs(players) do
 		player.is_sit = nil
 	end
-	self:set("sit_down_num",0)
+	room:set("sit_down_num",0)
 end
 
 --玩家断开连接 游戏服根据返回结果决定是否清掉玩家身上绑定的房间ID

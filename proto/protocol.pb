@@ -69,13 +69,13 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-¢ 
+¿ 
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
 	gang_type (RgangType
 from (Rfrom
-type (Rtype"×
+type (Rtype"ô
 UserInfo
 user_id (	RuserId
 	user_name (	RuserName
@@ -84,7 +84,8 @@ login_type (2.msg.login.LoginTypeR	loginType
 user_pos (RuserPos
 is_sit (RisSit
 gold_num (RgoldNum
-score (Rscore"…
+score (Rscore
+	cur_score	 (RcurScore"…
 RoomSetting
 	game_type (RgameType
 round (Rround

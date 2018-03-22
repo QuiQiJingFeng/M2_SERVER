@@ -56,9 +56,7 @@ end
 
 --游戏结束
 function game:gameOver(player,over_type,operate,tempResult)
-	--通知room_manager服务游戏结束
-	skynet.call(".room_manager","lua","gameOver",self.room:get("room_id"))
-
+	
 	local award_list = {}
 	if over_type == GAME_OVER_TYPE.NORMAL then
 		local players = self.room:get("players")
@@ -156,12 +154,18 @@ function game:gameOver(player,over_type,operate,tempResult)
 		--更新玩家的总积分
 		for i,obj in ipairs(players) do
 			obj.score = obj.score + obj.cur_score
+			print("cur_score = ",obj.cur_score)
+			print("obj.score = ",obj.score)
 		end
 	end
 
 	local info = self.room:getPlayerInfo("user_id","score","card_list","user_pos","cur_score")
 	local data = {over_type = over_type,players = info,award_list=award_list}
 	self.room:broadcastAllPlayers("notice_game_over",data)
+
+	self.room:set("players",self.room:get("players"))
+	--通知room_manager服务游戏结束
+	skynet.send(".room_manager","lua","gameOver",self.room:get("room_id"))
 end
 
 --检测流局
@@ -768,13 +772,6 @@ function game:gameCMD(data)
 
 	local player = self.room:getPlayerByUserId(user_id)
 	local result = func(game,player,data)
-	if result == "success" then
-		self.room:set("players",self.room:get("players"))
-		self.room:set("waite_operators",self.waite_operators)
-		self.room:set("card_list",self.card_list)
-		self.room:set("cur_play_user",self.cur_play_user)
-		self.room:set("cur_play_card",self.cur_play_card)
-	end
 	return result
 end
 
