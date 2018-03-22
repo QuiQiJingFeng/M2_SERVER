@@ -73,6 +73,8 @@ function Room:init(room_id,node_name,service_id)
 	info.can_distory = false
 	info.waite_operators = {}                   --等待玩家操作的列表
 	info.card_list = {}                         --房间的牌池
+	info.cur_play_user = nil                    --当前的出牌人
+	info.cur_play_card = nil                    --当前出的牌
 	self.property:updateValues(info)
 end
 

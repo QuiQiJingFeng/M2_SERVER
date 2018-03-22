@@ -607,6 +607,7 @@ game["GANG"] = function(self,player,data)
 			end
 		end
 	end
+
 	--记录下已经杠的牌
 	table.insert(player.card_stack,obj)
 
@@ -771,6 +772,8 @@ function game:gameCMD(data)
 		self.room:set("players",room:get("players"))
 		self.room:set("waite_operators",self.waite_operators)
 		self.room:set("card_list",self.card_list)
+		self.room:set("cur_play_user",self.cur_play_user)
+		self.room:set("cur_play_card",self.cur_play_card)
 	end
 	return result
 end
