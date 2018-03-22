@@ -444,13 +444,16 @@ game["PLAY_CARD"] = function(self,player,data)
 			break
 		end
 	end
-	
+	local operator_list = {}
 	if num == 2 then  --碰
-		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_state="PENG",user_pos=check_player.user_pos})
+		table.insert(operator_list,"PENG")
+		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_list=operator_list,user_pos=check_player.user_pos})
 		self.waite_operators[check_player.user_pos] = "WAIT_PENG"
 	elseif num == 3 then  --杠
-		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_state="GANG",user_pos=check_player.user_pos})
-		self.waite_operators[check_player.user_pos] = "WAIT_GANG"
+		table.insert(operator_list,"PENG")
+		table.insert(operator_list,"GANG")
+		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_list=operator_list,user_pos=check_player.user_pos})
+		self.waite_operators[check_player.user_pos] = "WAIT_GANG_WAIT_PENG"
 	else
 		next_pos = user_pos + 1
 		if next_pos > self.room:get("seat_num") then
@@ -473,7 +476,7 @@ end
 
 --碰
 game["PENG"] = function(self,player,data)
-	if self.waite_operators[player.user_pos] ~= "WAIT_PENG" then
+	if not string.find(self.waite_operators[player.user_pos],"WAIT_PENG") then
 		return "invaild_operator"
 	end
 	self.waite_operators[player.user_pos] = nil
@@ -575,9 +578,10 @@ game["GANG"] = function(self,player,data)
 	end
 
 	local operate = self.waite_operators[player.user_pos]
+
 	--如果操作是等待出牌,并且可以进行暗杠,则可以进去
 	if operate == "WAIT_PLAY_CARD" and gang_type == GANG_TYPE.AN_GANG then
-	elseif operate ~= "WAIT_PENG" then
+	elseif not string.find(self.waite_operators[player.user_pos],"WAIT_GANG") then
 		return "invaild_operator"
 	end
 
@@ -697,7 +701,7 @@ end
 --胡牌
 game["HU"] = function(self,player,data)
 	local operate = self.waite_operators[player.user_pos]
-	if not (operate == "WAIT_PLAY_CARD" or operate == "WAIT_HU") then
+	if not (operate == "WAIT_PLAY_CARD" or string.find(self.waite_operators[player.user_pos],"WAIT_HU")) then
 		return "invaild_operator"
 	end
 
@@ -765,6 +769,8 @@ function game:gameCMD(data)
 	local result = func(game,player,data)
 	if result == "success" then
 		self.room:set("players",room:get("players"))
+		self.room:set("waite_operators",self.waite_operators)
+		self.room:set("card_list",self.card_list)
 	end
 	return result
 end

@@ -71,6 +71,8 @@ function Room:init(room_id,node_name,service_id)
 	info.expire_time = skynet.time() + 30*60	--房间的解散时间
 	info.confirm_map = {}                       --同意解散房间的人员字典
 	info.can_distory = false
+	info.waite_operators = {}                   --等待玩家操作的列表
+	info.card_list = {}                         --房间的牌池
 	self.property:updateValues(info)
 end
 
@@ -269,15 +271,18 @@ function Room:distroy()
 	--赢家出资,如果在房间要释放掉的时候仍然没有结算,则积分高的掏钱
 	local cost = round * constant["ROUND_COST"]
 	local pay_type = self:get("pay_type")
-	if pay_type == constant.PAY_TYPE.WINNER_COST then
-		local players = self:get("players")
+	if cur_round >= 1 and pay_type == constant.PAY_TYPE.WINNER_COST then
+		--因为用到了score这个变量,而这个变量只在game里面更改,所有通过redis来获取
+		--要比直接获取传递方便
+		local info = Map.new("room:"..room_id)
+		local players = info.players
 		table.sort(players,function(a,b) 
 				return a.score > b.score
 			end)
-
 		local target = players[1]
 		local gold_num = cluster.call(target.node_name,".agent_manager","updateResource",target.user_id,"gold_num",-1*cost)
-		target.gold_num = gold_num
+		local player = self:getPlayerByUserId(target.user_id)
+		player.gold_num = gold_num
 		self:refreshRoomInfo()
 	end
 
