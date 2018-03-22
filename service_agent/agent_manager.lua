@@ -218,7 +218,7 @@ function SOCKET.data(fd, data)
                 --绑定fd 之前先检查之前的fd是否存在并且断开
                 if USER_MAP[user_id] then
                     --通知客户端被顶号
-                    pushEvent(fd,"handle_error",{result="other_player_login"})
+                    pushEvent(USER_MAP[user_id],"handle_error",{result="other_player_login"})
                     disconnect_fd(USER_MAP[user_id])
                 end
                 USER_MAP[user_id] = fd
