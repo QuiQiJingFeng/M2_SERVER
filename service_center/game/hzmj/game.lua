@@ -769,7 +769,7 @@ function game:gameCMD(data)
 	local player = self.room:getPlayerByUserId(user_id)
 	local result = func(game,player,data)
 	if result == "success" then
-		self.room:set("players",room:get("players"))
+		self.room:set("players",self.room:get("players"))
 		self.room:set("waite_operators",self.waite_operators)
 		self.room:set("card_list",self.card_list)
 		self.room:set("cur_play_user",self.cur_play_user)
