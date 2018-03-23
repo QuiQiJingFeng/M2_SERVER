@@ -70,8 +70,7 @@ function Room:init(room_id,node_name,service_id)
 	info.state = ROOM_STATE.GAME_PREPARE		--房间的状态
 	info.expire_time = skynet.time() + 30*60	--房间的解散时间
 	info.confirm_map = {}                       --同意解散房间的人员字典
-	info.can_distory = false
-	info.waite_operators = {}                   --等待玩家操作的列表
+	info.can_distory = false					--是否可以销毁房间
 	info.card_list = {}                         --房间的牌池
 	info.cur_play_user = nil                    --当前的出牌人
 	info.cur_play_card = nil                    --当前出的牌

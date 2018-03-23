@@ -273,9 +273,9 @@ function game:init(room_id,gtype)
 	self.hi_point = self.other_setting[4]
 	--一码不中当全中
 	self.convert = self.other_setting[5]
+
 	--等待玩家操作的列表
-	self.room:set("waite_operators",{})
-	self.waite_operators = self.room:get("waite_operators")
+	self.waite_operators = {}
 	--当前出牌人
 	self.cur_play_user = nil
 	--当前出的牌
@@ -304,16 +304,14 @@ function game:start()
 	end
 
 	local players = self.room:get("players")
-	--2、发牌
-	local deal_num = 13 --红中麻将发13张牌
-	local players = self.room:get("players")
-
 	local random_nums = {}
-	for i=1,2 do
+	for i = 1,2 do
 		local num = math.random(1,6)
 		table.insert(random_nums,num)
 	end
 
+	--2、发牌
+	local deal_num = 13 --红中麻将发13张牌
 	for index=1,self.room:get("sit_down_num") do
 		local cards = {}
 		for j=1,deal_num do
@@ -842,10 +840,6 @@ function game:gameCMD(data)
 
 	local player = self.room:getPlayerByUserId(user_id)
 	local result = func(game,player,data)
-	if result == "success" then
-		--更新操作列表
-		self.room:set("waite_operators",self.waite_operators)
-	end
 	return result
 end
 
