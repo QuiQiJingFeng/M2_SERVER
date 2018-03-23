@@ -7,12 +7,11 @@ local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
 local CMD = {}
 local game
 
-function CMD.startGame(room_info)
-	print("FYD++++++START GAME")
-	local game_type = RECOVER_GAME_TYPE[room_info.game_type]
-	game = require(string.lower(game_type)..".".."game")
+function CMD.startGame(room_id,game_type)
+	local gtype = RECOVER_GAME_TYPE[game_type]
+	game = require(string.lower(gtype)..".".."game")
 	--初始化
-	game:init(room_info)
+	game:init(room_id,gtype)
 	game:start()
 end
 

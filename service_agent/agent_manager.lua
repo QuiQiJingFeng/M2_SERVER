@@ -289,8 +289,12 @@ end
 function CMD.debugProto(user_id,proto_name,proto_msg)
     local fd = USER_MAP[user_id]
     local agent_item = AGENT_MAP[fd]
-    local service_id = agent_item.service_id
-    return skynet.call(agent_item.service_id, "lua", "debugProto", proto_name,proto_msg)
+    if agent_item then
+        local service_id = agent_item.service_id
+        return skynet.call(agent_item.service_id, "lua", "debugProto", proto_name,proto_msg)
+    else
+        return "not_user"
+    end
 end
 
 skynet.start(function()

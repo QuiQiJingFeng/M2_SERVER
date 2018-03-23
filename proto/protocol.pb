@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Ý!
+ý!
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -194,10 +194,12 @@ card_stack (2.msg.user.GPItemR	cardStack"X
 	over_type (RoverType(
 players (2.msg.user.ItemRplayers
 
-award_list (R	awardList"M
-NoticePlayersDisconnect
+award_list (R	awardList"m
+NoticePlayerConnectState
 user_id (	RuserId
-user_pos (RuserPos"Š
+user_pos (RuserPos
+
+is_connect (R	isConnect"Š
 
 PlayerInfo
 user_id (	RuserId
@@ -252,7 +254,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-‡
+‹
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ª
 C2S
 
@@ -269,7 +271,7 @@ createRoom3
 
 leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_down”N (2.msg.user.SitDownReqRsitDown0
-game_cmd•N (2.msg.user.GameCmdReqRgameCmd"…
+game_cmd•N (2.msg.user.GameCmdReqRgameCmd"‰
 S2C
 
 session_id (R	sessionId
@@ -297,8 +299,8 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_peng_card¨œ (2.msg.user.NoticePengCardRnoticePengCardD
 notice_gang_card©œ (2.msg.user.NoticeGangCardRnoticeGangCard`
 push_player_operator_stateªœ (2!.msg.user.PushPlayerOperatorStateRpushPlayerOperatorStateD
-notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOver_
-notice_players_disconnect¬œ (2!.msg.user.NoticePlayersDisconnectRnoticePlayersDisconnectG
+notice_game_over«œ (2.msg.user.NoticeGameOverRnoticeGameOverc
+notice_player_connect_state¬œ (2".msg.user.NoticePlayerConnectStateRnoticePlayerConnectStateG
 push_all_room_infoÝ (2.msg.user.PushAllRoomInfoRpushAllRoomInfo\
 notice_other_distroy_roomÞ (2 .msg.user.NoticeOtherDistoryRoomRnoticeOtherDistroyRoomL
 notice_other_refuseß (2.msg.user.NoticeOtherRefuseRnoticeOtherRefuseC

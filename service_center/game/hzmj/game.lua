@@ -1,12 +1,17 @@
 local skynet = require "skynet"
 local Room = require "Room"
 local constant = require "constant"
+local log = require "skynet.log"
 local ALL_CARDS = constant.ALL_CARDS
 local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
 local GAME_CMD = constant.GAME_CMD
 local NET_RESULT = constant.NET_RESULT
 local ZJ_MODE = constant.ZJ_MODE
 local PUSH_EVENT = constant.PUSH_EVENT
+
+local PAY_TYPE = constant.PAY_TYPE
+local ROUND_COST = constant.ROUND_COST
+
 local cjson = require "cjson"
 local judgecard = require "hzmj.judgecard"
 
@@ -54,13 +59,20 @@ function game:fisherYates()
 	end
 end
 
---游戏结束
-function game:gameOver(player,over_type,operate,tempResult)
-	
+function game:safeClusterCall(node_name,service_name,func,...)
+    local result,rsp = xpcall(cluster.call,debug.traceback,node_name,service_name,func,...)
+    if not result then
+    	log.warning("cluster call faild")
+    end
+    return rsp
+end
+
+--更新玩家的积分
+function game:updatePlayerScore(over_type,operate,tempResult)
+	local players = room:get("players")
 	local award_list = {}
 	if over_type == GAME_OVER_TYPE.NORMAL then
-		local players = self.room:get("players")
-		local count = self.room:get("seat_num") - 1
+		local count = seat_num - 1
 		--如果是自摸胡  赢每个玩家2*底分
 		if operate == "WAIT_PLAY_CARD" then
 			player.cur_score = player.cur_score + self.base_score * 2 * count
@@ -154,18 +166,76 @@ function game:gameOver(player,over_type,operate,tempResult)
 		--更新玩家的总积分
 		for i,obj in ipairs(players) do
 			obj.score = obj.score + obj.cur_score
-			print("cur_score = ",obj.cur_score)
-			print("obj.score = ",obj.score)
 		end
 	end
 
 	local info = self.room:getPlayerInfo("user_id","score","card_list","user_pos","cur_score")
 	local data = {over_type = over_type,players = info,award_list=award_list}
 	self.room:broadcastAllPlayers("notice_game_over",data)
+end
+
+--更新玩家的金币
+function game:updatePlayerGold()
+	local room = self.room
+	local players = room:get("players")
+	local cur_round = room:get("cur_round")
+	local round = room:get("round")
+	local seat_num = room:get("seat_num")
+
+	--花费
+	local cost = round * ROUND_COST
+	--出资类型
+	local pay_type = room:get("pay_type")
+	--第一局结束 结算(房主出资/平摊出资)的金币
+	if cur_round == 1 then
+		--房主出资
+		if pay_type == PAY_TYPE.ROOM_OWNER_COST then
+			local owner_id = room:get("owner_id")
+			--更新玩家的金币数量
+			local gold_num = self:safeClusterCall(owner.node_name,".agent_manager","updateResource",owner_id,"gold_num",-1*cost)
+			local owner = room:getPlayerByUserId(owner_id)
+			--如果owner不存在 有可能不在游戏中(比如:有人开房给别人玩,自己不玩)
+			if owner then
+				owner.gold_num = gold_num
+				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=gold_num}}
+				--通知房间中的所有人,有人的金币发生了变化
+				room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+			end
+		--平摊
+		elseif pay_type == PAY_TYPE.AMORTIZED_COST then
+			--每个人的花费
+			local per_cost = math.floor(cost / seat_num)
+			local gold_list = {}
+			for i,obj in ipairs(players) do
+				local gold_num = self:safeClusterCall(obj.node_name,".agent_manager","updateResource",obj.user_id,"gold_num",-1*per_cost)
+				obj.gold_num = gold_num
+				local info = {user_id = obj.user_id,user_pos = obj.user_pos,gold_num = gold_num}
+				table.insert(gold_list,info)
+			end
+			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+		end   
+	end
+end
+
+--游戏结束
+function game:gameOver(player,over_type,operate,tempResult)
+
+	local room = self.room
+	local players = room:get("players")
+	local cur_round = room:get("cur_round")
+	local round = room:get("round")
+	local seat_num = room:get("seat_num")
+	local room_id = room:get("room_id")
+
+	--计算金币并通知玩家更新
+	self:updatePlayerGold()
+
+	--计算积分并通知玩家
+	self:updatePlayerScore(over_type,operate,tempResult)
 
 	self.room:set("players",self.room:get("players"))
-	--通知room_manager服务游戏结束
-	skynet.send(".room_manager","lua","gameOver",self.room:get("room_id"))
+
+	skynet.call(".room_manager","lua","gameOver",room_id)
 end
 
 --检测流局
@@ -179,13 +249,13 @@ function game:flowBureau()
 end
 
 --游戏初始化
-function game:init(room_info)
-	self.room = Room.rebuild(room_info)
-	local game_type = room_info.game_type
+function game:init(room_id,gtype)
+
+	self.room = Room.recover("room:"..room_id)
+
 	--填充牌库
 	self.card_list = {}
-	local game_name = RECOVER_GAME_TYPE[game_type]
-	for _,value in ipairs(ALL_CARDS[game_name]) do
+	for _,value in ipairs(ALL_CARDS[gtype]) do
 		table.insert(self.card_list,value)
 	end
 
@@ -203,8 +273,9 @@ function game:init(room_info)
 	self.hi_point = self.other_setting[4]
 	--一码不中当全中
 	self.convert = self.other_setting[5]
-
-	self.waite_operators = {}
+	--等待玩家操作的列表
+	self.room:set("waite_operators",{})
+	self.waite_operators = self.room:get("waite_operators")
 	--当前出牌人
 	self.cur_play_user = nil
 	--当前出的牌
@@ -738,27 +809,19 @@ end
 
 --返回房间
 game["BACK_ROOM"] = function(self,player,data)
-
+	player.fd = data.fd
 	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
-	
-	--push_all_room_info
-	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack")
-	for i,obj in ipairs(players_info) do
-		for _,info in ipairs(data.gold_list) do
-			if info.user_id == obj.user_id then
-				obj.gold_num = info.gold_num
-			end
-		end
-	end
+
+	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack","gold_num")
 	local rsp_msg = {}
 	rsp_msg.room_setting = room_setting
 	rsp_msg.card_list = player.card_list
 	rsp_msg.players = players_info
 	rsp_msg.operator = self.waite_operators[player.user_pos]
 
-	self.room:set("fd",data.fd)
-
 	self.room:sendMsgToPlyaer(player,"push_all_room_info",rsp_msg)
+
+	self.room:noticePlayerConnectState(player,true)
 	return "success"
 end
 
@@ -779,6 +842,10 @@ function game:gameCMD(data)
 
 	local player = self.room:getPlayerByUserId(user_id)
 	local result = func(game,player,data)
+	if result == "success" then
+		--更新操作列表
+		self.room:set("waite_operators",self.waite_operators)
+	end
 	return result
 end
 

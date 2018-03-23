@@ -75,6 +75,7 @@ function Room:init(room_id,node_name,service_id)
 	info.card_list = {}                         --房间的牌池
 	info.cur_play_user = nil                    --当前的出牌人
 	info.cur_play_card = nil                    --当前出的牌
+	info.is_first_over = false
 	self.property:updateValues(info)
 end
 
@@ -283,19 +284,33 @@ function Room:distroy()
 	--赢家出资,如果在房间要释放掉的时候仍然没有结算,则积分高的掏钱
 	local cost = round * constant["ROUND_COST"]
 	local pay_type = self:get("pay_type")
-	if cur_round >= 1 and pay_type == constant.PAY_TYPE.WINNER_COST then
-		--因为用到了score这个变量,而这个变量只在game里面更改 所以这里需要重新拉取下redis
-		self.property:reloadFromDb()
-		local players = self:get("players")
-		table.sort(players,function(a,b) 
-				return a.score > b.score
-			end)
-		local player = players[1]
-		local gold_num = cluster.call(player.node_name,".agent_manager","updateResource",player.user_id,"gold_num",-1*cost)
-		player.gold_num = gold_num
-		
-		local gold_list = {{user_id = player.user_id,user_pos = player.user_pos,gold_num=gold_num}}
-		self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+	--检查大赢家的金币结算,如果打完第一局之后解散则需要掏钱
+	local is_first_over = room:get("is_first_over")
+	if cur_round >= 1 and is_first_over then
+		--赢家出资 积分高的掏钱
+		if pay_type == PAY_TYPE.WINNER_COST then
+			table.sort(players,function(a,b) 
+					return a.score > b.score
+				end)
+			local player = players[1]
+			local max_score = player.score
+			--大赢家列表
+			local winners = {}
+			for i,obj in ipairs(players) do
+				if obj.score == max_score then
+					table.insert(winners,obj)
+				end
+			end
+			local gold_list = { }
+			local per_cost = math.floor(cost/#winners)
+			for _,obj in ipairs(winners) do
+				local gold_num = self:safeClusterCall(obj.node_name,".agent_manager","updateResource",obj.user_id,"gold_num",-1*per_cost)
+				obj.gold_num = gold_num
+				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=gold_num}
+				table.insert(gold_list,info)
+			end
+			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+		end
 	end
 
 	local room_key = "room:"..room_id

@@ -114,8 +114,8 @@ function CMD.sitDown(data)
 			--推送到客户端,本房间的状态发生改变
 			room:broadcastAllPlayers("update_room_state",{room_id=room:get("room_id"),state = room:get("state")})
 		end
-		
-		skynet.call(room:get("service_id"),"lua","startGame",room:getAllInfo())
+		local game_type = room:get("game_type")
+		skynet.call(room:get("service_id"),"lua","startGame",room_id,game_type)
 	end
 
 	return "success"
@@ -159,7 +159,7 @@ function CMD.gameCMD(data)
 			end
 			local num = 0
 			for k,v in pairs(confirm_map) do
-				num = num + 1 --TODO
+				num = num + 1
 			end
 
 			--如果所有人都点了确定
@@ -191,84 +191,35 @@ function CMD.gameCMD(data)
 	if command == "BACK_ROOM" then
 		local fd = data.fd
 		local player = room:getPlayerByUserId(user_id)
-		--重新返回房间将标记重置
-		player.disconnect = false
-		room:set("players",room:get("players"))
 		local room = RoomPool:getRoomByRoomID(room_id)
 		--如果是返回房间,需要更新fd
-		room:set("fd",fd)
+		player.fd = fd
 
-		data.gold_list = room:getPlayerInfo("user_id","gold_num")
 	end
 	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
 
 	return result
 end
 
---游戏结束 更新房间的状态
+--游戏结束 某局结束
 function CMD.gameOver(room_id)
 	local room = RoomPool:getRoomByRoomID(room_id)
-	local cur_round = room:get("cur_round")
-	local round = room:get("round")
-	if cur_round == 1 then
-		local cost = round * constant["ROUND_COST"]
-		local pay_type = room:get("pay_type")
-		if pay_type == constant.PAY_TYPE.ROOM_OWNER_COST then
-			--房主出资
-			local owner_id = room:get("owner_id")
-			local player = room:getPlayerByUserId(owner_id)
-			--更新玩家的金币数量
-			local gold_num = cluster.call(player.node_name,".agent_manager","updateResource",owner_id,"gold_num",-1*cost)
-			player.gold_num = gold_num
 
-			local gold_list = {{user_id = owner_id,user_pos = player.user_pos,gold_num=gold_num}}
-			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
-			
-		elseif pay_type == constant.PAY_TYPE.AMORTIZED_COST then
-			--平摊
-			local seat_num = room:get("seat_num")
-			local per_cost = math.floor(cost / seat_num)
-			local players = room:get("players")
-			local gold_list = {}
-			for i,obj in ipairs(players) do
-				local info = {user_id = obj.user_id,user_pos=obj.user_pos}
-				local gold_num = cluster.call(obj.node_name,".agent_manager","updateResource",obj.user_id,"gold_num",-1*per_cost)
-				obj.gold_num = gold_num
-				info.gold_num = gold_num
-				table.insert(gold_list,info)
-			end
-			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
-		end   
-	end
-
-	room:set("state",constant.ROOM_STATE.GAME_OVER)
 	local players = room:get("players")
 	for i,player in ipairs(players) do
 		player.is_sit = nil
 	end
 	room:set("sit_down_num",0)
-end
 
---玩家断开连接 游戏服根据返回结果决定是否清掉玩家身上绑定的房间ID
---如果玩家在游戏没有开始的时候掉线,则离开房间
-function CMD.userDisconnect(data)
-    local room_id = data.room_id
-    local user_id = data.user_id
-
-	local room = RoomPool:getRoomByRoomID(room_id)
-	if not room then
-		return true
+	local cur_round = room:get("cur_round")
+	local round = room:get("round")
+	if cur_round == 1 then
+		--用一个字段标记第一局是否完毕,用来在房间解散的时候结算大赢家的金币
+		room:set("is_first_over",true)
 	end
-
-	local player = room:getPlayerByUserId(user_id)
-	if not player then
-		return true
+	if cur_round == round then
+		RoomPool:distroyRoom(room_id)
 	end
-	player.disconnect = true
-	room:set("players",room:get("players"))
-	room:noticePlayerDisconnect(player)
-
-	return true
 end
 
 skynet.start(function()
