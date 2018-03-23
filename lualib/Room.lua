@@ -237,9 +237,19 @@ function Room:pushEvent(node_name,player,msg_name,msg_data)
 	end
 
 	if result == "NOT_ONLINE" then
-		log.infof("玩家[%s]不在线",user_id)
-		player.disconnect = true
-		self:noticePlayerDisconnect(player)
+		--如果之前是连接状态,则标记为断开状态并且通知其他人有人断开
+		if not player.disconnect then
+			player.disconnect = true
+			self:noticePlayerConnectState(player,false)
+			log.infof("玩家[%s]断开连接",user_id)
+		end
+	else
+		--如果之前是断开状态,则标记为连接状态,并且通知其他人,该玩家已经连上
+		if player.disconnect then
+			player.disconnect = false
+			self:noticePlayerConnectState(player,true)
+			log.infof("玩家[%s]重新连接成功",user_id)
+		end
 	end
 end
 
@@ -258,8 +268,8 @@ function Room:sendMsgToPlyaer(player,msg_name,msg_data)
 end
 
 --通知有玩家掉线
-function Room:noticePlayerDisconnect(player)
-	self:broadcastAllPlayers("notice_players_disconnect",{user_id=player.user_id,user_pos=player.user_pos})
+function Room:noticePlayerConnectState(player,is_connect)
+	self:broadcastAllPlayers("notice_player_connect_state",{user_id=player.user_id,user_pos=player.user_pos,is_connect=is_connect})
 end
 
 --清理房间
