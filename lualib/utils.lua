@@ -1,3 +1,7 @@
+local crypt = require "skynet.crypt"
+local hmac = crypt.hmac_sha1
+local base64encode = crypt.base64encode
+local httpc = require("http.httpc")
 local utils = {}
 
 local CONVERT = { [10] = "A", [11] = "B", [12] = "C", [13] = "D", [14] = "E", [15] = "F", [16] = "G",
@@ -45,6 +49,62 @@ function utils:mergeToTable(tb1,tb2)
     for k,v in pairs(tb2) do
         tb1[k] = v
     end
+end
+
+function utils:getFileName(path)
+    return string.match(path, ".+/([^/]*%.%w+)$")
+end
+
+--下载文件
+--http://lsjgame.oss-cn-hongkong.aliyuncs.com/HotUpdate/index.html
+
+--上传文件
+--example: bucket_name=lsjgame path=HotUpdate/test2.txt content为字符串或者字节流
+--host = "lsjgame.oss-cn-hongkong.aliyuncs.com"
+function utils:ossRequest(host,bucket_name,path,content)
+    local access_key_id = "LTAI7X831y2ygKTf"
+    local access_key_secret = "kyhihlZhrneTp856smDukaBEbY2foU"
+ 
+    local method = "PUT"
+    --要转换成0时区的时间,而不是本地时间
+    local now = os.date("!%a, %d %b %Y %X GMT") 
+    --经过base64的md5码
+    local md5code = base64encode(md5.sum(content))
+    --传输的大小
+    local length = #content
+    --二进制流方式传输
+    local content_type = "application/octet-stream"
+    --文件名
+    local file_name = self:getFileName(path)
+    --校验字符串
+    local signature = base64encode(hmac(access_key_secret,
+                method .. "\n"
+                .. md5code .. "\n"
+                ..content_type.."\n" 
+                .. now .. "\n"
+                ..string.format("/%s/%s",bucket_name,path)
+                ))
+
+    local authorization = "OSS " .. access_key_id .. ":" .. signature
+
+    
+    local headers = {
+                        ["authorization"] = authorization,
+                        ["date"] = now,
+                        ["content-type"] = content_type,
+                        ["content-length"] = length,
+                        ["content-disposition"] = file_name,
+                        ["content-md5"] = md5code
+                    }
+
+    local status ,body = httpc.request(method,host, "/"..path, nil, headers, content)
+    if tonumber(status) ~= 200 then
+        print("error:=>status=",status)
+        print("msg=\n",body)
+    else
+        print("---------put success-------")
+    end
+    return status,body
 end
 
 return utils
