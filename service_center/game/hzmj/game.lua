@@ -521,12 +521,12 @@ game["PLAY_CARD"] = function(self,player,data)
 	local operator_list = {}
 	if num == 2 then  --碰
 		table.insert(operator_list,"PENG")
-		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_list=operator_list,user_pos=check_player.user_pos})
+		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_list=operator_list,user_pos=check_player.user_pos,card=data.card})
 		self.waite_operators[check_player.user_pos] = "WAIT_PENG"
 	elseif num == 3 then  --杠
 		table.insert(operator_list,"PENG")
 		table.insert(operator_list,"GANG")
-		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_list=operator_list,user_pos=check_player.user_pos})
+		self.room:sendMsgToPlyaer(check_player,"push_player_operator_state",{operator_list=operator_list,user_pos=check_player.user_pos,card=data.card})
 		self.waite_operators[check_player.user_pos] = "WAIT_GANG_WAIT_PENG"
 	else
 		next_pos = user_pos + 1

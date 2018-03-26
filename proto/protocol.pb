@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ý!
+’"
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -179,11 +179,12 @@ card_stack (2.msg.user.GPItemR	cardStack"X
 NoticeGangCard
 user_id (	RuserId
 user_pos (RuserPos$
-item (2.msg.user.GPItemRitem"r
+item (2.msg.user.GPItemRitem"†
 PushPlayerOperatorState#
 operator_list (	RoperatorList
 user_pos (RuserPos
-user_id (	RuserId"Š
+user_id (	RuserId
+card (Rcard"Š
 Item
 user_id (	RuserId
 user_pos (RuserPos
