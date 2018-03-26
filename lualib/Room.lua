@@ -284,7 +284,7 @@ function Room:distroy()
 	local cost = round * constant["ROUND_COST"]
 	local pay_type = self:get("pay_type")
 	--检查大赢家的金币结算,如果打完第一局之后解散则需要掏钱
-	local is_first_over = room:get("is_first_over")
+	local is_first_over = self:get("is_first_over")
 	if cur_round >= 1 and is_first_over then
 		--赢家出资 积分高的掏钱
 		if pay_type == PAY_TYPE.WINNER_COST then
