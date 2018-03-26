@@ -2,6 +2,7 @@ local skynet = require "skynet"
 local Room = require "Room"
 local constant = require "constant"
 local log = require "skynet.log"
+local utils = require "utils"
 local ALL_CARDS = constant.ALL_CARDS
 local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
 local GAME_CMD = constant.GAME_CMD
@@ -300,7 +301,7 @@ function game:start()
 	self:updateZpos()
 
 	if constant["DEBUG"] then
-		self.card_list = require("hzmj/conf")
+		utils:mergeToTable(self.card_list,require("hzmj/conf"))
 	end
 
 	local players = self.room:get("players")
