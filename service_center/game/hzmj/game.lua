@@ -809,7 +809,7 @@ end
 --返回房间
 game["BACK_ROOM"] = function(self,player,data)
 	player.fd = data.fd
-	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
+	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting","cur_round")
 
 	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack","gold_num")
 	local rsp_msg = {}
