@@ -137,8 +137,16 @@ function user:joinRoom(req_msg)
 	if result == "success" then
 		user_info:set("room_id",room_id)
 		local room_ids = user_info:get("room_ids")
-		table.insert(room_ids,room_id)
-		user_info:set("room_ids",room_ids)
+		local has = nil
+		for i,id in ipairs(room_ids) do
+			if id == room_id then
+				has = true
+			end
+		end
+		if not has then
+			table.insert(room_ids,room_id)
+			user_info:set("room_ids",room_ids)
+		end
 	end
 
 	return "join_room",{result=result}
