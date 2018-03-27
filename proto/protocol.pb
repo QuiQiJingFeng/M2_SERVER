@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-’"
+¯"
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -85,7 +85,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 is_sit (RisSit
 gold_num (RgoldNum
 score (Rscore
-	cur_score	 (RcurScore"…
+	cur_score	 (RcurScore"¢
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -94,7 +94,8 @@ login_type (2.msg.login.LoginTypeR	loginType
 is_friend_room (RisFriendRoom"
 is_open_voice (RisOpenVoice
 is_open_gps (R	isOpenGps#
-other_setting (RotherSetting"I
+other_setting (RotherSetting
+	cur_round	 (RcurRound"I
 CreateRoomReq8
 room_setting (2.msg.user.RoomSettingRroomSetting"9
 CreateRoomRsp(
