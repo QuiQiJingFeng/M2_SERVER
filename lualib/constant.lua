@@ -170,6 +170,6 @@ constant["ACCOUNT_DB"] = 0
 constant["ROUND_COST"] = 5
 
 --自动同意时间
-constant["AUTO_CONFIRM"] = 20*60* 100
+constant["AUTO_CONFIRM"] = 2*60* 100
 
 return constant
