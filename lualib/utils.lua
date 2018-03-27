@@ -1,6 +1,7 @@
 local crypt = require "skynet.crypt"
 local hmac = crypt.hmac_sha1
 local base64encode = crypt.base64encode
+local md5 = require "md5"
 local httpc = require("http.httpc")
 local utils = {}
 
@@ -97,14 +98,16 @@ function utils:ossRequest(host,bucket_name,path,content)
                         ["content-md5"] = md5code
                     }
 
-    local status ,body = httpc.request(method,host, "/"..path, nil, headers, content)
+    local status ,body = httpc.request(method,host, "/"..path, nil, headers, content,true)
     if tonumber(status) ~= 200 then
         print("error:=>status=",status)
         print("msg=\n",body)
-    else
-        print("---------put success-------")
+        return false
     end
-    return status,body
+
+    print("---------put success-------")
+
+    return true
 end
 
 return utils

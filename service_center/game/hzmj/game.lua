@@ -2,6 +2,7 @@ local skynet = require "skynet"
 local Room = require "Room"
 local constant = require "constant"
 local log = require "skynet.log"
+local cluster = require "skynet.cluster"
 local utils = require "utils"
 local ALL_CARDS = constant.ALL_CARDS
 local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
@@ -69,8 +70,9 @@ function game:safeClusterCall(node_name,service_name,func,...)
 end
 
 --更新玩家的积分
-function game:updatePlayerScore(over_type,operate,tempResult)
-	local players = room:get("players")
+function game:updatePlayerScore(player,over_type,operate,tempResult)
+	local players = self.room:get("players")
+	local seat_num = self.room:get("seat_num")
 	local award_list = {}
 	if over_type == GAME_OVER_TYPE.NORMAL then
 		local count = seat_num - 1
@@ -192,9 +194,9 @@ function game:updatePlayerGold()
 		--房主出资
 		if pay_type == PAY_TYPE.ROOM_OWNER_COST then
 			local owner_id = room:get("owner_id")
+			local owner = room:getPlayerByUserId(owner_id)
 			--更新玩家的金币数量
 			local gold_num = self:safeClusterCall(owner.node_name,".agent_manager","updateResource",owner_id,"gold_num",-1*cost)
-			local owner = room:getPlayerByUserId(owner_id)
 			--如果owner不存在 有可能不在游戏中(比如:有人开房给别人玩,自己不玩)
 			if owner then
 				owner.gold_num = gold_num
@@ -232,7 +234,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 	self:updatePlayerGold()
 
 	--计算积分并通知玩家
-	self:updatePlayerScore(over_type,operate,tempResult)
+	self:updatePlayerScore(player,over_type,operate,tempResult)
 
 	self.room:set("players",self.room:get("players"))
 

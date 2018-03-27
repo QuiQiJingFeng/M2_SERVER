@@ -15,6 +15,7 @@ local OPERATER = constant["OPERATER"]
 local PUSH_EVENT = constant["PUSH_EVENT"]
 local ROOM_STATE = constant.ROOM_STATE
 local RECOVER_GAME_TYPE = constant["RECOVER_GAME_TYPE"]
+local PAY_TYPE = constant.PAY_TYPE
 local REDIS_DB = 2
 local Room = {}
 
@@ -75,6 +76,7 @@ function Room:init(room_id,node_name,service_id)
 	info.cur_play_user = nil                    --当前的出牌人
 	info.cur_play_card = nil                    --当前出的牌
 	info.is_first_over = false
+	info.replay_id = nil                        --当前战局ID
 	self.property:updateValues(info)
 end
 
@@ -226,6 +228,10 @@ end
 
 --像游戏服推送消息
 function Room:pushEvent(node_name,player,msg_name,msg_data)
+	local replay_id = self:get("replay_id")
+	if replay_id then
+		skynet.send(".replay_cord","lua","insertRecord",replay_id,cjson.encode({[msg_name]=msg_data}))
+	end
 	local fd = player.fd
 	local user_id = player.user_id
 	if player.disconnect then

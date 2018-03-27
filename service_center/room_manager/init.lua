@@ -3,6 +3,7 @@ local log = require "skynet.log"
 require "skynet.manager"
 local cluster = require "skynet.cluster"
 local sharedata = require "skynet.sharedata"
+local cjson = require "cjson"
 local constant,config_manager,Room,RoomPool
 
 local CMD = {}
@@ -111,9 +112,16 @@ function CMD.sitDown(data)
 			--第一回合开始后,重新设定房间的释放时间
 			local now = skynet.time()
 			room:set("expire_time",now + 12*60*60)
-			--推送到客户端,本房间的状态发生改变
-			room:broadcastAllPlayers("update_room_state",{room_id=room:get("room_id"),state = room:get("state")})
 		end
+
+
+
+		local replay_id = skynet.call(".redis_center","lua","INCRBY",1,"replay_id_generator", 1)
+		room:set("replay_id",replay_id)
+
+		local msg = cjson.encode(room.property:getValues())
+		skynet.send(".replay_cord","lua","insertRecord",replay_id,msg)
+
 		local game_type = room:get("game_type")
 		skynet.call(room:get("service_id"),"lua","startGame",room_id,game_type)
 	end
@@ -204,6 +212,8 @@ end
 --游戏结束 某局结束
 function CMD.gameOver(room_id)
 	local room = RoomPool:getRoomByRoomID(room_id)
+	local replay_id = room:get("replay_id")
+
 
 	local players = room:get("players")
 	for i,player in ipairs(players) do
@@ -220,6 +230,8 @@ function CMD.gameOver(room_id)
 	if cur_round == round then
 		RoomPool:distroyRoom(room_id)
 	end
+
+	skynet.send(".replay_cord","lua","saveRecord",replay_id)
 end
 
 skynet.start(function()
@@ -231,6 +243,10 @@ skynet.start(function()
         print("CMD = ",cmd)
         print(cjson.encode(args))
         print("\n")
+        if not f then
+        	log.error("ERROR: not command")
+        	return
+        end
 
         skynet.ret(skynet.pack(f(...)))
     end)

@@ -8,7 +8,7 @@ local table = table
 
 local httpc = {}
 
-local function request(fd, method, host, url, recvheader, header, content)
+local function request(fd, method, host, url, recvheader, header, content,skip_length)
 	local read = socket.readfunc(fd)
 	local write = socket.writefunc(fd)
 	local header_content = ""
@@ -16,6 +16,7 @@ local function request(fd, method, host, url, recvheader, header, content)
 		if not header.host then
 			header.host = host
 		end
+
 		for k,v in pairs(header) do
 			header_content = string.format("%s%s:%s\r\n", header_content, k, v)
 		end
@@ -24,7 +25,13 @@ local function request(fd, method, host, url, recvheader, header, content)
 	end
 
 	if content then
-		local data = string.format("%s %s HTTP/1.1\r\n%scontent-length:%d\r\n\r\n", method, url, header_content, #content)
+		local data 
+		if skip_length then
+			data = string.format("%s %s HTTP/1.1\r\n%s\r\n", method, url, header_content)
+		else
+			data = string.format("%s %s HTTP/1.1\r\n%scontent-length:%d\r\n\r\n", method, url, header_content, #content)
+		end
+		print("FYD===>\n",data)
 		write(data)
 		write(content)
 	else
@@ -88,7 +95,7 @@ function httpc.dns(server,port)
 	dns.server(server,port)
 end
 
-function httpc.request(method, host, url, recvheader, header, content)
+function httpc.request(method, host, url, recvheader, header, content,skip_length)
 	local timeout = httpc.timeout	-- get httpc.timeout before any blocked api
 	local hostname, port = host:match"([^:]+):?(%d*)$"
 	if port == "" then
@@ -110,7 +117,7 @@ function httpc.request(method, host, url, recvheader, header, content)
 			end
 		end)
 	end
-	local ok , statuscode, body = pcall(request, fd,method, host, url, recvheader, header, content)
+	local ok , statuscode, body = pcall(request, fd,method, host, url, recvheader, header, content,skip_length)
 	finish = true
 	if fd then	-- may close by skynet.timeout
 		socket.close(fd)
