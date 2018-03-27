@@ -318,6 +318,10 @@ function Room:distroy()
 		end
 	end
 
+	if cur_round >= 1 and is_first_over then
+		skynet.call(service_id,"lua","gameCMD",{command="DISTROY_ROOM"})
+	end
+
 	local room_key = "room:"..room_id
 	--删除掉房间信息
 	skynet.call(".redis_center","lua","DEL",REDIS_DB,room_key)

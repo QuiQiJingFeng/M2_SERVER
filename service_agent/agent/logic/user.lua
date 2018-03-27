@@ -17,8 +17,9 @@ function user:init()
     event_handler:on("finish_deal",utils:handler(self,user.finishDeal))
     event_handler:on("leave_room",utils:handler(self,user.leaveRoom))
     event_handler:on("game_cmd",utils:handler(self,user.gameCmd))
+    event_handler:on("distroy_room",utils:handler(self,user.distroyRoom))
+    event_handler:on("confirm_distroy_room",utils:handler(self,user.confirmDistroyRoom))
 end
-
 
 --创建房间
 function user:createRoom(req_msg)
@@ -180,8 +181,6 @@ function user:leaveRoom()
 	return "leave_room",{result = result}
 end
 
-
-
 --入座
 function user:sitDown(req_msg)
 	local room_id = user_info:get("room_id")
@@ -206,6 +205,50 @@ function user:sitDown(req_msg)
 	end
 
 	return "sit_down",{result = result}
+end
+
+--申请解散房间
+function user:distroyRoom(req_msg)
+	local room_id = req_msg.room_id
+	if not room_id then  
+		return "distroy_room",{result = "paramater_error"}
+	end
+	local room_info = Map.new(ROOM_DB,"room:"..room_id)
+	--如果房间已经被解散
+	if not room_info.room_id then
+		user_info:set("room_id",nil)
+		return "distroy_room",{result = "not_exist_room"}
+	end
+	local center_node = room_info.node_name
+	req_msg.user_id = user_info:get("user_id")
+	local success,result = user_info:safeClusterCall(center_node,".room_manager","distroyRoom",req_msg)
+	if not success then
+		return "distroy_room",{result = "server_error"}
+	end
+
+	return "distroy_room",{result=result}
+end
+--是否同意解散房间
+function user:confirmDistroyRoom(req_msg)
+	local room_id = user_info:get("room_id")
+	if not room_id then  
+		return "confirm_distory_room",{result = "not_in_room"}
+	end
+	local room_info = Map.new(ROOM_DB,"room:"..room_id)
+	--如果房间已经被解散
+	if not room_info.room_id then
+		user_info:set("room_id",nil)
+		return "confirm_distory_room",{result = "not_exist_room"}
+	end
+	local center_node = room_info.node_name
+	req_msg.user_id = user_info:get("user_id")
+	req_msg.room_id = room_id
+	local success,result = user_info:safeClusterCall(center_node,".room_manager","confirmDistroyRoom",req_msg)
+	if not success then
+		return "confirm_distory_room",{result = "server_error"}
+	end
+
+	return "confirm_distory_room",{result=result}
 end
 
 --游戏命令 

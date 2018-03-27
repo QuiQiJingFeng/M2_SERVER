@@ -69,7 +69,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Ø"
+»$
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -112,13 +112,11 @@ SitDownReq
 pos (Rpos"6
 
 SitDownRsp(
-result (2.msg.user.ResultRresult"ﬁ
+result (2.msg.user.ResultRresult"Æ
 
 GameCmdReq
 command (	Rcommand
-card (Rcard
-confirm (Rconfirm
-alloc (Ralloc 
+card (Rcard 
 demandPoint (RdemandPoint
 nowType (RnowType
 nowValue (RnowValue
@@ -224,15 +222,28 @@ card_stack	 (2.msg.user.GPItemR	cardStack"¥
 user_pos (RuserPos
 gold_num (RgoldNum"A
 UpdateCostGold/
-	gold_list (2.msg.user.GoldItemRgoldList"
-NoticeOtherDistoryRoom"G
-NoticeOtherRefuse
-user_id (	RuserId
-user_pos (RuserPos"%
+	gold_list (2.msg.user.GoldItemRgoldList"%
 HandleError
 result (	Rresult"+
 UpdateResource
-gold_num (RgoldNum* 
+gold_num (RgoldNum"=
+DistroyRoomReq
+room_id (RroomId
+type (Rtype"(
+DistroyRoomRsp
+result (	Rresult"
+NoticeOtherDistoryRoom"1
+ConfirmDistroyRoomReq
+confirm (Rconfirm"/
+ConfirmDistroyRoomRsp
+result (	Rresult"`
+NoticeOtherRefuse
+user_id (	RuserId
+room_id (RroomId
+user_pos (RuserPos"F
+NoticePlayerDistroyRoom
+room_id (RroomId
+type (Rtype*Â
 Result
 success
 paramater_error
@@ -251,13 +262,14 @@ auth_faild
 pos_has_player
 already_sit
 invaild_operator
-no_support_command*5
+no_support_command
+no_permission_distroy*5
 GangType
 AN_GANG
 	MING_GANG
 	PENG_GANG
-ã
-protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"™
+ê
+protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"º
 C2S
 
 session_id (R	sessionId3
@@ -273,7 +285,9 @@ createRoom3
 
 leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_downîN (2.msg.user.SitDownReqRsitDown0
-game_cmdïN (2.msg.user.GameCmdReqRgameCmd"â
+game_cmdïN (2.msg.user.GameCmdReqRgameCmd<
+distroy_roomñN (2.msg.user.DistroyRoomReqRdistroyRoomR
+confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoom"¸
 S2C
 
 session_id (R	sessionId
@@ -290,7 +304,9 @@ createRoom3
 
 leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 sit_downîN (2.msg.user.SitDownRspRsitDown0
-game_cmdïN (2.msg.user.GameCmdRspRgameCmd>
+game_cmdïN (2.msg.user.GameCmdRspRgameCmd<
+distroy_roomñN (2.msg.user.DistroyRoomRspRdistroyRoomR
+confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomRspRconfirmDistroyRoom>
 push_user_info°ú (2.msg.user.PushUserInfoRpushUserInfoG
 refresh_room_info¢ú (2.msg.user.RefreshRoomInfoRrefreshRoomInfo;
 push_sit_down£ú (2.msg.user.PushSitDownRpushSitDown1
@@ -303,10 +319,11 @@ leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 push_player_operator_state™ú (2!.msg.user.PushPlayerOperatorStateRpushPlayerOperatorStateD
 notice_game_over´ú (2.msg.user.NoticeGameOverRnoticeGameOverc
 notice_player_connect_state¨ú (2".msg.user.NoticePlayerConnectStateRnoticePlayerConnectStateG
-push_all_room_info› (2.msg.user.PushAllRoomInfoRpushAllRoomInfo\
-notice_other_distroy_roomﬁ (2 .msg.user.NoticeOtherDistoryRoomRnoticeOtherDistroyRoomL
-notice_other_refuseﬂ (2.msg.user.NoticeOtherRefuseRnoticeOtherRefuseC
-update_cost_gold‡ (2.msg.user.UpdateCostGoldRupdateCostGoldC
+push_all_room_info› (2.msg.user.PushAllRoomInfoRpushAllRoomInfoC
+update_cost_goldﬁ (2.msg.user.UpdateCostGoldRupdateCostGold\
+notice_other_distroy_roomﬂ (2 .msg.user.NoticeOtherDistoryRoomRnoticeOtherDistroyRoomL
+notice_other_refuse‡ (2.msg.user.NoticeOtherRefuseRnoticeOtherRefuse_
+notice_player_distroy_room· (2!.msg.user.NoticePlayerDistroyRoomRnoticePlayerDistroyRoomC
 update_resource±Í (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state≤Í (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_errorëø (2.msg.user.HandleErrorRhandleErrorA

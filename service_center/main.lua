@@ -19,11 +19,15 @@ skynet.start(function()
 
 	skynet.uniqueservice("static_data")
 
+	skynet.uniqueservice("replay_cord")
 	skynet.uniqueservice("redis_center")
 
 	skynet.uniqueservice("room_manager") 
 
 	bindCluster()
+
+
+	
 
 	skynet.exit()
 end)

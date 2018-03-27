@@ -1,6 +1,7 @@
 local skynet = require "skynet"
 local sharedata = require "skynet.sharedata"
 local server_info = sharedata.query("server_info")
+local constant = require "constant"
 local Room = require "Room"
 local utils = require "utils"
 local REDIS_DB = 2
@@ -44,7 +45,7 @@ function RoomPool:checkExpireRoom()
 	end
 
 	for _,room_id in ipairs(cord_list) do
-		self:distroyRoom(room_id)
+		self:distroyRoom(room_id,constant.DISTORY_TYPE.EXPIRE_TIME)
 	end
 
 	--每隔1分钟检查一下失效的房间
@@ -63,13 +64,15 @@ function RoomPool:recovery()
     end
 end
 
---销毁房间
-function RoomPool:distroyRoom(room_id)
+--销毁房间 type 1、房间的过期时间到了 
+function RoomPool:distroyRoom(room_id,type)
 	local room = self.used_map[room_id]
+	room:broadcastAllPlayers("notice_player_distroy_room",{room_id=room_id,type=type})
+
 	self.used_map[room_id] = nil
 	table.insert(self.unused_list,room)
 	room:distroy()
-	skynet.call(".redis_center","lua","SREM",REDIS_DB,"room_pool",room_id)
+	skynet.send(".redis_center","lua","SREM",REDIS_DB,"room_pool",room_id)
 end
 
 function RoomPool:getRoomByRoomID(room_id)

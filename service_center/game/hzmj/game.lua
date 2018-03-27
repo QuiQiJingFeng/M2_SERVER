@@ -178,7 +178,10 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 end
 
 --更新玩家的金币
-function game:updatePlayerGold()
+function game:updatePlayerGold(over_type)
+	if over_type == GAME_OVER_TYPE.DISTROY_ROOM then
+		return 
+	end
 	local room = self.room
 	local players = room:get("players")
 	local cur_round = room:get("cur_round")
@@ -231,7 +234,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 	local room_id = room:get("room_id")
 
 	--计算金币并通知玩家更新
-	self:updatePlayerGold()
+	self:updatePlayerGold(over_type)
 
 	--计算积分并通知玩家
 	self:updatePlayerScore(player,over_type,operate,tempResult)

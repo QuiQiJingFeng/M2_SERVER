@@ -160,11 +160,16 @@ constant["NET_RESULT"] = {
 constant["DEBUG"] = true
 
 
-
+constant["DISTORY_TYPE"] = {
+	ALL_AGREE = 1,     -- 申请并所有人都同意
+	OWNER_DISTROY = 2, -- 房主解散
+	EXPIRE_TIME = 3,   -- 房间的时间过期
+}
 
 constant["ACCOUNT_DB"] = 0
 constant["ROUND_COST"] = 5
 
-
+--自动同意时间
+constant["AUTO_CONFIRM"] = 20*60* 100
 
 return constant

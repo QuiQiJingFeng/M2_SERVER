@@ -129,6 +129,116 @@ function CMD.sitDown(data)
 	return "success"
 end
 
+--申请解散房间  
+function CMD.distroyRoom(data)
+	local user_id = data.user_id
+	local room_id = data.room_id
+	local room = RoomPool:getRoomByRoomID(room_id)
+	local owner_id = room:get("owner_id")
+	local type = data.type
+	--如果是房主解散房间
+	if type == constant.DISTORY_TYPE.OWNER_DISTROY then
+		if room:get("state") ~= constant.ROOM_STATE.GAME_PREPARE or user_id ~= owner_id then
+			return "no_permission_distroy"
+		else
+			RoomPool:distroyRoom(room_id,constant.DISTORY_TYPE.OWNER_DISTROY)
+			return "success"
+		end
+	end
+	--如果是申请解散房间
+	if type ==  constant.DISTORY_TYPE.ALL_AGREE then
+		room:set("can_distory",true)
+		local players = room:get("players")
+		local confirm_map = room:get("confirm_map")
+		for i,obj in ipairs(players) do
+			confirm_map[obj.user_id] = false
+		end
+		confirm_map[user_id] = true
+
+		room:set("confirm_map",confirm_map)
+		
+		for i,player in ipairs(players) do
+			if user_id ~= player.user_id then --通知其他人有人申请解散房间
+				room:sendMsgToPlyaer(player,"notice_other_distroy_room",{})
+			end
+		end
+
+		--2分钟 如果玩家仍然没有同意,则自动同意
+		skynet.timeout(constant["AUTO_CONFIRM"],function() 
+				local room = RoomPool:getRoomByRoomID(room_id)
+				if not room then
+					print("这个房间已经被解散了")
+					--如果这个房间已经被解散了
+					return 
+				end
+				local can_distory = room:get("can_distory")
+				if not can_distory then
+					print("这个房间已经被人拒绝解散了")
+					--如果这个房间已经被人拒绝解散了
+					return 
+				end
+				--遍历所有没有同意的玩家,让他同意
+				local confirm_map = room:get("confirm_map")
+				for user_id,confirm in pairs(confirm_map) do
+					if not confirm then
+						CMD.confirmDistroyRoom({user_id=user_id,room_id=room_id,confirm=true})
+					end
+				end
+			end)
+		return "success"
+	end
+	return "paramater_error"
+end
+
+function CMD.confirmDistroyRoom(data)
+	local user_id = data.user_id
+	local room_id = data.room_id
+	local room = RoomPool:getRoomByRoomID(room_id)
+	local confirm = data.confirm
+	local can_distory = room:get("can_distory")
+	if not can_distory then
+		--非法的请求
+		return "no_support_command"
+	end
+	local players = room:get("players")
+	if confirm then
+		local confirm_map = room:get("confirm_map")
+		confirm_map[user_id] = true
+		room:set("confirm_map",confirm_map)
+		--当前玩家的数量
+		local player_num = 0
+		for i,player in ipairs(players) do
+			if not player.disconnect then
+				player_num = player_num + 1
+			end
+		end
+		local num = 0
+		for k,v in pairs(confirm_map) do
+			num = num + 1
+		end
+
+		--如果所有人都点了确定
+		if num == player_num then
+			room:set("can_distory",false)
+			RoomPool:distroyRoom(room_id,constant.DISTORY_TYPE.ALL_AGREE)
+		end
+	else
+		local s_player = room:getPlayerByUserId(user_id)
+
+		--如果有人不同意,则通知其他人 谁不同意
+		local players = room:get("players")
+		for i,player in ipairs(players) do
+			if user_id ~= player.user_id then
+				room:sendMsgToPlyaer(player,"notice_other_refuse",{user_id=s_player.user_id,user_pos=s_player.user_pos})
+			end
+		end
+		room:set("confirm_map",{})
+		room:set("can_distory",false)
+	end
+
+	return "success"
+end
+
 --FYD
 --游戏指令
 function CMD.gameCMD(data)
@@ -136,66 +246,6 @@ function CMD.gameCMD(data)
 	local room_id = data.room_id
 	local room = RoomPool:getRoomByRoomID(room_id)
 	local command = data.command
-	if command == "DISTROY_ROOM" then
-		local players = room:get("players")
-		if data.alloc then
-			room:set("can_distory",true)
-			local confirm_map = room:get("confirm_map")
-			confirm_map[user_id] = true
-			room:set("confirm_map",confirm_map)
-			for i,player in ipairs(players) do
-				if user_id ~= player.user_id then --通知其他人有人申请解散房间
-					room:sendMsgToPlyaer(player,"notice_other_distroy_room",{})
-				end
-			end
-			return "success"
-		end
-		local can_distory = room:get("can_distory")
-		if not can_distory then
-			return "success"
-		end
-		if data.confirm then
-			local confirm_map = room:get("confirm_map")
-			confirm_map[user_id] = true
-			room:set("confirm_map",confirm_map)
-			--当前玩家的数量
-			local player_num = 0
-			for i,player in ipairs(players) do
-				if not player.disconnect then
-					player_num = player_num + 1
-				end
-			end
-			local num = 0
-			for k,v in pairs(confirm_map) do
-				num = num + 1
-			end
-
-			--如果所有人都点了确定
-			if num == player_num then
-				local cur_round = room:get("cur_round")
-				--如果回合数大于1 则发送结算界面
-				if cur_round >= 1 then
-					skynet.call(room:get("service_id"),"lua","gameCMD",data)
-				end
-				room:set("can_distory",false)
-				RoomPool:distroyRoom(room_id)
-			end
-		else
-			local s_player = room:getPlayerByUserId(user_id)
-
-			--如果有人不同意,则通知其他人 谁不同意
-			local players = room:get("players")
-			for i,player in ipairs(players) do
-				if user_id ~= player.user_id then
-					room:sendMsgToPlyaer(player,"notice_other_refuse",{user_id=s_player.user_id,user_pos=s_player.user_pos})
-				end
-			end
-			room:set("confirm_map",{})
-			room:set("can_distory",false)
-		end
-		return "success"
-	end
-
 	if command == "BACK_ROOM" then
 		local fd = data.fd
 		local player = room:getPlayerByUserId(user_id)
