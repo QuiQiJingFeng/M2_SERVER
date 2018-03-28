@@ -19,6 +19,17 @@ function user:init()
     event_handler:on("game_cmd",utils:handler(self,user.gameCmd))
     event_handler:on("distroy_room",utils:handler(self,user.distroyRoom))
     event_handler:on("confirm_distroy_room",utils:handler(self,user.confirmDistroyRoom))
+    event_handler:on("get_my_room_list",utils:handler(self,user.getMyRoomList))
+
+end
+
+--获取房间列表的信息
+function user:getMyRoomList(req_msg)
+	local push_msg = {}
+	push_msg.room_list = user_info:caculateRoomList()
+    push_msg.room_id = user_info:get("room_id")
+ 	push_msg.result = "success"
+ 	return "get_my_room_list",push_msg
 end
 
 --创建房间
@@ -53,7 +64,21 @@ function user:createRoom(req_msg)
 		if not room_info.room_id then
 			user_info:set("room_id",nil)
 		else
-			return "create_room",{result = "current_in_game"}
+			local is_sit = false
+			local players = room_info.players
+			for _,player in ipairs(players) do
+				if player.user_id == user_info:get("user_id") then
+					is_sit = player.is_sit
+				end
+			end
+			print("is_sit=======>>",is_sit)
+			if room_info.state == constant.ROOM_STATE.GAME_PREPARE and not is_sit then
+				user_info:set("room_id",nil)
+			elseif room_info.state == constant.ROOM_STATE.GAME_PREPARE and is_sit then
+				return "create_room",{result = "current_in_room"}
+			else
+				return "create_room",{result = "current_in_game"}
+			end
 		end
 	end
 
@@ -94,7 +119,20 @@ function user:joinRoom(req_msg)
 		if not room_info.room_id then
 			user_info:set("room_id",nil)
 		else
-			return "join_room",{result = "current_in_game"}
+			local is_sit = false
+			local players = room_info.players
+			for _,player in ipairs(players) do
+				if player.user_id == user_info:get("user_id") then
+					is_sit = player.is_sit
+				end
+			end
+			if room_info.state == constant.ROOM_STATE.GAME_PREPARE and not is_sit then
+				user_info:set("room_id",nil)
+			elseif room_info.state == constant.ROOM_STATE.GAME_PREPARE and is_sit then
+				return "join_room",{result = "current_in_room"}
+			else
+				return "join_room",{result = "current_in_game"}
+			end
 		end
 	end
 

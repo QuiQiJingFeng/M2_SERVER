@@ -252,6 +252,7 @@ function SOCKET.data(fd, data)
             if result then
                 rsp_msg.result = "success"
                 rsp_msg.reconnect_token = new_token
+                skynet.call(agent_item.service_id, "lua", "reconnect")
             end
 
             send(fd, { ["session_id"] = data_content.session_id, ["reconnect"] = rsp_msg }, secret)

@@ -39,7 +39,11 @@ function user_info:init(info)
     if not property.gold_num then
         property.gold_num = 100
     end
+    self:pushUserInfo()
+    
+end
 
+function user_info:caculateRoomList()
     local will_remove = {}
     local room_list = {}
     for _,room_id in ipairs(property.room_ids) do
@@ -48,7 +52,19 @@ function user_info:init(info)
         local room_info = Map.new(ROOM_DB,room_key)
         if not room_info.room_id then
             table.insert(will_remove,room_id)
+            local id = self:get("room_id")
+            if id == room_id then
+                self:set("room_id",nil)
+            end
         else
+            if room_info.players then
+                for _,player in ipairs(room_info.players) do
+                    if player.user_id == self:get("user_id") then
+                        info.is_sit = player.is_sit
+                    end
+                end
+            end
+
             info.room_id = room_id
             info.expire_time = room_info.expire_time
             info.state = room_info.state
@@ -65,14 +81,17 @@ function user_info:init(info)
         end
     end
     self:set("room_ids",property.room_ids)
+    return room_list
+end
 
-    --登陆成功之后,推送玩家信息
-    data.gold_num = property.gold_num
-    local push_msg = data
+function user_info:pushUserInfo()
+    local room_list = self:caculateRoomList()
+
+    local push_msg = self:getPropertys("user_ip","user_id","user_name","user_pic","gold_num")
     --TODO FYD 玩家创建的房间信息列表,房间的状态,所以在房间信息中应该以用户ID 做为key
     push_msg.room_list = room_list
+    push_msg.room_id = self:get("room_id")
     --玩家登陆之后，检查下room_id对应的房间是否解散,如果解散则删掉room_id
-    -- FYD
     self:send({[PUSH_EVENT.PUSH_USER_INFO] = push_msg})
 end
 
@@ -121,7 +140,25 @@ function user_info:clear()
 end
 
 function user_info:disconnect()
-   event_handler:emit("leave_room")
+    local room_id = self:get("room_id")
+    if not room_id then
+        return
+    end
+    local room_info = Map.new(ROOM_DB,"room:"..room_id)
+    --如果房间已经被解散
+    if not room_info.room_id then
+        self:set("room_id",nil)
+        return 
+    end
+    local center_node = room_info.node_name
+
+    local user_id = self:get("user_id")
+    local data = {room_id = room_id,user_id = user_id}
+    local success,result = self:safeClusterCall(center_node,".room_manager","disconnect",data)
+
+    if not success then
+        print("----call failed----")
+    end
 end
 
 function user_info:send(data_content)

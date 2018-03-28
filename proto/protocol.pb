@@ -40,7 +40,7 @@ userDemand"M
 nowType (RnowType
 nowValue (RnowValue
 cardList (RcardList
-‘
+˝
 msg/login.proto	msg.login"ß
 LoginReq3
 
@@ -57,9 +57,10 @@ login_type (2.msg.login.LoginTypeR	loginType
 result (2.msg.login.ResultRresult"=
 ReconnectReq
 user_id (	RuserId
-token (	Rtoken"9
+token (	Rtoken"b
 ReconnectRsp)
-result (2.msg.login.ResultRresult*&
+result (2.msg.login.ResultRresult'
+reconnect_token (	RreconnectToken*&
 	LoginType
 
 weixin
@@ -69,7 +70,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-»$
+™&
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -123,19 +124,26 @@ GameCmdReq
 cardList (RcardList"6
 
 GameCmdRsp(
-result (2.msg.user.ResultRresult"Z
+result (2.msg.user.ResultRresult"q
 RoomItem
 room_id (RroomId
 state (Rstate
 expire_time (R
-expireTime"ƒ
+expireTime
+is_sit (RisSit"
+GetMyRoomListReq"Ü
+GetMyRoomListRsp(
+result (2.msg.user.ResultRresult/
+	room_list (2.msg.user.RoomItemRroomList
+room_id (RroomId"›
 PushUserInfo
 user_id (	RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
 gold_num (RgoldNum/
-	room_list (2.msg.user.RoomItemRroomList"@
+	room_list (2.msg.user.RoomItemRroomList
+room_id (RroomId"@
 UpdateRoomState
 room_id (RroomId
 state (Rstate"í
@@ -243,7 +251,7 @@ card_stack	 (2.msg.user.GPItemR	cardStack"¥
 user_pos (RuserPos"F
 NoticePlayerDistroyRoom
 room_id (RroomId
-type (Rtype*Â
+type (Rtype*˙
 Result
 success
 paramater_error
@@ -263,13 +271,14 @@ auth_faild
 already_sit
 invaild_operator
 no_support_command
-no_permission_distroy*5
+no_permission_distroy
+current_in_room*5
 GangType
 AN_GANG
 	MING_GANG
 	PENG_GANG
-ê
-protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"º
+ú
+protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"Ç
 C2S
 
 session_id (R	sessionId3
@@ -287,7 +296,8 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 sit_downîN (2.msg.user.SitDownReqRsitDown0
 game_cmdïN (2.msg.user.GameCmdReqRgameCmd<
 distroy_roomñN (2.msg.user.DistroyRoomReqRdistroyRoomR
-confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoom"¸
+confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
+get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"¬
 S2C
 
 session_id (R	sessionId
@@ -306,7 +316,8 @@ leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 sit_downîN (2.msg.user.SitDownRspRsitDown0
 game_cmdïN (2.msg.user.GameCmdRspRgameCmd<
 distroy_roomñN (2.msg.user.DistroyRoomRspRdistroyRoomR
-confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomRspRconfirmDistroyRoom>
+confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomRspRconfirmDistroyRoomD
+get_my_room_listòN (2.msg.user.GetMyRoomListRspRgetMyRoomList>
 push_user_info°ú (2.msg.user.PushUserInfoRpushUserInfoG
 refresh_room_info¢ú (2.msg.user.RefreshRoomInfoRrefreshRoomInfo;
 push_sit_down£ú (2.msg.user.PushSitDownRpushSitDown1

@@ -30,6 +30,11 @@ function CMD.disconnect()
     user_info:disconnect()
 end
 
+--重新连接
+function CMD.reconnect()
+    user_info:pushUserInfo()
+end
+
 -- 请求处理函数
 function CMD.request(data_content)
     -- 获取数据包中的各项值

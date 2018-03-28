@@ -34,8 +34,22 @@ function CMD.joinRoom(data)
  
 	return constant.NET_RESULT.SUCCESS
 end
+--断开连接的话,检测是否已经坐下,如果已经坐下则不处理,否则踢出房间
+function CMD.disconnect(data)
+	local room_id = data.room_id
+	local user_id = data.user_id
+	local room = RoomPool:getRoomByRoomID(room_id)
+	if not room then
+		return
+	end
+	local player = room:getPlayerByUserId(user_id)
+	if player and player.is_sit then
+		return 
+	end
+	CMD.leaveRoom(data)
+end
 
---离开房间
+--离开房间 客户端只在游戏开始无法离开房间
 function CMD.leaveRoom(data)
 	local room_id = data.room_id
 	local user_id = data.user_id
@@ -84,7 +98,7 @@ function CMD.sitDown(data)
 	player.is_sit = true
 
 	room:updatePlayerProperty(user_id,"user_pos",pos)
-	
+	room:set("players",room:get("players"))
 	--推送
 	local sit_list = room:getPlayerInfo("user_id","user_pos","is_sit")
 	for i=#sit_list,1,-1 do
@@ -247,6 +261,7 @@ function CMD.gameCMD(data)
 	local room = RoomPool:getRoomByRoomID(room_id)
 	local command = data.command
 	if command == "BACK_ROOM" then
+		--返回房间
 		local fd = data.fd
 		local player = room:getPlayerByUserId(user_id)
 		local room = RoomPool:getRoomByRoomID(room_id)
