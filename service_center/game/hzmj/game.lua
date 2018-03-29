@@ -673,24 +673,27 @@ game["GANG"] = function(self,player,data)
 	if gang_type == GANG_TYPE.AN_GANG then
 		obj.from = player.user_pos
 		num = 4
+		--记录下已经杠的牌
+		table.insert(player.card_stack,obj)
 	elseif gang_type == GANG_TYPE.MING_GANG then
 		obj.from = self.cur_play_user.user_pos
 		num = 3
+		--记录下已经杠的牌
+		table.insert(player.card_stack,obj)
 	elseif gang_type == GANG_TYPE.PENG_GANG then
-		obj.from = player.user_pos
 		num = 1
 		--如果是碰杠,则更改碰变成杠
-		for _,obj in ipairs(player.card_stack) do
-			if obj.value == card and obj.type == TYPE.PENG then
-				obj.type = TYPE.GANG
-				obj.gang_type = GANG_TYPE.PENG_GANG
+		for _,item in ipairs(player.card_stack) do
+			if item.value == card and item.type == TYPE.PENG then
+				item.type = TYPE.GANG
+				item.gang_type = GANG_TYPE.PENG_GANG
+				obj = item
 				break
 			end
 		end
 	end
 
-	--记录下已经杠的牌
-	table.insert(player.card_stack,obj)
+	
 
 	--移除手牌
 	local result = self:removeHandleCard(player,card,num)
