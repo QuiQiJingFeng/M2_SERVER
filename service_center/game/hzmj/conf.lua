@@ -44,8 +44,13 @@ local card_list = {
 		1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,35
 	}
 
-local handle1 = {11,11,11,11,21,21,21,27,28,29,14,15,16,
-				23,23,24,24,25,25,26,26,1,1,1,2,2,3,3,4,4,5,35,35,35,35}
+
+local handle1 = {11,11,11,11,21,21,1,14,14,  
+
+4,4,4,4,3,3,3,3,2,2,2,1,1,
+
+29,14,15,16,13,13,13,13,12,12,12,2,1,     
+}
 
 for _,v in ipairs(handle1) do
 	for i=#card_list,1,-1 do
@@ -61,5 +66,5 @@ for _,v in ipairs(handle1) do
 	table.insert(card_list,v)
 end
 
-
-return card_list
+return {card_list=card_list,zpos = 1}
+--return card_list
