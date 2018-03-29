@@ -221,6 +221,7 @@ function Room:refreshRoomInfo()
 	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting","cur_round")
 	rsp_msg.room_setting = room_setting
 	rsp_msg.room_id = self:get("room_id")
+	rsp_msg.state = self:get("state")
 	rsp_msg.players = players
 
 	self:broadcastAllPlayers("refresh_room_info",rsp_msg)

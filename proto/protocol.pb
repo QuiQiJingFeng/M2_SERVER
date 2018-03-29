@@ -70,7 +70,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-•(
+«(
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -148,11 +148,12 @@ expireTime
 room_id (RroomId"@
 UpdateRoomState
 room_id (RroomId
-state (Rstate"’
+state (Rstate"¨
 RefreshRoomInfo
 room_id (RroomId,
 players (2.msg.user.UserInfoRplayers8
-room_setting (2.msg.user.RoomSettingRroomSetting"=
+room_setting (2.msg.user.RoomSettingRroomSetting
+state (Rstate"=
 SitItem
 user_id (	RuserId
 user_pos (RuserPos"T
