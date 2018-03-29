@@ -661,7 +661,7 @@ game["GANG"] = function(self,player,data)
 	local operate = self.waite_operators[player.user_pos]
 
 	--如果操作是等待出牌,并且可以进行暗杠,则可以进去
-	if operate == "WAIT_PLAY_CARD" and gang_type == GANG_TYPE.AN_GANG then
+	if operate == "WAIT_PLAY_CARD" and (gang_type == GANG_TYPE.AN_GANG or gang_type == GANG_TYPE.PENG_GANG ) then
 	elseif not string.find(self.waite_operators[player.user_pos],"WAIT_GANG") then
 		return "invaild_operator"
 	end
