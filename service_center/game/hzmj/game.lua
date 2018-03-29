@@ -671,13 +671,13 @@ game["GANG"] = function(self,player,data)
 	local obj = {value = card,gang_type = gang_type,type=TYPE.GANG}
 	local num = 0
 	if gang_type == GANG_TYPE.AN_GANG then
-		obj.form = player.user_pos
+		obj.from = player.user_pos
 		num = 4
 	elseif gang_type == GANG_TYPE.MING_GANG then
-		obj.form = self.cur_play_user.user_pos
+		obj.from = self.cur_play_user.user_pos
 		num = 3
 	elseif gang_type == GANG_TYPE.PENG_GANG then
-		obj.form = player.user_pos
+		obj.from = player.user_pos
 		num = 1
 		--如果是碰杠,则更改碰变成杠
 		for _,obj in ipairs(player.card_stack) do
