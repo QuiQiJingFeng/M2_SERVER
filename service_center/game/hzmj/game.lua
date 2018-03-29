@@ -96,35 +96,6 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 			end
 		end
 
-		--计算杠的积分
-		for _,obj in ipairs(player.card_stack) do
-			if obj.gang_type == GANG_TYPE.AN_GANG then
-				--暗杠，赢每个玩家2*底分；
-				player.cur_score = player.cur_score + self.base_score * 2 * count
-				for _,obj in ipairs(players) do
-					if player.user_id ~= obj.user_id then
-						obj.cur_score = obj.cur_score - self.base_score * 2
-					end
-				end
-			elseif obj.gang_type == GANG_TYPE.MING_GANG then
-				--明杠 赢放杠者3*底分
-				player.cur_score = player.cur_score + self.base_score * 3
-				for _,obj in ipairs(players) do
-					if obj.from == obj.user_pos then
-						obj.cur_score = obj.cur_score - self.base_score * 3
-					end
-				end
-			elseif obj.gang_type == GANG_TYPE.PENG_GANG then
-				--自己摸的明杠(公杠) 三家出，赢每个玩家1*底分；
-				player.cur_score = player.cur_score + self.base_score * 1 * count
-				for _,obj in ipairs(players) do
-					if player.user_id ~= obj.user_id then
-						obj.cur_score = obj.cur_score - self.base_score * 1
-					end
-				end
-			end
-		end
-
  		--胡七对 赢每个玩家2*底分
 		if tempResult.iChiNum + tempResult.iPengNum == 0 then
 			player.cur_score = player.cur_score + self.base_score * 2 * count
@@ -169,6 +140,10 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 		--更新玩家的总积分
 		for i,obj in ipairs(players) do
 			obj.score = obj.score + obj.cur_score
+		end
+	else
+		for _,player in ipairs(players) do
+			player.cur_score = 0
 		end
 	end
 
@@ -286,6 +261,12 @@ function game:init(room_id,gtype)
 	self.cur_play_user = nil
 	--当前出的牌
 	self.cur_play_card = nil
+
+	local players = self.room:get("players")
+	for _,player in ipairs(players) do
+		--玩家当前局积分清零
+		player.cur_score = 0
+	end	
 end
 
 --更新庄家的位置
@@ -302,6 +283,11 @@ function game:updateZpos()
 	self.zpos = zpos
 end
 function game:start()
+
+	--通知玩家当前局积分重置为0
+	local data = self.room:getPlayerInfo("user_id","user_pos","cur_score")
+	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
+
 	--1、更新庄家的位置
 	self:updateZpos()
 
@@ -365,6 +351,8 @@ function game:start()
 	for i,player in ipairs(players) do
 		self.waite_operators[player.user_pos] = "WAIT_DEAL_FINISH"
 	end
+
+
 end
 
 --增加手牌
@@ -705,6 +693,39 @@ game["GANG"] = function(self,player,data)
 	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
 
 	self.room:broadcastAllPlayers("notice_gang_card",data)
+
+
+	local count = self.room:get("seat_num") - 1
+	--计算杠的积分
+	for _,obj in ipairs(player.card_stack) do
+		if obj.gang_type == GANG_TYPE.AN_GANG then
+			--暗杠，赢每个玩家2*底分；
+			player.cur_score = player.cur_score + self.base_score * 2 * count
+			for _,obj in ipairs(players) do
+				if player.user_id ~= obj.user_id then
+					obj.cur_score = obj.cur_score - self.base_score * 2
+				end
+			end
+		elseif obj.gang_type == GANG_TYPE.MING_GANG then
+			--明杠 赢放杠者3*底分
+			player.cur_score = player.cur_score + self.base_score * 3
+			for _,obj in ipairs(players) do
+				if obj.from == obj.user_pos then
+					obj.cur_score = obj.cur_score - self.base_score * 3
+				end
+			end
+		elseif obj.gang_type == GANG_TYPE.PENG_GANG then
+			--自己摸的明杠(公杠) 三家出，赢每个玩家1*底分；
+			player.cur_score = player.cur_score + self.base_score * 1 * count
+			for _,obj in ipairs(players) do
+				if player.user_id ~= obj.user_id then
+					obj.cur_score = obj.cur_score - self.base_score * 1
+				end
+			end
+		end
+	end
+	local data = self.room:getPlayerInfo("user_id","user_pos","cur_score")
+	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 
 	if gang_type ~= GANG_TYPE.PENG_GANG then
 		--杠了之后再摸一张牌
