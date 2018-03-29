@@ -73,7 +73,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 ª&
 msg/user.protomsg.user"c
 GPItem
-value (Rvalue
+value (Rvalue
 	gang_type (RgangType
 from (Rfrom
 type (Rtype"ô
