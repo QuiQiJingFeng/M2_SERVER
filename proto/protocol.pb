@@ -70,7 +70,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-Ü'
+•(
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -124,13 +124,15 @@ GameCmdReq
 cardList (RcardList"6
 
 GameCmdRsp(
-result (2.msg.user.ResultRresult"q
+result (2.msg.user.ResultRresult"©
 RoomItem
 room_id (RroomId
 state (Rstate
 expire_time (R
 expireTime
-is_sit (RisSit"
+is_sit (RisSit
+	game_type (RgameType
+owner_id (	RownerId"
 GetMyRoomListReq"†
 GetMyRoomListRsp(
 result (2.msg.user.ResultRresult/

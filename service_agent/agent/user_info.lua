@@ -43,6 +43,10 @@ function user_info:init(info)
     
 end
 
+function user_info:updateFd(fd)
+    self.fd = fd
+end
+
 function user_info:caculateRoomList()
     local will_remove = {}
     local room_list = {}
@@ -68,6 +72,9 @@ function user_info:caculateRoomList()
             info.room_id = room_id
             info.expire_time = room_info.expire_time
             info.state = room_info.state
+            info.game_type = room_info.game_type
+            info.owner_id = room_info.owner_id
+
             table.insert(room_list,info)
         end
     end

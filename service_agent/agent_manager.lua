@@ -250,9 +250,11 @@ function SOCKET.data(fd, data)
             local new_token = crypt.base64encode(crypt.randomkey() .. crypt.randomkey())
             local result = skynet.call(".redis_center","lua","ProcessReconnect",ACCOUNT_DB,info_key,filed,token,new_token)
             if result then
+                --绑定fd 之前先检查之前的fd是否存在并且断开
+                USER_MAP[user_id] = fd
                 rsp_msg.result = "success"
                 rsp_msg.reconnect_token = new_token
-                skynet.call(agent_item.service_id, "lua", "reconnect")
+                skynet.call(agent_item.service_id, "lua", "reconnect",fd)
             end
 
             send(fd, { ["session_id"] = data_content.session_id, ["reconnect"] = rsp_msg }, secret)

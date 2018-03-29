@@ -216,6 +216,10 @@ function game:gameOver(player,over_type,operate,tempResult)
 
 	self.room:set("players",self.room:get("players"))
 
+	local players = self.room:get("players")
+	for i,player in ipairs(players) do
+		player.is_sit = nil
+	end
 	skynet.call(".room_manager","lua","gameOver",room_id)
 end
 

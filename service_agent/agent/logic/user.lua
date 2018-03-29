@@ -129,9 +129,8 @@ function user:joinRoom(req_msg)
 			if room_info.state == constant.ROOM_STATE.GAME_PREPARE and not is_sit then
 				user_info:set("room_id",nil)
 			elseif room_info.state == constant.ROOM_STATE.GAME_PREPARE and is_sit then
-				return "join_room",{result = "current_in_room"}
-			else
-				return "join_room",{result = "current_in_game"}
+				local _,rsp = user:gameCmd({command="BACK_ROOM"})
+				return "join_room",{result=rsp.result}
 			end
 		end
 	end

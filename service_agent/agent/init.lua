@@ -32,6 +32,7 @@ end
 
 --重新连接
 function CMD.reconnect()
+    user_info:updateFd(fd)
     user_info:pushUserInfo()
 end
 

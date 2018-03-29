@@ -267,8 +267,17 @@ function CMD.gameCMD(data)
 		local room = RoomPool:getRoomByRoomID(room_id)
 		--如果是返回房间,需要更新fd
 		player.fd = fd
-
 	end
+
+	local result
+	--如果游戏还在未准备状态
+	if command == "BACK_ROOM" and room:get("state") == constant.ROOM_STATE.GAME_PREPARE then
+		room:refreshRoomInfo()
+		return "success"
+	else
+		result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
+	end
+
 	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
 
 	return result
