@@ -16,7 +16,12 @@ function CMD.startGame(room_id,game_type)
 end
 
 function CMD.gameCMD(data)
-	return game:gameCMD(data)
+	if game then
+		return game:gameCMD(data)
+	else
+		local cjson = require "cjson"
+		print("ERROR:====>>>>>",cjson.encode(data))
+	end
 end
 
 --当房间被销毁的时候,需要清理游戏的数据
