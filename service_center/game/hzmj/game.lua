@@ -306,7 +306,9 @@ function game:start()
 	self:updateZpos()
 
 	if constant["DEBUG"] then
-		utils:mergeToTable(self.card_list,require("hzmj/conf"))
+		local conf = require("hzmj/conf")
+		self.zpos = conf.zpos
+		utils:mergeToTable(self.card_list,conf.card_list)
 	end
 
 	local players = self.room:get("players")
