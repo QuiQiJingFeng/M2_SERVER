@@ -42,6 +42,47 @@ game.__index = game_meta
 game.__newindex = game_meta
 
 function game:clear()
+
+	local players = self.room:get("players")
+	local over_round = self.room:get("over_round")
+	local round = self.room:get("round")
+	-- 大赢家金币结算
+	if over_round >= 1 then
+		local pay_type = self:get("pay_type")
+		--赢家出资 积分高的掏钱
+		if pay_type == PAY_TYPE.WINNER_COST then
+			-- 积分从高到低排序
+			table.sort(players,function(a,b) 
+					return a.score > b.score
+				end)
+
+			local max_score = players[1].score
+			--大赢家列表
+			local winners = {}
+			for i,obj in ipairs(players) do
+				if obj.score >= max_score then
+					table.insert(winners,obj)
+				end
+			end
+			local gold_list = { }
+			local per_cost = math.floor(cost/#winners)
+			for _,obj in ipairs(winners) do
+				local gold_num = self:safeClusterCall(obj.node_name,".agent_manager","updateResource",obj.user_id,"gold_num",-1*per_cost)
+				obj.gold_num = gold_num
+				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=gold_num}
+				table.insert(gold_list,info)
+			end
+			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+		end
+	end
+
+	--如果在1局跟最后一局之间解散的,则需要发送结算通知
+	if over_round >= 1 and over_round < round then
+		self:gameOver(player,GAME_OVER_TYPE.DISTROY_ROOM)
+	end
+	
+
+	--清空数据
 	local game_meta = {}
 	setmetatable(game,game_meta)
 	game.__index = game_meta
@@ -244,7 +285,11 @@ function game:gameOver(player,over_type,operate,tempResult)
 	--计算积分并通知玩家
 	self:updatePlayerScore(player,over_type,operate,tempResult)
 
-	
+	--FYD1
+	--更新当前已经完成的局数
+	local over_round = self.room:get("over_round")
+	self.room:set(over_round + 1)
+
 
 	local players = self.room:get("players")
 	for i,player in ipairs(players) do
@@ -922,13 +967,6 @@ game["BACK_ROOM"] = function(self,player,data)
 	self.room:sendMsgToPlyaer(player,"push_all_room_info",rsp_msg)
 
 	self.room:noticePlayerConnectState(player,true)
-	return "success"
-end
-
---解散房间
-game["DISTROY_ROOM"] = function(self,player,data)
-	--发送结算积分
-	self:gameOver(player,GAME_OVER_TYPE.DISTROY_ROOM)
 	return "success"
 end
 

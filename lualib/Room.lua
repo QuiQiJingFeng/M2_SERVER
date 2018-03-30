@@ -75,7 +75,6 @@ function Room:init(room_id,node_name,service_id)
 	info.card_list = {}                         --房间的牌池
 	info.cur_play_user = nil                    --当前的出牌人
 	info.cur_play_card = nil                    --当前出的牌
-	info.is_first_over = false
 	info.replay_id = nil                        --当前战局ID
 	self.property:updateValues(info)
 end
@@ -84,14 +83,15 @@ function Room:setInfo(info)
 	local data = {}
 	data.owner_id = info.user_id                --房间创建人
 	data.game_type = info.game_type             --游戏类型
-	data.round = info.round                     --房间回合数
+	data.round = info.round                     --房间总局数
 	data.pay_type = info.pay_type				--资费类型
 	data.seat_num = info.seat_num               --座位的数量
 	data.is_friend_room = info.is_friend_room   --是否是好友房
 	data.is_open_voice = info.is_open_voice     --是否开启声音
 	data.is_open_gps = info.is_open_gps         --是否开启GPS
 	data.other_setting = info.other_setting     --其他设置
-	data.cur_round = 0          				--当前回合数
+	data.cur_round = 0          				--当前局数
+	data.over_round = 0                         --当前已经结束的房间局数
 	self.property:updateValues(data)
 end
 
@@ -292,44 +292,6 @@ function Room:distroy()
 	local room_id = self:get("room_id")
 	local service_id = self:get("service_id")
 	local node_name = self:get("node_name")
-
-	local cur_round = self:get("cur_round")
-	local round = self:get("round")
-	--赢家出资,如果在房间要释放掉的时候仍然没有结算,则积分高的掏钱
-	local cost = round * constant["ROUND_COST"]
-	local pay_type = self:get("pay_type")
-	--检查大赢家的金币结算,如果打完第一局之后解散则需要掏钱
-	local is_first_over = self:get("is_first_over")
-	if cur_round >= 1 and is_first_over then
-		--赢家出资 积分高的掏钱
-		if pay_type == PAY_TYPE.WINNER_COST then
-			table.sort(players,function(a,b) 
-					return a.score > b.score
-				end)
-			local player = players[1]
-			local max_score = player.score
-			--大赢家列表
-			local winners = {}
-			for i,obj in ipairs(players) do
-				if obj.score == max_score then
-					table.insert(winners,obj)
-				end
-			end
-			local gold_list = { }
-			local per_cost = math.floor(cost/#winners)
-			for _,obj in ipairs(winners) do
-				local gold_num = self:safeClusterCall(obj.node_name,".agent_manager","updateResource",obj.user_id,"gold_num",-1*per_cost)
-				obj.gold_num = gold_num
-				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=gold_num}
-				table.insert(gold_list,info)
-			end
-			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
-		end
-	end
-
-	if cur_round >= 1 and is_first_over then
-		skynet.call(service_id,"lua","gameCMD",{command="DISTROY_ROOM"})
-	end
 
 	local room_key = "room:"..room_id
 	--删除掉房间信息
