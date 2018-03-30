@@ -1,6 +1,5 @@
-
-
-
+CREATE DATABASE IF NOT EXISTS lsj_game default char set utf8;
+use lsj_game;
 -- 用户的注册信息表
 CREATE TABLE register_log
 (
