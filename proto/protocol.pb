@@ -70,7 +70,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-«(
+­(
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -233,11 +233,12 @@ card_stack	 (2.msg.user.GPItemR	cardStack"´
 user_pos (RuserPos
 gold_num (RgoldNum"A
 UpdateCostGold/
-	gold_list (2.msg.user.GoldItemRgoldList"\
+	gold_list (2.msg.user.GoldItemRgoldList"^
 	ScoreItem
 user_id (	RuserId
-user_pos (RuserPos
-	cur_score (RcurScore"R
+user_pos (RuserPos
+
+delt_score (R	deltScore"R
 RefreshPlayerCurScore9
 cur_score_list (2.msg.user.ScoreItemRcurScoreList"%
 HandleError
