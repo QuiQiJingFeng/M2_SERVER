@@ -288,10 +288,6 @@ function game:updateZpos()
 end
 function game:start()
 
-	--通知玩家当前局积分重置为0
-	local data = self.room:getPlayerInfo("user_id","user_pos","cur_score")
-	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
-
 	--1、更新庄家的位置
 	self:updateZpos()
 
@@ -701,6 +697,9 @@ game["GANG"] = function(self,player,data)
 
 	local players = self.room:get("players")
 	local count = self.room:get("seat_num") - 1
+
+	local origin_data = self.room:getPlayerInfo("user_id","cur_score")
+
 	--计算杠的积分
 	for _,obj in ipairs(player.card_stack) do
 		if obj.gang_type == GANG_TYPE.AN_GANG then
@@ -730,6 +729,16 @@ game["GANG"] = function(self,player,data)
 		end
 	end
 	local data = self.room:getPlayerInfo("user_id","user_pos","cur_score")
+
+	for _,origin_info in ipairs(origin_data) do
+		for _,info in ipairs(data) do
+			if origin_info.user_id == info.user_id then
+				info.delt_score = info.cur_score - origin_info.cur_score
+				info.cur_score = nil
+			end
+		end
+	end
+
 	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 
 	if gang_type ~= GANG_TYPE.PENG_GANG then
