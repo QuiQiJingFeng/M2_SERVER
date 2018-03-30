@@ -22,7 +22,7 @@ function CMD.saveRecord(replay_id)
     end
     print("FYD++++++>>>saveRecord")
     local content = table.concat(record_msg[replay_id],"\n")
-    local success = utils:ossRequest("replaycord.oss-cn-hongkong.aliyuncs.com","replaycord","hzmj/"..replay_id..".txt",content)
+    local success = utils:ossRequest("replaycord.oss-cn-hongkong-internal.aliyuncs.com","replaycord","hzmj/"..replay_id..".txt",content)
     if not success then
         --设置回调 等会继续尝试发送
         print("FYD===发送失败")
