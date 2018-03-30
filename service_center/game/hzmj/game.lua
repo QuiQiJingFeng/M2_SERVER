@@ -699,6 +699,7 @@ game["GANG"] = function(self,player,data)
 	self.room:broadcastAllPlayers("notice_gang_card",data)
 
 
+	local players = self.room:get("players")
 	local count = self.room:get("seat_num") - 1
 	--计算杠的积分
 	for _,obj in ipairs(player.card_stack) do
