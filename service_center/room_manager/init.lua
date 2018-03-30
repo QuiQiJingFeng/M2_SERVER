@@ -264,6 +264,9 @@ function CMD.gameCMD(data)
 		--返回房间
 		local fd = data.fd
 		local player = room:getPlayerByUserId(user_id)
+		if not player then
+			return "not_in_room"
+		end
 		local room = RoomPool:getRoomByRoomID(room_id)
 		--如果是返回房间,需要更新fd
 		player.fd = fd
