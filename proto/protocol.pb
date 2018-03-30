@@ -70,7 +70,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-­(
+‹)
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -200,12 +200,17 @@ card_stack (2.msg.user.GPItemR	cardStack"X
 user_pos (RuserPos
 	cur_score (RcurScore
 score (Rscore
-	card_list (RcardList"v
+	card_list (RcardList"Ó
 NoticeGameOver
 	over_type (RoverType(
 players (2.msg.user.ItemRplayers
 
-award_list (R	awardList"m
+award_list (R	awardList
+	winner_id (	RwinnerId
+winner_type (R
+winnerType
+
+last_round (R	lastRound"m
 NoticePlayerConnectState
 user_id (	RuserId
 user_pos (RuserPos

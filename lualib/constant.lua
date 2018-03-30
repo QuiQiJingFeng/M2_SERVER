@@ -172,4 +172,13 @@ constant["ROUND_COST"] = 5
 --自动同意时间
 constant["AUTO_CONFIRM"] = 2*60* 100
 
+
+constant["WINNER_TYPE"] = {
+	ZIMO = 1,
+	QIANG_GANG = 2,
+}
+
+
+
+
 return constant

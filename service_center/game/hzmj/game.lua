@@ -147,8 +147,35 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 		end
 	end
 
+	if over_type == GAME_OVER_TYPE.NORMAL then
+		player.hu_num = plyaer.hu_num + 1
+		for _,player in ipairs(players) do
+			for i,obj in ipairs(player.card_stack) do
+				if obj.type == TYPE.GANG then
+					if obj.gang_type == GANG_TYPE.AN_GANG then
+						player.an_gang_num = player.an_gang_num + 1
+					else
+						player.ming_gang_num = player.ming_gang_num + 1
+					end
+				end
+			end
+			player.reward_num = player.reward_num + 1
+			player.card_stack = {}
+		end
+	end
+	
 	local info = self.room:getPlayerInfo("user_id","score","card_list","user_pos","cur_score")
 	local data = {over_type = over_type,players = info,award_list=award_list}
+	data.winner_id = player.user_id
+	if operate == "WAIT_PLAY_CARD" then
+		data.winner_type = constant["WINNER_TYPE"].ZIMO
+	elseif operate == "WAIT_HU" then
+		data.winner_type = constant["WINNER_TYPE"].QIANG_GANG
+	end
+	local cur_round = self.room:get("cur_round")
+	local round = self.room:get("round")
+	data.last_round = cur_round == round
+
 	self.room:broadcastAllPlayers("notice_game_over",data)
 end
 
@@ -214,12 +241,14 @@ function game:gameOver(player,over_type,operate,tempResult)
 	--计算积分并通知玩家
 	self:updatePlayerScore(player,over_type,operate,tempResult)
 
-	self.room:set("players",self.room:get("players"))
+	
 
 	local players = self.room:get("players")
 	for i,player in ipairs(players) do
 		player.is_sit = nil
 	end
+	self.room:set("players",self.room:get("players"))
+
 	skynet.call(".room_manager","lua","gameOver",room_id)
 end
 
@@ -821,7 +850,9 @@ end
 --胡牌
 game["HU"] = function(self,player,data)
 	local operate = self.waite_operators[player.user_pos]
-	if not (operate == "WAIT_PLAY_CARD" or string.find(self.waite_operators[player.user_pos],"WAIT_HU")) then
+	local gang_hu = string.find(self.waite_operators[player.user_pos],"WAIT_HU")
+
+	if not (operate == "WAIT_PLAY_CARD" or gang_hu) then
 		return "invaild_operator"
 	end
 
@@ -843,6 +874,28 @@ game["HU"] = function(self,player,data)
 	end
 
 	self.waite_operators[player.user_pos] = nil
+
+
+	--抢杠的话，杠是不算的
+	if gang_hu then
+		local card = nil
+		for _,obj in ipairs(player.card_stack) do
+			if obj.gang_type == GANG_TYPE.PENG_GANG then
+				obj.gang_type = nil
+				obj.type = TYPE.PENG
+				card = obj.value
+			end
+		end
+		--胡牌前,先将这张杠牌加入玩家手牌
+		self:addHandleCard(player,card)
+		local is_hu = self:checkHu(player)
+		--检查完之后,去掉这张牌
+		self:removeHandleCard(player,card,1)
+		if is_hu then
+			self:gameOver(player,GAME_OVER_TYPE.NORMAL,operate,tempResult)
+		end
+		return "success"
+	end
 
 	local is_hu,tempResult = self:checkHu(player)
 	if is_hu then

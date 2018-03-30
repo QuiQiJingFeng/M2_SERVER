@@ -118,6 +118,14 @@ function Room:addPlayer(info)
 	player.fd = info.fd                          --玩家的fd
 	player.gold_num = info.gold_num				 --玩家的金币数量
 	player.disconnect = false                    --玩家是否掉线
+
+	--记录下玩家重开始到房间结束 总的 杠、胡、奖码 的个数
+	player.hu_num = 0
+	player.ming_gang_num = 0
+	player.an_gang_num = 0
+	player.reward_num = 0
+
+
 	--记录已经碰或者杠的牌 记录下碰谁的牌
 	--item = {card=card,from=user_id,type=type,gang_type=gang_type}
 	player.card_stack = {}
