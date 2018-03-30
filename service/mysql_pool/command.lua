@@ -89,8 +89,7 @@ function command:insertTable(tb_name,data,is_quote)
 end
 
 function command:selectTable(tb_name,...)
-    
-    SELECT `user_id`,`server_id`,`leader_name`,`group`,`ladder_core` FROM `expedition`
+
 end
 
 function command:selectTableAll(tb_name,filter)

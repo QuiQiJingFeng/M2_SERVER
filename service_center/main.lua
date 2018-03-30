@@ -20,6 +20,9 @@ skynet.start(function()
 	skynet.uniqueservice("static_data")
 
 	skynet.uniqueservice("replay_cord")
+
+	skynet.uniqueservice("mysql_pool")
+
 	skynet.uniqueservice("redis_center")
 
 	skynet.uniqueservice("room_manager") 
