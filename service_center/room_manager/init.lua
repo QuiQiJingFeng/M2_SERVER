@@ -16,7 +16,7 @@ function CMD.createRoom(data)
 	--筛选数据传递到客户端
 	room:refreshRoomInfo()
 
-	local room_id = self:get("room_id")
+	local room_id = room:get("room_id")
 	local args = {user_id = data.user_id,room_id = room_id,time="NOW"}
 	skynet.send(".mysql_pool","lua","insertTable","create_room",args)
 
@@ -36,7 +36,7 @@ function CMD.joinRoom(data)
 
 	room:refreshRoomInfo()
 
-	local room_id = self:get("room_id")
+	local room_id = room:get("room_id")
 	local args = {user_id = data.user_id,room_id = room_id,time="NOW"}
 	skynet.send(".mysql_pool","lua","insertTable","join_room",args)
  
@@ -74,7 +74,7 @@ function CMD.leaveRoom(data)
 	room:removePlayer(user_id)
 	room:refreshRoomInfo()
 
-	local room_id = self:get("room_id")
+	local room_id = room:get("room_id")
 	local args = {user_id = data.user_id,room_id = room_id,time="NOW"}
 	skynet.send(".mysql_pool","lua","insertTable","leave_room",args)
 
