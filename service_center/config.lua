@@ -1,5 +1,5 @@
 root = "./"
-luaservice = root.."service/?.lua;"..root.."service/?/init.lua"..root.."service_center/?.lua;"..root.."service_center/?/init.lua"
+luaservice = root.."service/?.lua;"..root.."service/?/init.lua;"..root.."service_center/?.lua;"..root.."service_center/?/init.lua"
 lualoader = root .. "lualib/loader.lua"
 lua_path = root.."lualib/?.lua;"..root.."lualib/?/init.lua;"..root.."service_center/?.lua"
 lua_cpath = root .. "luaclib/?.so"

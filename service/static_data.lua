@@ -20,7 +20,7 @@ FUNCTION["REFRESH_CONFIG"] = function()
 
     local center_mysql = skynet.getenv("center_mysql")
     local host, port = string.match(center_mysql, "([%d%.]+):([%d]+)")
-    local mysql_conf = {host=host,port=port}
+    local mysql_conf = {host=host,port=port,database = "lsj_game"}
     sharedata.update("mysql_conf",mysql_conf)
 
 end

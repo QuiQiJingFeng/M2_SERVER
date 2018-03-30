@@ -1,7 +1,7 @@
 local skynet = require "skynet"
 local sharedata = require "skynet.sharedata"
 local log = require "skynet.log"
-local mysql = require "mysql"
+local mysql = require "skynet.db.mysql"
 local utils = require "utils"
 local mysql_list = {}
 local MYSQL_INDEX = 1
