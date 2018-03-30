@@ -163,10 +163,10 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 			player.card_stack = {}
 		end
 	end
-	
+
 	local info = self.room:getPlayerInfo("user_id","score","card_list","user_pos","cur_score")
 	local data = {over_type = over_type,players = info,award_list=award_list}
-	data.winner_id = player.user_id
+	data.winner_pos = player.user_pos
 	if operate == "WAIT_PLAY_CARD" then
 		data.winner_type = constant["WINNER_TYPE"].ZIMO
 	elseif operate == "WAIT_HU" then
