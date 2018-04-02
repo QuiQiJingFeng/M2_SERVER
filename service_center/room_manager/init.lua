@@ -32,6 +32,11 @@ function CMD.joinRoom(data)
 		return "not_exist_room"
 	end
 
+	local seat_num = room:get("seat_num")
+	local player_num = #room:get("players")
+	if player_num >= seat_num then
+		return "no_position"
+	end
 	room:addPlayer(data)
 
 	room:refreshRoomInfo()
