@@ -295,8 +295,6 @@ function CMD.gameCMD(data)
 	if command == "BACK_ROOM" and room:get("state") == constant.ROOM_STATE.GAME_PREPARE then
 		room:refreshRoomInfo()
 		return "success"
-	else
-		result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
 	end
 
 	local result = skynet.call(room:get("service_id"),"lua","gameCMD",data)
