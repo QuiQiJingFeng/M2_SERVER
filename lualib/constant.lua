@@ -48,19 +48,32 @@ constant["ROOM_STATE"] = {
 }
 
 constant["PUSH_EVENT"] = {
-	PUSH_USER_INFO = "push_user_info",  --推送玩家的基本信息
-	REFRESH_ROOM_INFO = "refresh_room_info", --刷新房间信息
-	PUSH_SIT_DOWN = "push_sit_down",      --推送玩家坐下的信息
-	DEAL_CARD = "deal_card", --发牌
-	PUSH_DRAW_CARD = "push_draw_card", --摸牌通知
-	PUSH_PLAY_CARD = "push_play_card", --通知玩家  该出牌了
-	NOTICE_PLAY_CARD = "notice_play_card", --通知有人出牌
-	NOTICE_PENG_CARD = "notice_peng_card",--通知有人碰牌了
-	NOTICE_GANG_CARD = "notice_gang_card",--通知有人杠拍了
-	PUSH_OPERATOR_PALYER_STATE = "push_player_operator_state", --通知客户端是否 碰/杠/胡
-	NOTICE_GAME_OVER = "notice_game_over", --本局结束
-	NOTICE_PLAYERS_DISCONNECT = "notice_players_disconnect", --通知玩家有人掉线
-	HANDLE_ERROR = "handle_error", --错误处理
+	PUSH_USER_INFO = "push_user_info",  		--推送玩家的基本信息
+	REFRESH_ROOM_INFO = "refresh_room_info", 	--刷新房间信息
+	PUSH_SIT_DOWN = "push_sit_down",      		--推送玩家坐下的信息
+	DEAL_CARD = "deal_card", 					--发牌
+	PUSH_DRAW_CARD = "push_draw_card", 			--摸牌通知
+	PUSH_PLAY_CARD = "push_play_card", 			--通知玩家  该出牌了
+	NOTICE_PLAY_CARD = "notice_play_card", 		--通知有人出牌
+	NOTICE_PENG_CARD = "notice_peng_card",		--通知有人碰牌了
+	NOTICE_GANG_CARD = "notice_gang_card",		--通知有人杠拍了
+	PUSH_OPERATOR_PALYER_STATE = "push_player_operator_state", 	--通知客户端是否 碰/杠/胡
+	NOTICE_GAME_OVER = "notice_game_over", 		--本局结束
+	NOTICE_PLAYERS_DISCONNECT = "notice_players_disconnect", 	--通知玩家有人掉线
+	HANDLE_ERROR = "handle_error", 				--错误处理
+	PUSH_DEMAND_POINT = "push_demand_point",	--通知玩家叫分
+
+	-- ddz_msg
+	SERVER_SEND_CARD  = "ServerSendCard",
+	NOTICE_POINT_DEMAND  = "NoticePointDemand",
+	NOTICE_MAIN_PALAYER = "NoticeMainPaleyer",
+	NOTICE_SEND_CARD = "NoticeSendCard",
+	SERVER_POINT_DEMAND = "ServerPointDemand",
+	NOTICE_DDZ_GAME_OVER = "NoticeDDZGameOver",
+
+
+	-- 
+
 }
 
 -----------------------游戏类型配置相关--------------------------
@@ -139,7 +152,7 @@ constant["NET_EVENT"] = {
 
 constant["GAME_CMD"] = {
 	DEAL_FINISH = "DEAL_FINISH",	--发牌完毕
-
+	DEMAND = "DEMAND"
 }
 
 constant["NET_RESULT"] = {

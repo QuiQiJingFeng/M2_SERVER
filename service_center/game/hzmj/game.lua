@@ -401,7 +401,7 @@ function game:start()
 		rsp_msg.random_nums = random_nums
 		rsp_msg.cur_round = self.room:get("cur_round")
 
-		self.room:sendMsgToPlyaer(player,"deal_card",rsp_msg)
+		self.room:sendMsgToPlyaer(player, "deal_card", rsp_msg)
 	end
 
 	--3、将card按类别和数字存储
@@ -519,7 +519,7 @@ function game:drawCard(player)
 end
 
 --发牌完毕
-game["DEAL_FINISH"] = function(self,player)
+game["DEAL_FINISH"] = function(self, player)
 
 	local user_pos = player.user_pos
 	if self.waite_operators[user_pos] ~= "WAIT_DEAL_FINISH" then
@@ -528,14 +528,15 @@ game["DEAL_FINISH"] = function(self,player)
 	self.waite_operators[user_pos] = nil
 	--计算剩余的数量
 	local num = 0
-	for k,v in pairs(self.waite_operators) do
+	for k, v in pairs(self.waite_operators) do
 		num = num + 1
 	end
 
-	if num == 0 then
+	if num > 0 then
 		--庄家出牌
 		local zplayer = self.room:getPlayerByPos(self.zpos)
 		self:drawCard(zplayer)
+
 	end
 	return "success"
 end
