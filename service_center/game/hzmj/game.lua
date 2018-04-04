@@ -189,7 +189,7 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 	end
 
 	if over_type == GAME_OVER_TYPE.NORMAL then
-		player.hu_num = plyaer.hu_num + 1
+		player.hu_num = player.hu_num + 1
 		for _,player in ipairs(players) do
 			for i,obj in ipairs(player.card_stack) do
 				if obj.type == TYPE.GANG then
