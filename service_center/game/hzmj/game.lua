@@ -288,7 +288,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 	--FYD1
 	--更新当前已经完成的局数
 	local over_round = self.room:get("over_round")
-	self.room:set(over_round + 1)
+	self.room:set("over_round",over_round + 1)
 
 
 	local players = self.room:get("players")
