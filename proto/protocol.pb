@@ -10,7 +10,7 @@ msg.common"
 Result
 success
 fail
-ó
+¥
 msg/ddz.protomsg.ddz"0
 ReqPointDemand
 
@@ -34,12 +34,29 @@ userDemand (R
 userDemand"M
 NoticeMainPaleyer
 	userExtra (R	userExtra
-baseCard (RbaseCard"Ä
+baseCard (RbaseCard"ä
+Item
+user_id (	RuserId
+user_pos (RuserPos
+	cur_score (RcurScore
+score (Rscore
+	card_list (RcardList"…
+NoticeDDZGameOver
+	over_type (RoverType'
+players (2.msg.ddz.ItemRplayers
+	bIfSpring (R	bIfSpring
+iTime (RiTime
+	iBoomNums (R	iBoomNums
+	iLastCard (R	iLastCard"ƒ
 NoticeSendCard
-	userExtra (R	userExtra
-nowType (RnowType
-nowValue (RnowValue
-cardList (RcardList
+	userExtra (R	userExtra
+cCardNum (RcCardNum
+	cCardType (R	cCardType
+
+cCardValue (R
+cCardValue"
+cLestCardNum (RcLestCardNum
+cCards (RcCards
 ˝
 msg/login.proto	msg.login"ß
 LoginReq3
@@ -70,7 +87,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 fail
 unknow_login_type
 	auth_fail
-ç)
+∫)
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -113,7 +130,7 @@ SitDownReq
 pos (Rpos"6
 
 SitDownRsp(
-result (2.msg.user.ResultRresult"Æ
+result (2.msg.user.ResultRresult" 
 
 GameCmdReq
 command (	Rcommand
@@ -121,7 +138,8 @@ GameCmdReq
 demandPoint (RdemandPoint
 nowType (RnowType
 nowValue (RnowValue
-cardList (RcardList"6
+cardList (RcardList
+cardNums	 (RcardNums"6
 
 GameCmdRsp(
 result (2.msg.user.ResultRresult"©
@@ -267,7 +285,7 @@ delt_score (R	deltScore"R
 user_pos (RuserPos"F
 NoticePlayerDistroyRoom
 room_id (RroomId
-type (Rtype*˙
+type (Rtype*ã
 Result
 success
 paramater_error
@@ -288,12 +306,13 @@ auth_faild
 invaild_operator
 no_support_command
 no_permission_distroy
-current_in_room*5
+current_in_room
+no_position*5
 GangType
 AN_GANG
 	MING_GANG
 	PENG_GANG
-˜
+√
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"Ç
 C2S
 
@@ -313,7 +332,7 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 game_cmdïN (2.msg.user.GameCmdReqRgameCmd<
 distroy_roomñN (2.msg.user.DistroyRoomReqRdistroyRoomR
 confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
-get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"ù
+get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"È
 S2C
 
 session_id (R	sessionId
@@ -359,4 +378,5 @@ leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 NoticePointDemandÆú (2.msg.ddz.NoticePointDemandRNoticePointDemandJ
 NoticeMainPaleyerØú (2.msg.ddz.NoticeMainPaleyerRNoticeMainPaleyerA
 NoticeSendCard∞ú (2.msg.ddz.NoticeSendCardRNoticeSendCardJ
-ServerPointDemand±ú (2.msg.ddz.ServerPointDemandRServerPointDemand
+ServerPointDemand±ú (2.msg.ddz.ServerPointDemandRServerPointDemandJ
+NoticeDDZGameOver≤ú (2.msg.ddz.NoticeDDZGameOverRNoticeDDZGameOver
