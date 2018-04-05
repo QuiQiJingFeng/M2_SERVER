@@ -155,7 +155,7 @@ function CMD.sitDown(data)
 		skynet.send(".replay_cord","lua","insertRecord",replay_id,msg)
 
 		local game_type = room:get("game_type")
-		skynet.call(room:get("service_id"),"lua","startGame",room_id,game_type)
+		skynet.send(room:get("service_id"),"lua","startGame",room_id,game_type)
 	end
 
 	return "success"
