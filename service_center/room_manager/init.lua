@@ -17,7 +17,7 @@ function CMD.createRoom(data)
 	room:refreshRoomInfo()
 
 	local room_id = room:get("room_id")
-	local args = {user_id = data.user_id,room_id = room_id,time="NOW"}
+	local args = {user_id = data.user_id,room_id = room_id,time="NOW()"}
 	skynet.send(".mysql_pool","lua","insertTable","create_room",args)
 
 	return "success",room_id
@@ -42,7 +42,7 @@ function CMD.joinRoom(data)
 	room:refreshRoomInfo()
 
 	local room_id = room:get("room_id")
-	local args = {user_id = data.user_id,room_id = room_id,time="NOW"}
+	local args = {user_id = data.user_id,room_id = room_id,time="NOW()"}
 	skynet.send(".mysql_pool","lua","insertTable","join_room",args)
  
 	return constant.NET_RESULT.SUCCESS
@@ -80,7 +80,7 @@ function CMD.leaveRoom(data)
 	room:refreshRoomInfo()
 
 	local room_id = room:get("room_id")
-	local args = {user_id = data.user_id,room_id = room_id,time="NOW"}
+	local args = {user_id = data.user_id,room_id = room_id,time="NOW()"}
 	skynet.send(".mysql_pool","lua","insertTable","leave_room",args)
 
 	return "success"
