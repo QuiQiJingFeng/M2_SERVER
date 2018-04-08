@@ -99,21 +99,6 @@ CREATE TABLE room_servers
 (
     game_type       int,                     -- 游戏类型
     server_host     varchar(50),             -- 服务器地址
-    server_port     int                      -- 服务器端口号
-    primary key(game_type,server_host,server_port)
+    server_port     int,                      -- 服务器端口号
+    primary key (game_type,server_host,server_port)
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
