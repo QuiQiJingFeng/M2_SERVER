@@ -221,6 +221,8 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 	data.last_round = cur_round == round
 
 	self.room:broadcastAllPlayers("notice_game_over",data)
+
+	self.room:set("players",players)
 end
 
 --更新玩家的金币
