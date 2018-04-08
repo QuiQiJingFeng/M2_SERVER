@@ -303,16 +303,11 @@ function CMD.gameCMD(data)
 end
 
 --游戏结束 某局结束
-function CMD.gameOver(room_id)
+function CMD.gameOver(room_id,room_info)
 	local room = RoomPool:getRoomByRoomID(room_id)
 	local replay_id = room:get("replay_id")
 
-
-	local players = room:get("players")
-	for i,player in ipairs(players) do
-		player.is_sit = nil
-	end
-	room:set("sit_down_num",0)
+	room.rebuild(room_info)
 
 	local cur_round = room:get("cur_round")
 	local round = room:get("round")

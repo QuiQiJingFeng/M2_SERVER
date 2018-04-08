@@ -221,8 +221,6 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 	data.last_round = cur_round == round
 
 	self.room:broadcastAllPlayers("notice_game_over",data)
-
-	self.room:set("players",players)
 end
 
 --更新玩家的金币
@@ -297,9 +295,10 @@ function game:gameOver(player,over_type,operate,tempResult)
 	for i,player in ipairs(players) do
 		player.is_sit = nil
 	end
-	self.room:set("players",self.room:get("players"))
+	room:set("sit_down_num",0)
 
-	skynet.call(".room_manager","lua","gameOver",room_id)
+	local room_info = self.room:getAllInfo()
+	skynet.call(".room_manager","lua","gameOver",room_id,room_info)
 end
 
 --检测流局
