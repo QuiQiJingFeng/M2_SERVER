@@ -75,7 +75,7 @@ CREATE TABLE join_room
 -- 离开房间的记录
 CREATE TABLE leave_room
 (
-	user_id         int(10),            -- 玩家ID
+	user_id         int(10),                -- 玩家ID
     room_id         int,                    -- 房间ID
     time            datetime                -- 离开房间的时间
 );
@@ -83,7 +83,7 @@ CREATE TABLE leave_room
 -- 资源变化的记录
 CREATE TABLE resource
 (
-     user_id        int(10),             -- 玩家ID
+     user_id        int(10),                 -- 玩家ID
      resource_type  int,                     -- 资源类型 1 = 金币
      source         int,                     -- 资源变化来源 1 = 开房  2 = 充值 3 = 抽奖
      old_num        double,                  -- 旧的数量
@@ -94,14 +94,14 @@ CREATE TABLE resource
 );
 
 
-
-
-
-
-
-
-
-
+-- 房间服务器列表
+CREATE TABLE room_servers
+(
+    game_type       int,                     -- 游戏类型
+    server_host     varchar(50),             -- 服务器地址
+    server_port     int                      -- 服务器端口号
+    primary key(game_type,server_host,server_port)
+);
 
 
 
