@@ -17,8 +17,6 @@ function CMD.createRoom(data)
 	room:refreshRoomInfo()
 
 	local room_id = room:get("room_id")
-	local args = {user_id = data.user_id,room_id = room_id,time="NOW()"}
-	skynet.send(".mysql_pool","lua","insertTable","create_room",args)
 
 	return "success",room_id
 end
@@ -79,10 +77,6 @@ function CMD.leaveRoom(data)
 	room:removePlayer(user_id)
 	room:refreshRoomInfo()
 
-	local room_id = room:get("room_id")
-	local args = {user_id = data.user_id,room_id = room_id,time="NOW()"}
-	skynet.send(".mysql_pool","lua","insertTable","leave_room",args)
-
 	return "success"
 end
 
@@ -106,7 +100,7 @@ function CMD.sitDown(data)
 	if obj and obj.user_id ~= player.user_id then
 		return "pos_has_player"
 	end
-
+	print("PLAYER --=->>>>>>",cjson.encode(player))
 	--如果已经是准备状态了
 	if player.is_sit then
 		return "already_sit"
@@ -306,9 +300,9 @@ end
 function CMD.gameOver(room_id,room_info)
 	local room = RoomPool:getRoomByRoomID(room_id)
 	local replay_id = room:get("replay_id")
-
-	room.rebuild(room_info)
-
+	local cjson = require "cjson"
+	print("FYD===++++++ gameOver ==>",cjson.encode(room_info))
+	room.property:updateValues(room_info)
 	local cur_round = room:get("cur_round")
 	local round = room:get("round")
 	if cur_round == 1 then

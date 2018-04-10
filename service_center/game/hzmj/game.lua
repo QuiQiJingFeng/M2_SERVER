@@ -48,7 +48,7 @@ function game:clear()
 	local round = self.room:get("round")
 	-- 大赢家金币结算
 	if over_round >= 1 then
-		local pay_type = self:get("pay_type")
+		local pay_type = self.room:get("pay_type")
 		--赢家出资 积分高的掏钱
 		if pay_type == PAY_TYPE.WINNER_COST then
 			-- 积分从高到低排序
@@ -533,7 +533,7 @@ game["DEAL_FINISH"] = function(self, player)
 		num = num + 1
 	end
 
-	if num > 0 then
+	if num == 0 then
 		--庄家出牌
 		local zplayer = self.room:getPlayerByPos(self.zpos)
 		self:drawCard(zplayer)
@@ -885,7 +885,7 @@ game["GUO"] = function(self,player,data)
 			end
 		end
 	end
-		
+
 	--下一家出牌
 	local next_pos = self.cur_play_user.user_pos + 1
 	if next_pos > self.room:get("seat_num") then
