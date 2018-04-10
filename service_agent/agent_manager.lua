@@ -28,9 +28,6 @@ local AGENT_POOL = {}
 local agent_manager = {}
 
 local function pushEvent(fd,event_name,event_msg)
-   local cjson = require "cjson"
-   print("event_name = ",event_name)
-   print("msg = ",cjson.encode(event_msg))
     local agent_item = AGENT_MAP[fd]
     if agent_item then
         print("service_id = ",agent_item.service_id)
@@ -39,7 +36,6 @@ local function pushEvent(fd,event_name,event_msg)
 end
 
 local function disconnect_fd(fd)
-    print("disconnect=====")
     local agent_item = AGENT_MAP[fd]
     AGENT_MAP[fd] = nil
     skynet.call(GATE_SERVICE,"lua","kick",fd)
