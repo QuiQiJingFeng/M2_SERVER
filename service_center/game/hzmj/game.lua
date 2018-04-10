@@ -293,7 +293,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 
 	local players = self.room:get("players")
 	for i,player in ipairs(players) do
-		player.is_sit = nil
+		player.is_sit = false
 	end
 	room:set("sit_down_num",0)
 
