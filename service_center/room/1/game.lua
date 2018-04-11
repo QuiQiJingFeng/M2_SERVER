@@ -879,7 +879,7 @@ end
 function game:back_room(user_id)
 	local player = self.room:getPlayerByUserId(user_id)
 	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting","cur_round")
-	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack","gold_num")
+	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack","gold_num","disconnect")
 	local rsp_msg = {}
 	rsp_msg.room_setting = room_setting
 	rsp_msg.card_list = player.card_list

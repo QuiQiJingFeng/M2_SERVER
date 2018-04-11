@@ -71,13 +71,13 @@ cCardValue"
 Result
 success
 	auth_fail
-º)
+ú)
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
 	gang_type (RgangType
 from (Rfrom
-type (Rtype"ô
+type (Rtype"”
 UserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -87,7 +87,11 @@ cCardValue"
 is_sit (RisSit
 gold_num (RgoldNum
 score (Rscore
-	cur_score	 (RcurScore"¢
+	cur_score	 (RcurScore
+
+disconnect
+ (R
+disconnect"¢
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -218,7 +222,7 @@ winner_pos (R	winnerPos"m
 user_id (RuserId
 user_pos (RuserPos
 
-is_connect (R	isConnect"Š
+is_connect (R	isConnect"ª
 
 PlayerInfo
 user_id (RuserId
@@ -230,7 +234,11 @@ PlayerInfo
 gold_num (RgoldNum
 score (Rscore/
 
-card_stack	 (2.msg.user.GPItemR	cardStack"´
+card_stack	 (2.msg.user.GPItemR	cardStack
+
+disconnect
+ (R
+disconnect"´
 PushAllRoomInfo8
 room_setting (2.msg.user.RoomSettingRroomSetting
 	card_list (RcardList.

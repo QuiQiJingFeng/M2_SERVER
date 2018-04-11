@@ -82,7 +82,6 @@ function CMD.back_room(content)
     info.secret = content.secret
     player:update(info)
     player.disconnect = false
-    room:userReconnect(player)
     --如果房间是由于宕机恢复过来的,则该局作废重新开始
     if room.recover_state then
         --遍历下房间中剩下的  在线的玩家是否全部都准备了
@@ -95,9 +94,9 @@ function CMD.back_room(content)
                 num = num + 1
             end
         end
+        room:refreshRoomInfo()
         if num >= room.seat_num then
             --开始游戏
-            room:refreshRoomInfo()
             room:startGame()
             room:updatePlayersToDb()
         end
