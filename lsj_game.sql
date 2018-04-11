@@ -134,7 +134,7 @@ CREATE TABLE room_servers
 );
 
 
-INSERT INTO room_servers values(1,1,"127.0.0.1",8888);
+INSERT INTO room_servers values(1,1,"47.52.99.120",8888);
 
 
 
