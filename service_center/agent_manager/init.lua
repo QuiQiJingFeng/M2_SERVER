@@ -158,7 +158,6 @@ function SOCKET.data(fd, data)
 
                 local origin_info = userid_to_info[user_id]
                 if origin_info and origin_info.fd then
-                    send(fd,"handle_error",{result="server_error"})
                     send(origin_info.fd, { handle_error = {result="other_player_login"} }, origin_info.secret)
                     skynet.call(GATE_SERVICE,"lua","kick",origin_info.fd)
                 end
