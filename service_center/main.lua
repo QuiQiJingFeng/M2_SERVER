@@ -16,11 +16,6 @@ skynet.start(function()
 	skynet.uniqueservice("redis_center")
 
 	skynet.uniqueservice("agent_manager")
-
-	skynet.uniqueservice("room_manager") 
 	
-	
-
-
 	skynet.exit()
 end)
