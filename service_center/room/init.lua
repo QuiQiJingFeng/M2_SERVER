@@ -83,7 +83,7 @@ function CMD.back_room(content)
     player:update(info)
     player.disconnect = false
     --如果房间是由于宕机恢复过来的,则该局作废重新开始
-    if room.recover_state then
+    if room.recover_state and not room.game then
         --遍历下房间中剩下的  在线的玩家是否全部都准备了
         local num = 0
         for i,player in ipairs(room.player_list) do
