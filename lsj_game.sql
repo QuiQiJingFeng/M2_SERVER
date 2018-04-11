@@ -1,11 +1,6 @@
 CREATE DATABASE IF NOT EXISTS lsj_game default char set utf8;
 use lsj_game;
 
-CREATE TABLE generators
-(
-	user_id_generator double
-);
-
 -- 用户的注册信息表
 CREATE TABLE register
 (
@@ -58,16 +53,26 @@ CREATE TABLE user_info
 -- 房间的创建记录
 CREATE TABLE create_room
 (
-	user_id         int(10),            -- 玩家ID
-	room_id         int,                    -- 房间号
+	user_id         int(10),                -- 玩家ID
+	room_id         int(10),                -- 房间号
+    game_type       int,                    -- 游戏的类型
+    round           int,                    -- 圈数
+    pay_type        int,                    -- 支付类型
+    seat_num        int,                    -- 游戏的人数
+    over_round      int,                    -- 已经结束的局数
+    other_setting   varchar(200),           -- 其他设定
+    is_friend_room  boolean,                -- 是否好友房
+    is_open_voice   boolean,                -- 是否开启语音聊天
+    is_open_gps     boolean,                -- 是否开启gps
     time            datetime                -- 创建时间
 );
 
 -- 房间的加入记录
 CREATE TABLE join_room
 (
-	user_id         int(10),            -- 玩家ID
-    room_id         int,                    -- 房间号
+	user_id         int(10),                -- 玩家ID
+    room_id         int(10),                -- 房间号
+    game_type       int,                    -- 游戏的类型
     time            datetime                -- 加入时间
 );
 
@@ -76,8 +81,32 @@ CREATE TABLE join_room
 CREATE TABLE leave_room
 (
 	user_id         int(10),                -- 玩家ID
-    room_id         int,                    -- 房间ID
+    room_id         int(10),                -- 房间ID
+    game_type       int,                    -- 游戏的类型
     time            datetime                -- 离开房间的时间
+);
+
+-- 当前存在的房间的列表
+CREATE TABLE room_list                      
+(
+    owner_id        int(10),                -- 拥有者的ID
+    room_id         int(10),                -- 房间ID
+    game_type       int,                    -- 游戏的类型
+    round           int,                    -- 圈数
+    pay_type        int,                    -- 支付类型
+    seat_num        int,                    -- 游戏的人数
+    over_round      int,                    -- 已经结束的局数
+    cur_round       int,                    -- 当前的回合数量
+    sit_down_num    int,                    -- 已经坐下的人数
+    other_setting   varchar(200),           -- 其他设定
+    is_friend_room  boolean,                -- 是否好友房
+    is_open_voice   boolean,                -- 是否开启语音聊天
+    is_open_gps     boolean,                -- 是否开启gps
+    player_list     text,                   -- 玩家列表
+    server_id       int,                    -- 服务器ID
+    state           int,                    -- 当前房间的状态
+    expire_time     double,                 -- 房间的释放时间
+    primary key(room_id)
 );
 
 -- 资源变化的记录
@@ -97,8 +126,18 @@ CREATE TABLE resource
 -- 房间服务器列表
 CREATE TABLE room_servers
 (
+	server_id       int,                     -- 服务器ID
     game_type       int,                     -- 游戏类型
     server_host     varchar(50),             -- 服务器地址
     server_port     int,                      -- 服务器端口号
-    primary key (game_type,server_host,server_port)
+    primary key(game_type,server_host,server_port)
 );
+
+
+INSERT INTO room_servers values(1,1,"127.0.0.1",8888);
+
+
+
+
+
+

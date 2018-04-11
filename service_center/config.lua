@@ -28,6 +28,7 @@ node_type = "center_server"
 node_name = "center_server_01"
 node_address = "127.0.0.1:20001"
 
-center_server_id = 1
+server_id = 1
 
 cluster = "./lualib/cluster_config.lua"
+
