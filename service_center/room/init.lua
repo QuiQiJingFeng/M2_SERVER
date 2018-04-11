@@ -85,7 +85,7 @@ function CMD.back_room(content)
     --如果房间是由于宕机恢复过来的,则该局作废重新开始
     if room.recover_state then
         --遍历下房间中剩下的  在线的玩家是否全部都准备了
-        local num = 1
+        local num = 0
         for i,player in ipairs(room.player_list) do
             if player.disconnect then
                 return "success"
@@ -95,6 +95,7 @@ function CMD.back_room(content)
             end
         end
         room:refreshRoomInfo()
+        print("num--->>>",num)
         if num >= room.seat_num then
             --开始游戏
             room:startGame()
