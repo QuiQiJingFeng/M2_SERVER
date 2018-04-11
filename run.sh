@@ -1,22 +1,10 @@
 SERVER=$1
-
-CENTER_DIR_PATH="service_center/log/"
-if [ ! -d "$CENTER_DIR_PATH" ]; then
-    mkdir "$CENTER_DIR_PATH"
+#检查启动参数
+if [ ! -n "$SERVER" ]; then
+    echo "[ERROR] NO SERVER TYPE!"
+    exit 1
 fi
-
-touch service_common/log/print.log
-touch service_center/log/print.log
-touch service_agent/log/print.log
-
-NAME="skynet"
-PROCESS=`ps -ef | grep "$NAME" | grep -v "$0" | grep -v "grep" | awk '{print $2}'`  
-for i in $PROCESS  
-do  
-  echo "Kill the $1 process [ $i ]"  
-  kill $i  
-done
-
+touch conf/$SERVER/print.log
 
 if [ "$(uname)" == "Darwin" ]; then
     # Do something under Mac OS X platform
