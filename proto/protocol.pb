@@ -57,35 +57,19 @@ cCardValue (R
 cCardValue"
 cLestCardNum (RcLestCardNum
 cCards (RcCards
-˝
-msg/login.proto	msg.login"ß
-LoginReq3
-
-login_type (2.msg.login.LoginTypeR	loginType
-account (	Raccount
-token (	Rtoken
-	user_name (	RuserName
-user_pic (	RuserPic"^
+‹
+msg/login.proto	msg.login"9
+LoginReq
+user_id (RuserId
+token (	Rtoken"5
 LoginRsp)
-result (2.msg.login.ResultRresult'
-reconnect_token (	RreconnectToken"
-	LogoutReq"6
-	LogoutRsp)
-result (2.msg.login.ResultRresult"=
-ReconnectReq
-user_id (	RuserId
-token (	Rtoken"b
-ReconnectRsp)
-result (2.msg.login.ResultRresult'
-reconnect_token (	RreconnectToken*&
+result (2.msg.login.ResultRresult*&
 	LoginType
 
 weixin
-	reconnect*E
+	reconnect*$
 Result
-success
-fail
-unknow_login_type
+success
 	auth_fail
 ∫)
 msg/user.protomsg.user"c
@@ -95,7 +79,7 @@ login_type (2.msg.login.LoginTypeR	loginType
 from (Rfrom
 type (Rtype"Ù
 UserInfo
-user_id (	RuserId
+user_id (RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
@@ -157,7 +141,7 @@ expireTime
 	room_list (2.msg.user.RoomItemRroomList
 room_id (RroomId"›
 PushUserInfo
-user_id (	RuserId
+user_id (RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
@@ -173,7 +157,7 @@ expireTime
 room_setting (2.msg.user.RoomSettingRroomSetting
 state (Rstate"=
 SitItem
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos"T
 PushSitDown
 room_id (RroomId,
@@ -186,35 +170,35 @@ expireTime
 randomNums
 	cur_round (RcurRound"V
 PushDrawCard
-user_id (	RuserId
+user_id (RuserId
 card (Rcard
 user_pos (RuserPos"¨
 PushPlayCard
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos
 operator (Roperator
 	card_list (RcardList/
 
 card_stack (2.msg.user.GPItemR	cardStack"X
 NoticePlayCard
-user_id (	RuserId
+user_id (RuserId
 card (Rcard
 user_pos (RuserPos"j
 NoticePengCard
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos$
 item (2.msg.user.GPItemRitem"j
 NoticeGangCard
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos$
 item (2.msg.user.GPItemRitem"Ü
 PushPlayerOperatorState#
 operator_list (	RoperatorList
 user_pos (RuserPos
-user_id (	RuserId
+user_id (RuserId
 card (Rcard"ä
 Item
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos
 	cur_score (RcurScore
 score (Rscore
@@ -231,13 +215,13 @@ last_round (R	lastRound
 
 winner_pos (R	winnerPos"m
 NoticePlayerConnectState
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos
 
 is_connect (R	isConnect"ä
 
 PlayerInfo
-user_id (	RuserId
+user_id (RuserId
 	user_name (	RuserName
 user_pic (	RuserPic
 user_ip (	RuserIp
@@ -253,13 +237,13 @@ card_stack	 (2.msg.user.GPItemR	cardStack"¥
 players (2.msg.user.PlayerInfoRplayers
 operator (	Roperator"Y
 GoldItem
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos
 gold_num (RgoldNum"A
 UpdateCostGold/
 	gold_list (2.msg.user.GoldItemRgoldList"^
 	ScoreItem
-user_id (	RuserId
+user_id (RuserId
 user_pos (RuserPos
 
 delt_score (R	deltScore"R
@@ -280,7 +264,7 @@ delt_score (R	deltScore"R
 ConfirmDistroyRoomRsp
 result (	Rresult"`
 NoticeOtherRefuse
-user_id (	RuserId
+user_id (RuserId
 room_id (RroomId
 user_pos (RuserPos"F
 NoticePlayerDistroyRoom
@@ -312,17 +296,15 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-√
-protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"Ç
+˘
+protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ù
 C2S
 
 session_id (R	sessionId3
 	handshake
  (2.msg.common.HandshakeR	handshake3
 	heartbeat (2.msg.common.HeartbeatR	heartbeat)
-login (2.msg.login.LoginReqRlogin,
-logout (2.msg.login.LogoutReqRlogout5
-	reconnect (2.msg.login.ReconnectReqR	reconnect9
+login (2.msg.login.LoginReqRlogin9
 create_roomëN (2.msg.user.CreateRoomReqR
 createRoom3
 	join_roomíN (2.msg.user.JoinRoomReqRjoinRoom6
@@ -332,7 +314,7 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 game_cmdïN (2.msg.user.GameCmdReqRgameCmd<
 distroy_roomñN (2.msg.user.DistroyRoomReqRdistroyRoomR
 confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
-get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"È
+get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"Ñ
 S2C
 
 session_id (R	sessionId
@@ -340,9 +322,7 @@ session_id (R	sessionId
 	handshake
  (2.msg.common.HandshakeR	handshake3
 	heartbeat (2.msg.common.HeartbeatR	heartbeat)
-login (2.msg.login.LoginRspRlogin,
-logout (2.msg.login.LogoutRspRlogout5
-	reconnect (2.msg.login.ReconnectRspR	reconnect9
+login (2.msg.login.LoginRspRlogin9
 create_roomëN (2.msg.user.CreateRoomRspR
 createRoom3
 	join_roomíN (2.msg.user.JoinRoomRspRjoinRoom6

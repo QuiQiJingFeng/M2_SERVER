@@ -110,4 +110,19 @@ function utils:ossRequest(host,bucket_name,path,content)
     return true
 end
 
+
+--洗牌  FisherYates洗牌算法
+--算法的思想是每次从未选中的数字中随机挑选一个加入排列，时间复杂度为O(n)
+function utils:fisherYates(card_list)
+    for i = #card_list,1,-1 do
+        --在剩余的牌中随机取一张
+        local j = math.random(i)
+        --交换i和j位置的牌
+        local temp = card_list[i]
+        card_list[i] = card_list[j]
+        card_list[j] = temp
+    end
+    return card_list
+end
+
 return utils
