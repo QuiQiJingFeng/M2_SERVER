@@ -56,6 +56,8 @@ function game:start(room)
 	self.cur_play_user = nil
 	--当前出的牌
 	self.cur_play_card = nil
+	--胡牌列表
+	self.hu_list = {}
 	--玩家当前局积分清零
 	for _,player in ipairs(self.room.player_list) do
 		player.cur_score = 0
@@ -589,7 +591,6 @@ game["GANG"] = function(self,player,data)
 				end
 				return a_pos < b_pos
 			end)
-
 
 		local hu_player = table.remove(hu_list,1)
 		--通知客户端当前可以胡牌
