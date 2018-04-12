@@ -81,6 +81,7 @@ end
 
 function SOCKET.error(fd, msg)
     print("socket error",fd, msg)
+    SOCKET.close(fd)
 end
 
 function SOCKET.warning(fd, size)
