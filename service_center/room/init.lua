@@ -102,8 +102,8 @@ function CMD.back_room(content)
             room:updatePlayersToDb()
         end
     else
+        room:userReconnect(player)
         room.game:back_room(user_id)
-        room:refreshRoomInfo()
     end
     return "success"
 end
