@@ -3,6 +3,8 @@ local socket = require "skynet.socket"
 local crypt = require "skynet.crypt"
 local cjson = require "cjson"
 local utils = require "utils"
+local skynet = require "skynet"
+
 local Player = {}
 
 Player.__index = Player
@@ -37,20 +39,25 @@ end
 
 function Player:update(info)
     utils:mergeToTable(self,info)
-    print("FYD----1111>>>",self.fd)
-    print("FYD----2222>>>",info.fd)
 end
 
 function Player:send(data_content)
     if self.disconnect then
         return
     end
+
     -- 转换为protobuf编码
     local success, data, err = pcall(pbc.encode, "S2C", data_content)
     if not success or err then
         print("encode protobuf error",cjson.encode(data_content))
         return
     end
+    local room = require "room"
+    if room.replay_id then
+        skynet.send(".replay_cord","lua","insertRecord",room.replay_id,data_content)
+    end
+    
+    
 
     -- 根据密钥进行加密
     local secret = self.secret

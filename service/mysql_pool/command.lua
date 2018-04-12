@@ -134,8 +134,17 @@ function command:checkIsInGame(user_id)
     return data[1]
 end
 
+--查询所有没有被销毁的房间
 function command:selectRoomListByServerId(server_id)
-    local sql = string.format("select * from room_list where server_id = "..server_id.." and state < 4;")
+    local now = math.floor(tonumber(skynet.time()))
+    local sql = string.format("select * from room_list where server_id = %d and expire_time < %d",server_id,now)
+    return do_query(sql)
+end
+
+-- 查询指定服务器上的销毁超过12个小时的房间并删除(这就意味着 房间号必须通过mysql来生成)
+function command:distroyCord()
+    local time = skynet.time() + 12 * 60 * 60
+    local sql = string.format("delete from room_list where server_id = %d and expire_time < %d",server_id,time)
     return do_query(sql)
 end
 
@@ -144,6 +153,30 @@ function command:updateGoldNum(num,user_id)
     sql = string.format(sql,num,user_id)
     return do_query(sql)
 end
+-- 一次查找4个  如果4个都被用了 则继续筛选
+--select round(rand()*(max-min)+min); 生成指定范围内的随机数
+function command:getRandomRoomId()
+    local sql = [[SELECT room_id
+    FROM (
+      SELECT FLOOR(RAND() * 899999 + 100000) AS room_id 
+      UNION
+      SELECT FLOOR(RAND() * 899999 + 100000) AS room_id
+      UNION
+      SELECT FLOOR(RAND() * 899999 + 100000) AS room_id
+      UNION
+      SELECT FLOOR(RAND() * 899999 + 100000) AS room_id
+    ) AS temp
+    WHERE `room_id` NOT IN (SELECT room_id FROM room_list)
+    LIMIT 1]];
+    for i = 1,10 do
+        local ret = do_query(sql)
+        local info = ret[1]
+        if info then
+            return info.room_id
+        end
+    end
+end
+
 
 
 return command

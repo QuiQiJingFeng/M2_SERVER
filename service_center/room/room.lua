@@ -142,16 +142,19 @@ function room:updatePlayerProperty(user_id,name,value)
 	return false
 end
 
-function room:refreshRoomInfo()
+function room:getRoomInfo()
 	local rsp_msg = {}
-
 	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","cur_score","disconnect")
 	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting","cur_round")
 	rsp_msg.room_setting = room_setting
 	rsp_msg.room_id = self.room_id
 	rsp_msg.state = self.state
 	rsp_msg.players = players
+	return rsp_msg
+end
 
+function room:refreshRoomInfo()
+	local rsp_msg = self:getRoomInfo()
 	self:broadcastAllPlayers("refresh_room_info",rsp_msg)
 end
 
@@ -199,14 +202,20 @@ function room:startGame()
     if self.cur_round == 1 then
         local now = skynet.time()
         self.expire_time = now + 12*60*60
-
         --更新销毁时间
         local data = {}
         data.room_id = self.room_id
 	    data.expire_time = self.expire_time
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
-    end
+	end
 
+	self.replay_id = skynet.call(".redis_center","lua","INCR",0,"general_replay_id")
+	if self.replay_id then
+		local record_msg = self:getRoomInfo()
+		skynet.send(".replay_cord","lua","insertRecord",self.replay_id,record_msg)
+	else
+		print("ERROR: 无法获取到replay_id")
+	end
     local game_type = self.game_type
     local path = string.format("%d.game",game_type)
     self.game = require(path)

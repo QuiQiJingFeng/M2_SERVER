@@ -22,20 +22,10 @@ local fd_to_info = {}
 local userid_to_info = {}
 local roomid_to_agent = {}
 local room_services = {}
-local REDIS_DB = 0
+
 --获取一个唯一的房间号ID
 local function getUnusedRandomId()
-    local pre_id = math.random(1,9)
-    local last_id = string.format("%05d",math.random(0,99999)) 
-    local random_id = tonumber(pre_id..last_id)
-
-    local ret = skynet.call(".redis_center","lua","SISMEMBER",REDIS_DB,"room_pool",random_id)
-    if ret == 1 then
-        return getUnusedRandomId()
-    else
-        skynet.call(".redis_center","lua","SADD",REDIS_DB,"room_pool",random_id)
-        return random_id
-    end
+    return skynet.call(".mysql_pool","lua","getRandomRoomId")
 end
 
 local agent_manager = {}
@@ -276,14 +266,20 @@ end
 function CMD.distroyRoom(room_id)
     local service_id = roomid_to_agent[room_id]
     if service_id then
-        local data = {}
-        data.room_id = room_id
-        data.state = constant.ROOM_STATE.ROOM_DISTROY
-        skynet.send(".mysql_pool","lua","insertTable","room_list",data)
-
         table.insert(room_services,room_info.service_id)
         roomid_to_agent[room_id] = nil
     end
+end
+
+local function checkExpireRoom()
+    local delay_time = 12 * 60 * 60
+    local remove_time = skynet.time() + delay_time
+    local server_id = skynet.getenv("server_id")
+    local room_list = skynet.call(".mysql_pool","lua","selectRoomListByServerId",server_id,remove_time)
+ 
+        --每隔1分钟检查一下失效的房间
+        skynet.timeout(60 * 100, checkExpireRoom)   
+ 
 end
 
 skynet.start(function()

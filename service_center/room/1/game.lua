@@ -45,11 +45,11 @@ function game:start(room)
 	--奖码数
 	self.award_num = self.room.other_setting[2]
 	--七对
-	self.seven_pairs = self.room.other_setting[3]
+	self.seven_pairs = self.room.other_setting[3] == 1
 	--喜分
-	self.hi_point = self.room.other_setting[4]
+	self.hi_point = self.room.other_setting[4] == 1
 	--一码不中当全中
-	self.convert = self.room.other_setting[5]
+	self.convert = self.room.other_setting[5] == 1
 	--等待玩家操作的列表
 	self.waite_operators = {}
 	--当前出牌人
@@ -513,7 +513,6 @@ game["GANG"] = function(self,player,data)
 	local count = self.room.seat_num - 1
 
 	local origin_data = self.room:getPlayerInfo("user_id","cur_score")
-	print("origin_data =>>>>>",cjson.encode(origin_data))
 	--计算杠的积分
 	if obj.gang_type == GANG_TYPE.AN_GANG then
 		--暗杠，赢每个玩家2*底分；
@@ -562,13 +561,17 @@ game["GANG"] = function(self,player,data)
 	local players = self.room.player_list
 	for _,temp_player in ipairs(players) do
 		if temp_player.user_id ~= player.user_id then
-			--胡牌前,先将这张杠牌加入玩家手牌
-			self:addHandleCard(temp_player,card)
-			local is_hu = self:checkHu(player)
-			--检查完之后,去掉这张牌
-			self:removeHandleCard(temp_player,card,1)
-			if is_hu then
-				table.insert(hu_list,temp_player)
+			--有红中不能抢杠胡
+			local num = temp_player.handle_cards[3][5]
+			if num <= 0 then
+				--胡牌前,先将这张杠牌加入玩家手牌
+				self:addHandleCard(temp_player,card)
+				local is_hu = self:checkHu(player)
+				--检查完之后,去掉这张牌
+				self:removeHandleCard(temp_player,card,1)
+				if is_hu then
+					table.insert(hu_list,temp_player)
+				end
 			end
 		end
 	end
@@ -683,22 +686,26 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 			end
 		end
 
-		--摸到四张红中胡牌，赢每个玩家2*底分；
-		if tempResult.iHuiNum == 4 then
-			player.cur_score = player.cur_score + self.base_score * 2 * count
-			for _,obj in ipairs(players) do
-				if player.user_id ~= obj.user_id then
-					obj.cur_score = obj.cur_score - self.base_score * 2
+		if self.hi_point then 
+			--摸到四张红中胡牌，赢每个玩家2*底分
+			if tempResult.iHuiNum == 4 then
+				player.cur_score = player.cur_score + self.base_score * 2 * count + 5 * count
+				for _,obj in ipairs(players) do
+					if player.user_id ~= obj.user_id then
+						obj.cur_score = obj.cur_score - self.base_score * 2 - 5
+					end
 				end
 			end
 		end
 
- 		--胡七对 赢每个玩家2*底分
-		if tempResult.iChiNum + tempResult.iPengNum == 0 then
-			player.cur_score = player.cur_score + self.base_score * 2 * count
-			for _,obj in ipairs(players) do
-				if player.user_id ~= obj.user_id then
-					obj.cur_score = obj.cur_score - self.base_score * 2
+		if self.seven_pairs then
+			--胡七对 赢每个玩家2*底分
+			if tempResult.iChiNum + tempResult.iPengNum == 0 then
+				player.cur_score = player.cur_score + self.base_score * 2 * count
+				for _,obj in ipairs(players) do
+					if player.user_id ~= obj.user_id then
+						obj.cur_score = obj.cur_score - self.base_score * 2
+					end
 				end
 			end
 		end
@@ -724,6 +731,10 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 			if card_value == 1 or card_value == 5 or card_value == 9 then
 				num = num + 1
 			end
+		end
+		-- 一码不中当全中
+		if self.convert then
+			num =  award_num
 		end
 		if num > 0 then
 			player.cur_score = player.cur_score + self.base_score * 2 * 2 * num * count 
@@ -860,6 +871,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 	    skynet.call(".agent_manager","lua","distroyRoom")
 	end
 	self:clear()
+	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
 
 
