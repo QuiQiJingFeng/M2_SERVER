@@ -85,7 +85,9 @@ function room:removePlayer(user_id)
 	for index,player in ipairs(self.player_list) do
 		if player.user_id == user_id then
 			table.remove(self.player_list,index)
-			room.sit_down_num = room.sit_down_num - 1
+			if player.is_ist then
+				room.sit_down_num = room.sit_down_num - 1
+			end
 			break
 		end
 	end
