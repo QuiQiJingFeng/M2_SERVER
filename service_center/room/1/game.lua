@@ -558,6 +558,7 @@ game["GANG"] = function(self,player,data)
 		self:drawCard(player)
 		return "success"
 	end
+
 	--如果是碰杠,则需要检查是否有人胡这张牌
 	local hu_list = {}
 	local players = self.room.player_list
@@ -575,12 +576,25 @@ game["GANG"] = function(self,player,data)
 	end
 
 	if #hu_list > 1 then
-		for _,hu_player in ipairs(hu_list) do
-			--通知客户端当前可以胡牌
-			hu_player:send({push_player_operator_state={operator_state = "HU",user_pos = hu_player.user_pos,user_id=hu_player.user_id}})
-			self.waite_operators[player.user_pos] = "WAIT_HU"
-			self.gang_pos = player.user_pos
-		end
+		self.hu_list = hu_list
+		local gang_pos = player.user_pos
+		table.sort(hu_list,function(a,b) 
+				local a_pos = a.user_pos
+				local b_pos = b.user_pos
+				if a_pos < gang_pos then
+					a_pos = a_pos * 100
+				end
+				if b_pos < gang_pos then
+					b_pos = b_pos * 100
+				end
+				return a_pos < b_pos
+			end)
+
+
+		local hu_player = table.remove(hu_list,1)
+		--通知客户端当前可以胡牌
+		hu_player:send({push_player_operator_state={operator_state = "HU",user_pos = hu_player.user_pos,user_id=hu_player.user_id}})
+		self.waite_operators[hu_player.user_pos] = "WAIT_HU"
 	else
 	    --杠了之后再摸一张牌
 		self:drawCard(player)
@@ -597,26 +611,20 @@ game["GUO"] = function(self,player,data)
 	end
 	self.waite_operators[player.user_pos] = nil
 
-	--检测是否有延迟胡牌的情况
-	local positions = {}
-	for pos,v in pairs(self.waite_operators) do
-		table.insert(positions,pos)
-	end
-
-	if #positions >= 1 then
-		for i=1,self.room.seat_num  -1 do
-			local next_pos = self.gang_pos + 1
-			if positions[next_pos] then  --找到胡牌人中优先级最高的人
-				if positions[next_pos] == "DELAY_HU" then --如果这个人处于延迟胡状态
-					local player = self.room:getPlayerByPos(next_pos)
-					local is_hu,tempResult = self:checkHu(player)
-					if is_hu then
-						--延迟胡牌不可能是自摸胡牌,所以这里填写WAIT_HU
-						self:gameOver(player,GAME_OVER_TYPE.NORMAL,"WAIT_HU",tempResult)
-					end
-				end
-			end
+	--检测是否有下一个人胡牌
+	if self.hu_list and #self.hu_list >= 1 then
+		local hu_player = table.remove(hu_list,1)
+		--通知客户端当前可以胡牌
+		hu_player:send({push_player_operator_state={operator_state = "HU",user_pos = hu_player.user_pos,user_id=hu_player.user_id}})
+		self.waite_operators[hu_player.user_pos] = "WAIT_HU"
+	else
+		-- 如果某个碰、杠被过了,那么原来的出牌人的下一位摸牌
+		local next_pos = self.cur_play_user.user_pos + 1
+		if next_pos > self.room.seat_num then
+			next_pos = 1
 		end
+		local next_player = self.room:getPlayerByPos(next_pos)
+		self:drawCard(next_player)
 	end
 
 	return "success"
@@ -629,23 +637,6 @@ game["HU"] = function(self,player,data)
 
 	if not (operate == "WAIT_PLAY_CARD" or gang_hu) then
 		return "invaild_operator"
-	end
-
-	local positions = {}
-	for pos,v in pairs(self.waite_operators) do
-		positions[pos] = true
-	end
-	if # positions > 1 then
-		for i=1,self.room.seat_num - 1 do
-			local next_pos = self.gang_pos + 1
-			if positions[next_pos] then  --找到胡牌人中优先级最高的人,如果当前胡牌人不是这个人
-				if positions[next_pos] ~= player.user_pos then
-					--延迟胡牌
-					self.waite_operators[player.user_pos] = "DELAY_HU"
-					return "success"
-				end
-			end
-		end
 	end
 
 	self.waite_operators[player.user_pos] = nil
@@ -662,7 +653,7 @@ game["HU"] = function(self,player,data)
 		end
 		--胡牌前,先将这张杠牌加入玩家手牌
 		self:addHandleCard(player,card)
-		local is_hu = self:checkHu(player)
+		local is_hu,tempResult = self:checkHu(player)
 		--检查完之后,去掉这张牌
 		self:removeHandleCard(player,card,1)
 		if is_hu then
