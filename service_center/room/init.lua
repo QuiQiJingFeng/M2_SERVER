@@ -103,6 +103,7 @@ function CMD.back_room(content)
         end
     else
         room.game:back_room(user_id)
+        room:refreshRoomInfo()
     end
     return "success"
 end
@@ -177,8 +178,6 @@ function CMD.sit_down(content)
     room:broadcastAllPlayers("push_sit_down",rsp_msg)
 
     room.sit_down_num = room.sit_down_num + 1
-    print("FYD------room.seat_num ",room.seat_num)
-    print("FYD------room.sit_down_num ",room.sit_down_num)
     if room.seat_num == room.sit_down_num then
         room:startGame()
     end
