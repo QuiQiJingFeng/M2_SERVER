@@ -513,37 +513,33 @@ game["GANG"] = function(self,player,data)
 	local count = self.room.seat_num - 1
 
 	local origin_data = self.room:getPlayerInfo("user_id","cur_score")
-
+	print("origin_data =>>>>>",cjson.encode(origin_data))
 	--计算杠的积分
-	for _,obj in ipairs(player.card_stack) do
-		if obj.gang_type == GANG_TYPE.AN_GANG then
-			--暗杠，赢每个玩家2*底分；
-			player.cur_score = player.cur_score + self.base_score * 2 * count
-			for _,obj in ipairs(players) do
-				if player.user_id ~= obj.user_id then
-					obj.cur_score = obj.cur_score - self.base_score * 2
-				end
+	if obj.gang_type == GANG_TYPE.AN_GANG then
+		--暗杠，赢每个玩家2*底分；
+		player.cur_score = player.cur_score + self.base_score * 2 * count
+		for _,obj in ipairs(players) do
+			if player.user_id ~= obj.user_id then
+				obj.cur_score = obj.cur_score - self.base_score * 2
 			end
-		elseif obj.gang_type == GANG_TYPE.MING_GANG then
-			--明杠 赢放杠者3*底分
-			player.cur_score = player.cur_score + self.base_score * 3
-			for _,obj in ipairs(players) do
-				if obj.from == obj.user_pos then
-					obj.cur_score = obj.cur_score - self.base_score * 3
-				end
+		end
+	elseif obj.gang_type == GANG_TYPE.MING_GANG then
+		--明杠 赢放杠者3*底分
+		player.cur_score = player.cur_score + self.base_score * 3
+		for _,obj in ipairs(players) do
+			if obj.from == obj.user_pos then
+				obj.cur_score = obj.cur_score - self.base_score * 3
 			end
-		elseif obj.gang_type == GANG_TYPE.PENG_GANG then
-			--自己摸的明杠(公杠) 三家出，赢每个玩家1*底分；
-			player.cur_score = player.cur_score + self.base_score * 1 * count
-			for _,obj in ipairs(players) do
-				if player.user_id ~= obj.user_id then
-					obj.cur_score = obj.cur_score - self.base_score * 1
-				end
+		end
+	elseif obj.gang_type == GANG_TYPE.PENG_GANG then
+		--自己摸的明杠(公杠) 三家出，赢每个玩家1*底分；
+		player.cur_score = player.cur_score + self.base_score * 1 * count
+		for _,obj in ipairs(players) do
+			if player.user_id ~= obj.user_id then
+				obj.cur_score = obj.cur_score - self.base_score * 1
 			end
 		end
 	end
-	local data = self.room:getPlayerInfo("user_id","user_pos","cur_score")
-
 	for _,origin_info in ipairs(origin_data) do
 		for _,info in ipairs(data) do
 			if origin_info.user_id == info.user_id then
