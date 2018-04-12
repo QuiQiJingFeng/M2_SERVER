@@ -179,7 +179,9 @@ function CMD.sit_down(content)
 
     room.sit_down_num = room.sit_down_num + 1
     if room.seat_num == room.sit_down_num then
-        room:startGame()
+        skynet.timeout(1,function() 
+                room:startGame()
+            end)
     end
 
     room:updatePlayersToDb()
