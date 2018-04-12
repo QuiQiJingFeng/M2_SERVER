@@ -178,6 +178,7 @@ function CMD.sit_down(content)
     room:broadcastAllPlayers("push_sit_down",rsp_msg)
 
     room.sit_down_num = room.sit_down_num + 1
+
     if room.seat_num == room.sit_down_num then
         skynet.timeout(1,function() 
                 room:startGame()
@@ -192,7 +193,9 @@ end
 function CMD.disconnect(content)
     local user_id = content.user_id
     local player = room:getPlayerByUserId(user_id)
-    
+    if not player then
+        return
+    end
     if player.is_sit then
         room:userDisconnect(player)
         return
