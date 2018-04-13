@@ -71,13 +71,12 @@ cCardValue"
 Result
 success
 	auth_fail
-ú,
-msg/user.protomsg.user"c
+Î,
+msg/user.protomsg.user"F
 GPItem
-value (Rvalue
-	gang_type (RgangType
-from (Rfrom
-type (Rtype"î
+value (Rvalue
+from (Rfrom
+type (Rtype"î
 UserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -193,6 +192,10 @@ card_stack (2.msg.user.GPItemR	cardStack"X
 user_pos (RuserPos$
 item (2.msg.user.GPItemRitem"j
 NoticeGangCard
+user_id (RuserId
+user_pos (RuserPos$
+item (2.msg.user.GPItemRitem"j
+NoticeCPGHCard
 user_id (RuserId
 user_pos (RuserPos$
 item (2.msg.user.GPItemRitem"Ü
@@ -317,7 +320,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-«
+å
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ù
 C2S
 
@@ -335,7 +338,7 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 game_cmdïN (2.msg.user.GameCmdReqRgameCmd<
 distroy_roomñN (2.msg.user.DistroyRoomReqRdistroyRoomR
 confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
-get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"“
+get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"ó
 S2C
 
 session_id (R	sessionId
@@ -373,6 +376,7 @@ leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_player_distroy_room· (2!.msg.user.NoticePlayerDistroyRoomRnoticePlayerDistroyRoomY
 refresh_player_cur_score‚ (2.msg.user.RefreshPlayerCurScoreRrefreshPlayerCurScoreL
 notice_total_sattle„ (2.msg.user.NoticeTotalSattleRnoticeTotalSattleC
+notice_cpgh_card‰ (2.msg.user.NoticeCPGHCardRnoticeCpghCardC
 update_resource±Í (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state≤Í (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_errorëø (2.msg.user.HandleErrorRhandleErrorA
