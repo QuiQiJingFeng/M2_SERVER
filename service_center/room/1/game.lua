@@ -867,10 +867,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 	room.sit_down_num = 0
 
 	if room.cur_round == room.round then
-		--总结算通知
-		--标记房间已经被销毁
-		room.state = ROOM_STATE.ROOM_DISTROY
-	    skynet.call(".agent_manager","lua","distroyRoom")
+		room:distory(constant.DISTORY_TYPE.FINISH_GAME)
 	end
 	self:clear()
 	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)

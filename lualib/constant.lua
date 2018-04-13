@@ -177,7 +177,8 @@ constant["DEBUG"] = true
 constant["DISTORY_TYPE"] = {
 	ALL_AGREE = 1,     -- 申请并所有人都同意
 	OWNER_DISTROY = 2, -- 房主解散
-	EXPIRE_TIME = 3,   -- 房间的时间过期
+	FINISH_GAME = 3,   -- 游戏结束解散
+	EXPIRE_TIME = 4,   -- 房间的时间过期
 }
 
 constant["ACCOUNT_DB"] = 0

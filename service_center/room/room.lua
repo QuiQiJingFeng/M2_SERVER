@@ -223,6 +223,15 @@ function room:startGame()
     self.recover_state = nil
 end
 
+function room:distory(type)
+	room.state = ROOM_STATE.ROOM_DISTROY
+    if room.game then
+        room.game:clear()
+    end
+    room.player_list = {}
+    skynet.call(".agent_manager","lua","distroyRoom")
+    self:broadcastAllPlayers("notice_player_distroy_room",{room_id=self.room_id,type=type})
+end
 
 
 
