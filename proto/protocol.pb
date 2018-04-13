@@ -71,7 +71,7 @@ cCardValue"
 Result
 success
 	auth_fail
-˙)
+ú,
 msg/user.protomsg.user"c
 GPItem
 value (Rvalue
@@ -277,7 +277,20 @@ delt_score (R	deltScore"R
 user_pos (RuserPos"F
 NoticePlayerDistroyRoom
 room_id (RroomId
-type (Rtype*ã
+type (Rtype"∫
+
+SattleItem
+user_id (RuserId
+user_pos (RuserPos
+hu_num (RhuNum"
+ming_gang_num (RmingGangNum
+an_gang_num (R	anGangNum
+
+reward_num (R	rewardNum"c
+NoticeTotalSattle
+room_id (RroomId5
+sattle_list (2.msg.user.SattleItemR
+sattleList*ã
 Result
 success
 paramater_error
@@ -304,7 +317,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-˘
+«
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ù
 C2S
 
@@ -322,7 +335,7 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 game_cmdïN (2.msg.user.GameCmdReqRgameCmd<
 distroy_roomñN (2.msg.user.DistroyRoomReqRdistroyRoomR
 confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
-get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"Ñ
+get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"“
 S2C
 
 session_id (R	sessionId
@@ -358,7 +371,8 @@ leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_other_distroy_roomﬂ (2 .msg.user.NoticeOtherDistoryRoomRnoticeOtherDistroyRoomL
 notice_other_refuse‡ (2.msg.user.NoticeOtherRefuseRnoticeOtherRefuse_
 notice_player_distroy_room· (2!.msg.user.NoticePlayerDistroyRoomRnoticePlayerDistroyRoomY
-refresh_player_cur_score‚ (2.msg.user.RefreshPlayerCurScoreRrefreshPlayerCurScoreC
+refresh_player_cur_score‚ (2.msg.user.RefreshPlayerCurScoreRrefreshPlayerCurScoreL
+notice_total_sattle„ (2.msg.user.NoticeTotalSattleRnoticeTotalSattleC
 update_resource±Í (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state≤Í (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_errorëø (2.msg.user.HandleErrorRhandleErrorA

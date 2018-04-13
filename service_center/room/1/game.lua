@@ -759,6 +759,7 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 
 	if over_type == GAME_OVER_TYPE.NORMAL then
 		player.hu_num = player.hu_num + 1
+		player.reward_num = player.reward_num + 1
 		for _,player in ipairs(players) do
 			for i,obj in ipairs(player.card_stack) do
 				if obj.type == TYPE.GANG then
@@ -769,7 +770,6 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 					end
 				end
 			end
-			player.reward_num = player.reward_num + 1
 			player.card_stack = {}
 		end
 	end
