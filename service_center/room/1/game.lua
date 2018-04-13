@@ -734,14 +734,15 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 			end
 		end
 		-- 一码不中当全中
-		if self.convert then
+		if self.convert and num <= 0 then
 			num =  award_num
 		end
+
 		if num > 0 then
-			player.cur_score = player.cur_score + self.base_score * 2 * 2 * num * count 
+			player.cur_score = player.cur_score + self.base_score * 2 * num * count 
 			for _,obj in ipairs(players) do
 				if player.user_id ~= obj.user_id then
-					obj.cur_score = obj.cur_score - self.base_score * 2 * 2 * num
+					obj.cur_score = obj.cur_score - self.base_score * 2 * num
 				end
 			end
 		end
