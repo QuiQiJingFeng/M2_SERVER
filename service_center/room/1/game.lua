@@ -384,7 +384,7 @@ game["PENG"] = function(self,player,data)
 	--通知所有人,有人碰了
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 
-	self.room:broadcastAllPlayers("notice_cpgh_card",data)
+	self.room:broadcastAllPlayers("notice_special_event",data)
 
 	--通知玩家出牌
 	local operator = 2
@@ -504,7 +504,7 @@ game["GANG"] = function(self,player,data)
 
 	--通知所有人,有人杠了
 	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
-	self.room:broadcastAllPlayers("notice_cpgh_card",data)
+	self.room:broadcastAllPlayers("notice_special_event",data)
 	local players = self.room.player_list
 	local count = self.room.seat_num - 1
 
@@ -839,7 +839,7 @@ function game:gameOver(player,over_type,operate,tempResult)
 		--通知所有人,有人胡了
 		local obj = {type = TYPE.HU}
 		local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
-		self.room:broadcastAllPlayers("notice_cpgh_card",data)
+		self.room:broadcastAllPlayers("notice_special_event",data)
 	end
 
 	-- 计算庄家的位置
