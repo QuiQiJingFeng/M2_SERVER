@@ -539,6 +539,7 @@ game["GANG"] = function(self,player,data)
 			end
 		end
 	end
+	local data = self.room:getPlayerInfo("user_id","cur_score")
 	for _,origin_info in ipairs(origin_data) do
 		for _,info in ipairs(data) do
 			if origin_info.user_id == info.user_id then
