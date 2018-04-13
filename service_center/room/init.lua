@@ -39,7 +39,6 @@ function CMD.create_room(content)
     data.expire_time = content.expire_time
     data.state = ROOM_STATE.GAME_PREPARE
     data.over_round = 0
-    data.sit_down_num = 0
     data.cur_round = 0
     data.time = nil
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
@@ -84,17 +83,14 @@ function CMD.back_room(content)
     player.disconnect = false
     --如果房间是由于宕机恢复过来的,则该局作废重新开始
     if room.recover_state and not room.game then
+        room:refreshRoomInfo()
         --遍历下房间中剩下的  在线的玩家是否全部都准备了
         local num = 0
         for i,player in ipairs(room.player_list) do
-            if player.disconnect then
-                return "success"
-            end
             if player.is_sit then
                 num = num + 1
             end
         end
-        room:refreshRoomInfo()
         print("num--->>>",num)
         if num >= room.seat_num then
             --开始游戏
@@ -177,9 +173,8 @@ function CMD.sit_down(content)
     local rsp_msg = {room_id = room_id,sit_list = sit_list}
     room:broadcastAllPlayers("push_sit_down",rsp_msg)
 
-    room.sit_down_num = room.sit_down_num + 1
-
-    if room.seat_num == room.sit_down_num then
+    local sit_num = room:getSitNums()
+    if room.seat_num == sit_num then
         skynet.timeout(1,function() 
                 room:startGame()
             end)

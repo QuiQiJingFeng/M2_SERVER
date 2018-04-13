@@ -137,7 +137,7 @@ end
 --查询所有没有被销毁的房间
 function command:selectRoomListByServerId(server_id)
     local now = math.floor(tonumber(skynet.time()))
-    local sql = string.format("select * from room_list where server_id = %d and expire_time < %d",server_id,now)
+    local sql = string.format("select * from room_list where server_id = %d and expire_time > %d",server_id,now)
     return do_query(sql)
 end
 

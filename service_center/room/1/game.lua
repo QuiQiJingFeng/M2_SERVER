@@ -865,7 +865,6 @@ function game:gameOver(player,over_type,operate,tempResult)
 	for i,player in ipairs(players) do
 		player.is_sit = false
 	end
-	room.sit_down_num = 0
 
 	if room.cur_round == room.round then
 		room:distory(constant.DISTORY_TYPE.FINISH_GAME)
