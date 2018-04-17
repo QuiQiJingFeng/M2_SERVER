@@ -1,3 +1,7 @@
+*.a
+*.so
+*.o
+*.dSYM
 .vscode/settings.json
 conf/print.log
 conf/1/print.log
