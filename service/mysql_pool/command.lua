@@ -142,8 +142,8 @@ function command:selectRoomListByServerId(server_id)
 end
 
 -- 查询指定服务器上的销毁超过12个小时的房间并删除(这就意味着 房间号必须通过mysql来生成)
-function command:distroyCord()
-    local time = skynet.time() + 12 * 60 * 60
+function command:distroyCord(server_id)
+    local time = math.ceil(tonumber(skynet.time() + 12 * 60 * 60))
     local sql = string.format("delete from room_list where server_id = %d and expire_time < %d",server_id,time)
     return do_query(sql)
 end

@@ -237,7 +237,7 @@ function SOCKET.data(fd, data)
                 info.room_id = nil
             end
         else
-            log.errorf("wrong connect, state: %s", info.state)
+            log.errorf("wrong connect, state: %s, req_name = ", info.state,req_name)
         end
     end
 end
@@ -272,14 +272,11 @@ function CMD.distroyRoom(room_id)
 end
 
 local function checkExpireRoom()
-    local delay_time = 12 * 60 * 60
-    local remove_time = skynet.time() + delay_time
     local server_id = skynet.getenv("server_id")
-    local room_list = skynet.call(".mysql_pool","lua","selectRoomListByServerId",server_id,remove_time)
- 
-        --每隔1分钟检查一下失效的房间
-        skynet.timeout(60 * 100, checkExpireRoom)   
- 
+    --每隔1小时检查一下失效的房间并删除
+    skynet.send(".mysql_pool","lua","distroyCord",server_id)
+    
+    skynet.timeout( 60 * 60 * 100, checkExpireRoom)   
 end
 
 skynet.start(function()
@@ -292,6 +289,9 @@ skynet.start(function()
             skynet.ret(skynet.pack(f(subcmd, ...)))
         end
     end)
+
+    checkExpireRoom()
+
     recoverRoomList()
     --注册protobuf协议
     pbc.register_file(skynet.getenv("protobuf"))
