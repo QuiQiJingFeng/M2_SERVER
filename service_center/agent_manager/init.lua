@@ -299,7 +299,7 @@ skynet.start(function()
     -- 启动gate服务 监听来自客户端的连接
     GATE_SERVICE = skynet.newservice("gate")
     skynet.call(GATE_SERVICE, "lua", "open" , {
-        port = 8888,
+        port = tonumber(skynet.getenv("port")),
         nodelay = true,
     })
     genneralUnusedService()
