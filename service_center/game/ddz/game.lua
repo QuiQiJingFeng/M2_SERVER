@@ -776,4 +776,17 @@ game["PLAY_CARD"] = function(self,player,data)
 end
 
 
+function game:gameCMD(data)
+	local user_id = data.user_id
+	local command = data.command
+	local func = game[command]
+	if not func then
+		return "no_support_command"
+	end
+
+	local player = self.room:getPlayerByUserId(user_id)
+	local result = func(game,player,data)
+	return result
+end
+
 return game
