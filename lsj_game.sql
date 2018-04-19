@@ -135,6 +135,8 @@ CREATE TABLE room_servers
 
 
 INSERT INTO room_servers values(1,1,"47.52.99.120",8888);
+INSERT INTO room_servers values(2,2,"47.52.99.120",8889);
+
 
 -- REPLAY ID
 CREATE TABLE replay_ids
