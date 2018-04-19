@@ -4,8 +4,8 @@ local log  =require "skynet.log"
 
 skynet.start(function()
 	log.info("Server start")
-
-	skynet.uniqueservice("debug_console",9000)
+	local console_port = skynet.getenv("console_port")
+	skynet.uniqueservice("debug_console",console_port)
 
 	skynet.uniqueservice("static_data")
 
