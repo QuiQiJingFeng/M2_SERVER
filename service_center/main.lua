@@ -13,7 +13,7 @@ skynet.start(function()
 
 	skynet.uniqueservice("mysql_pool")
 
-	skynet.uniqueservice("redis_center")
+	-- skynet.uniqueservice("redis_center")
 
 	skynet.uniqueservice("agent_manager")
 	

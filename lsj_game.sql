@@ -136,7 +136,15 @@ CREATE TABLE room_servers
 
 INSERT INTO room_servers values(1,1,"47.52.99.120",8888);
 
-
+-- REPLAY ID
+CREATE TABLE replay_ids
+(
+    replay_id      int auto_increment,       -- 战局编号
+    room_id        double,                   -- 房间编号
+    primary key(replay_id)               
+);
+-- 定义replay_id 的自增ID 从100开始
+ALTER TABLE replay_ids AUTO_INCREMENT = 100;
 
 
 

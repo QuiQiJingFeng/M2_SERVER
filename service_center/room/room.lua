@@ -1,5 +1,6 @@
 local cjson = require "cjson"
 local skynet = require "skynet"
+local log = require "skynet.log"
 local constant = require "constant"
 local ROOM_STATE = constant.ROOM_STATE
 local Player = require "Player"
@@ -204,7 +205,13 @@ function room:startGame()
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 	end
 
-	self.replay_id = skynet.call(".redis_center","lua","INCR",0,"general_replay_id")
+	data = {room_id = self.room_id}
+	
+	local info = skynet.call(".mysql_pool","lua","insertTable","replay_ids",data)
+	if not info or not info.insert_id then
+		log.error("not replay_id")
+	end
+	self.replay_id = info.insert_id
 	if self.replay_id then
 		local record_msg = self:getRoomInfo()
 		skynet.send(".replay_cord","lua","insertRecord",self.replay_id,record_msg)
