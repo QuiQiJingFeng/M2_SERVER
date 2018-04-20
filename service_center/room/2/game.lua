@@ -42,6 +42,7 @@ end
 
 -- 开始游戏
 function game:start()
+	print("ddz, start()")
 	-- 洗牌
 	-- self:fisherYates()
 	self.other_setting = self.room:get("other_setting")
@@ -54,7 +55,7 @@ function game:start()
 end
 
 function game:dealCardServer( ... )
-
+	print("ddz, start()")
 	local players = self.room:get("players")
 
 	-- 每人先发13张牌

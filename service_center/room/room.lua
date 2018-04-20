@@ -219,6 +219,9 @@ function room:startGame()
 		print("ERROR: 无法获取到replay_id")
 	end
     local game_type = self.game_type
+
+    print(string.format("game_type == %d", game_type))
+
     local path = string.format("%d.game",game_type)
     self.game = require(path)
     self.game:start(self)
