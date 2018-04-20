@@ -1,5 +1,5 @@
 local JudgeCard  = {}
-local bit = require("bit")
+-- local bit = require("bit")
 
 JudgeCard.TYPE_SINGLE_CARDS 				= 101			--单牌	  
 JudgeCard.TYPE_PAIR_CARDS 					= 102			--对子	
@@ -91,18 +91,18 @@ function JudgeCard:JudgeCardShape( arg_card,  arg_num, arg_value)
 
 	while card[i] ~= nil and i < 17 do
 		if card[i] == card[i-1] then
-			-- statu = statu | (3 << (i-1)*2)
-			statu = bit:_or(statu, bit:_lshift(3, (i-1)*2))
+			statu = statu | (3 << (i-1)*2)
+			-- statu = bit:_or(statu, bit:_lshift(3, (i-1)*2))
 
 			temp_count = temp_count +1
 		elseif card[i] == (card[i-1] + 1) then
 			-- print(string.format("card[%d] = [%d], card[i-1] = %d", i, card[i], card[i-1]))
-			-- statu = statu | (2 << (i-1)*2)
-			statu = bit:_or(statu, bit:_lshift(2, (i-1)*2))
+			statu = statu | (2 << (i-1)*2)
+			-- statu = bit:_or(statu, bit:_lshift(2, (i-1)*2))
 			temp_count = 1
 		else
-			-- statu = statu | (1 << (i-1)*2)
-			statu = bit:_or(statu, bit:_lshift(1, (i-1)*2))
+			statu = statu | (1 << (i-1)*2)
+			-- statu = bit:_or(statu, bit:_lshift(1, (i-1)*2))
 			temp_count = 1
 		end
 
