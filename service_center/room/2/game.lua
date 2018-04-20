@@ -3,7 +3,8 @@ local skynet = require "skynet"
 -- local Room = require "Room"
 local constant = require "constant"
 local ALL_CARDS = constant.ALL_CARDS
-local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
+-- local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
+-- local ALL_CARDS = constant.ALL_CARDS
 local GAME_CMD = constant.GAME_CMD
 local NET_RESULT = constant.NET_RESULT
 local PLAYER_STATE = constant.PLAYER_STATE
@@ -13,6 +14,8 @@ local GANG_TYPE = constant.GANG_TYPE
 local GAME_OVER_TYPE = constant.GAME_OVER_TYPE
 local cjson = require "cjson"
 local Judgecard = require("2.judgeCard")
+
+local conf = require("2.conf")
 
 local game = {}
 local game_meta = {}
@@ -43,7 +46,8 @@ function game:start(room)
 	print("ddz, start()")
 	self.room = room
 
-	-- print("",self.room)
+
+	self:initGame()
 
 	self.other_setting = self.room.other_setting
 	--底分
@@ -65,7 +69,6 @@ function game:dealCardServer( ... )
 			iHandCards[j] = 0
 		end
 	end
-
 	for i = 1, 3 do 
 		for j = 1, 17 do 
 			iHandCards[i][j] = self.card_list[(i-1)*17 + j]
@@ -96,21 +99,21 @@ end
 
 
 function game:init(room_info)
-
+	print("ddz:init()")
 	---------- 公共的，可以直接拷贝----------------
-	self.room = Room.rebuild(room_info)
-	local game_type = room_info.game_type
+	-- self.room = Room.rebuild(room_info)
+	-- local game_type = room_info.game_type
 
-	self.card_list = {}
-	local game_name = RECOVER_GAME_TYPE[game_type]
-	for _,value in ipairs(ALL_CARDS[game_name]) do
-		table.insert(self.card_list,value)
-	end
+	-- self.card_list = {}
+	-- local game_name = RECOVER_GAME_TYPE[game_type]
+	-- for _,value in ipairs(ALL_CARDS[game_name]) do
+	-- 	table.insert(self.card_list,value)
+	-- end
 
 	---------- 公共的，可以直接拷贝end----------------
 
 	-- 初始化当前的数据
-	self:initGame()
+	-- self:initGame()
 
 	-- self:start()
 
@@ -118,6 +121,15 @@ end
 
 -- 游戏当前的数据会在这个里面，用self去表示
 function game:initGame( ... )
+
+	math.randomseed(tostring(os.time()):reverse():sub(1, 6)) 
+	self.card_list = {}
+	local game_type = self.room_info.game_type
+
+	for _,value in ipairs(ALL_CARDS[game_type]) do
+		table.insert(self.card_list,value)
+	end
+
 	--洗牌
 	self:fisherYates()
 	self.other_setting = self.room.other_setting
@@ -127,7 +139,6 @@ function game:initGame( ... )
 	self.bHuanLe = self.other_setting[2] == 2
 	-- 封顶数
 	self.iMaxBoom = self.other_setting[3] or 3
-
 	-- 当前操作状态
 	self.waite_operators = {}
 	--当前出牌的位置
@@ -164,8 +175,6 @@ function game:initGame( ... )
 
 	-- 当局的底分
 	self.iAmountResult = {0, 0, 0}
-
-	math.randomseed(tostring(os.time()):reverse():sub(1, 6)) 
 end
 
 function game:demandPointServer( )
