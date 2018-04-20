@@ -42,7 +42,10 @@ end
 function game:start(room)
 	print("ddz, start()")
 	self.room = room
-	self.other_setting = self.room:get("other_setting")
+
+	-- print("",self.room)
+
+	self.other_setting = self.room.other_setting
 	--底分
 	self.base_score = self.other_setting[1]
 	self.iRoomTime = self.other_setting[1]
@@ -53,7 +56,7 @@ end
 
 function game:dealCardServer( ... )
 	print("ddz, start()")
-	local players = self.room:get("players")
+	local players = self.room.player_list
 	-- 每人先发13张牌
 	local iHandCards = {}
 	for i = 1, 3 do 
@@ -78,14 +81,14 @@ function game:dealCardServer( ... )
 		table.insert(self.baseCard, self.card_list[i])		
 	end
 
-	for index=1,self.room:get("sit_down_num") do
+	for index=1,self.room:getSitNums() do
 		
 		local player = self.room:getPlayerByPos(index)
 		local cards = players[index].handle_cards
 		local rsp_msg = {}
 		rsp_msg.cards = cards
 		rsp_msg.user_pos = player.user_pos
-		rsp_msg.cur_round = self.room:get("cur_round")
+		rsp_msg.cur_round = self.room.cur_round
 
 		self.room:sendMsgToPlyaer(player, "deal_card", rsp_msg)
 	end
@@ -115,10 +118,9 @@ end
 
 -- 游戏当前的数据会在这个里面，用self去表示
 function game:initGame( ... )
-		--洗牌
+	--洗牌
 	self:fisherYates()
-
-	self.other_setting = self.room:get("other_setting")
+	self.other_setting = self.room.other_setting
 	--底分
 	self.base_score = self.other_setting[1]
 	-- 是否是欢乐斗地主
@@ -168,7 +170,8 @@ end
 
 function game:demandPointServer( )
 	
-	local iRoundIndex = self.room:get("cur_round")
+	-- local iRoundIndex = self.room:get("cur_round")
+	local iRoundIndex = self.room.cur_round
 	self.iCurDemandPlayer = math.floor(math.randomseed(100) % 3 )
 	-- local data = {user_id = user_id,card = data.card,user_pos = player.user_pos}
 	local data = { userExtra = self.iCurDemandPlayer, userNowDemand = self.iMaxPoint};
@@ -371,7 +374,7 @@ end
 
 --通知玩家出牌
 function game:serverPushPlayCard(iTableExtraNum)
-	local players = self.room:get("players")
+	local players = self.room.player_list
 
 	local cardNums = {}
 	for i = 1, 3 do 
@@ -390,30 +393,6 @@ function game:serverPushPlayCard(iTableExtraNum)
 	end
 end
 
-
--- --通知玩家出牌
--- function game:noticePushPlayCard(iTableExtraNum, )
--- 	local players = self.room:get("players")
-
--- 	local cardNums = {}
--- 	for i = 1, 3 do 
--- 		-- 统计一下牌数, 
--- 		cardNums[i] = #players[i].card_list
--- 	end
-
--- 	for i,player in ipairs(players) do
--- 		local rsp_msg = {userExtra = iTableExtraNum}
--- 		if player.user_pos == iTableExtraNum then
--- 			-- rsp_msg.card_list = player.card_list
--- 			-- -- rsp_msg.card_stack = player.card_stack
--- 			rsp_msg.userExtra = self.iCurPlayExtraNum
--- 			rsp_msg.userCard = player.card_list
--- 			rsp_msg.userCardNum = cardNums
--- 		end
--- 		self.room:sendMsgToPlyaer(player,"push_play_card",rsp_msg)
--- 	end
--- end
-
 --发牌完毕
 game["DEAL_FINISH"] = function(self,player)
 
@@ -430,12 +409,6 @@ game["DEAL_FINISH"] = function(self,player)
 
 	if num == 1 then
 		--庄家出牌
-		-- local zplayer = self.room:getPlayerByPos(self.zpos)
-		-- self:drawCard(zplayer)
-
-
-
-
 	end
 	return "success"
 end
