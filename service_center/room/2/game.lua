@@ -39,10 +39,9 @@ function game:fisherYates()
 end
 
 -- 开始游戏
-function game:start()
+function game:start(room)
 	print("ddz, start()")
-	-- 洗牌
-	-- self:fisherYates()
+	self.room = room
 	self.other_setting = self.room:get("other_setting")
 	--底分
 	self.base_score = self.other_setting[1]
@@ -55,7 +54,6 @@ end
 function game:dealCardServer( ... )
 	print("ddz, start()")
 	local players = self.room:get("players")
-
 	-- 每人先发13张牌
 	local iHandCards = {}
 	for i = 1, 3 do 
