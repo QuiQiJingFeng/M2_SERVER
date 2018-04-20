@@ -1,6 +1,6 @@
 
 local skynet = require "skynet"
-local Room = require "Room"
+-- local Room = require "Room"
 local constant = require "constant"
 local ALL_CARDS = constant.ALL_CARDS
 local RECOVER_GAME_TYPE = constant.RECOVER_GAME_TYPE
@@ -12,9 +12,7 @@ local PUSH_EVENT = constant.PUSH_EVENT
 local GANG_TYPE = constant.GANG_TYPE
 local GAME_OVER_TYPE = constant.GAME_OVER_TYPE
 local cjson = require "cjson"
-local Judgecard = require "hzmj.judgecard"
-
-
+local Judgecard = require("2.judgeCard")
 
 local game = {}
 local game_meta = {}
