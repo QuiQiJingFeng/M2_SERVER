@@ -80,7 +80,7 @@ function CMD.back_room(content)
     info.fd = content.fd
     info.secret = content.secret
     player:update(info)
-    player.disconnect = false
+    
     --如果房间是由于宕机恢复过来的,则该局作废重新开始
     if room.recover_state and not room.game then
         room:refreshRoomInfo()
@@ -96,12 +96,13 @@ function CMD.back_room(content)
             --开始游戏
             room:startGame()
             room:updatePlayersToDb()
+            player.disconnect = false
+            room.game:back_room(user_id)
         end
-    --如果当前局数不等于结束局数,即在游戏当中
-    elseif room.cur_round == room.over_round then
+    elseif room.game then
         room:userReconnect(player)
         room.game:back_room(user_id)
-    else
+    elseif not room.game then
         --如果某局结束,但是还没有开始新的一局
         room:userReconnect(player)
         room:refreshRoomInfo()
