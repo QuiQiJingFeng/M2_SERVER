@@ -869,6 +869,13 @@ function game:gameOver(player,over_type,operate,tempResult)
 	if room.cur_round == room.round then
 		room:distory(constant.DISTORY_TYPE.FINISH_GAME)
 	end
+
+    local data = {}
+    data.room_id = self.room.room_id
+    data.over_round = self.room.over_round
+	data.cur_round = self.room.cur_round
+    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
+
 	self:clear()
 	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
