@@ -157,7 +157,7 @@ end
 
 function room:pushAllRoomInfo()
 	local rsp_msg = self:getRoomInfo()
-	self:broadcastAllPlayers("push_all_room_info",rsp_msg)
+	self:broadcastAllPlayers("push_all_room_info",{refresh_room_info = rsp_msg})
 end
 
 function room:broadcastAllPlayers(proto_name,proto_data)
