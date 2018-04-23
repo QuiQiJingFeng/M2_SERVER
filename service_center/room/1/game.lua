@@ -891,6 +891,10 @@ function game:back_room(user_id)
 	rsp_msg.card_list = player.card_list
 	rsp_msg.players = players_info
 	rsp_msg.operator = self.waite_operators[player.user_pos]
+	if self.cur_play_user then
+		rsp_msg.cur_play_pos = self.cur_play_user.user_pos
+	end
+
 	player:send({push_all_room_info = rsp_msg})
 
 	return "success"
