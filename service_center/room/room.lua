@@ -141,11 +141,12 @@ end
 function room:getRoomInfo()
 	local rsp_msg = {}
 	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","cur_score","disconnect")
-	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting","cur_round")
+	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	rsp_msg.room_setting = room_setting
 	rsp_msg.room_id = self.room_id
 	rsp_msg.state = self.state
 	rsp_msg.players = players
+	rsp_msg.cur_round = self.cur_round
 	return rsp_msg
 end
 

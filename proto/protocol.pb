@@ -71,7 +71,7 @@ cCardValue"
 Result
 success
 	auth_fail
-¥-
+Â-
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -90,7 +90,7 @@ cCardValue"
 
 disconnect
  (R
-disconnect"¢
+disconnect"…
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -99,8 +99,7 @@ disconnect"¢
 is_friend_room (RisFriendRoom"
 is_open_voice (RisOpenVoice
 is_open_gps (R	isOpenGps#
-other_setting (RotherSetting
-	cur_round	 (RcurRound"I
+other_setting (RotherSetting"I
 CreateRoomReq8
 room_setting (2.msg.user.RoomSettingRroomSetting"9
 CreateRoomRsp(
@@ -153,12 +152,13 @@ expireTime
 room_id (RroomId"@
 UpdateRoomState
 room_id (RroomId
-state (Rstate"¨
+state (Rstate"Å
 RefreshRoomInfo
 room_id (RroomId,
 players (2.msg.user.UserInfoRplayers8
 room_setting (2.msg.user.RoomSettingRroomSetting
-state (Rstate"=
+state (Rstate
+	cur_round (RcurRound"=
 SitItem
 user_id (RuserId
 user_pos (RuserPos"T
@@ -241,7 +241,7 @@ card_stack	 (2.msg.user.GPItemR	cardStack
 
 disconnect
  (R
-disconnect"ê
+disconnect"‡
 PushAllRoomInfo8
 room_setting (2.msg.user.RoomSettingRroomSetting
 	card_list (RcardList.
@@ -249,7 +249,8 @@ disconnect"ê
 operator (	Roperator 
 cur_play_pos (R
 curPlayPos
-zpos (Rzpos"Y
+zpos (Rzpos
+	cur_round (RcurRound"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos

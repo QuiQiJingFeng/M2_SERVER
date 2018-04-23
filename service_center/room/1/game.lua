@@ -884,7 +884,7 @@ end
 --返回房间,推送当局的游戏信息
 function game:back_room(user_id)
 	local player = self.room:getPlayerByUserId(user_id)
-	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting","cur_round")
+	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack","gold_num","disconnect")
 	local rsp_msg = {}
 	rsp_msg.room_setting = room_setting
@@ -892,6 +892,7 @@ function game:back_room(user_id)
 	rsp_msg.players = players_info
 	rsp_msg.operator = self.waite_operators[player.user_pos]
 	rsp_msg.zpos = self.zpos
+	rsp_msg.cur_round = self.room.cur_round
 	if self.cur_play_user then
 		rsp_msg.cur_play_pos = self.cur_play_user.user_pos
 	end
