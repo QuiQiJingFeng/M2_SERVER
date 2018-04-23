@@ -42,6 +42,11 @@ function Player:update(info)
 end
 
 function Player:send(data_content)
+    local room = require "room"
+    if room.replay_id then
+        skynet.send(".replay_cord","lua","insertRecord",room.replay_id,data_content)
+    end
+
     if self.disconnect then
         return
     end
@@ -52,13 +57,7 @@ function Player:send(data_content)
         print("encode protobuf error",cjson.encode(data_content))
         return
     end
-    local room = require "room"
-    if room.replay_id then
-        skynet.send(".replay_cord","lua","insertRecord",room.replay_id,data_content)
-    end
     
-    
-
     -- 根据密钥进行加密
     local secret = self.secret
     if data and secret then
