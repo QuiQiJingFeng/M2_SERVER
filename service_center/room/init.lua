@@ -97,9 +97,14 @@ function CMD.back_room(content)
             room:startGame()
             room:updatePlayersToDb()
         end
-    else
+    --如果当前局数不等于结束局数,即在游戏当中
+    elseif room.cur_round == room.over_round then
         room:userReconnect(player)
         room.game:back_room(user_id)
+    else
+        --如果某局结束,但是还没有开始新的一局
+        room:userReconnect(player)
+        room:refreshRoomInfo()
     end
     return "success"
 end
