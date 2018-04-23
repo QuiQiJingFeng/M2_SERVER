@@ -261,7 +261,7 @@ end
 --检测流局
 function game:flowBureau()
 	local num = #self.card_list
-	if num  == self.award_num + 1 then
+	if num  == self.award_num then
 		return true
 	end
 
