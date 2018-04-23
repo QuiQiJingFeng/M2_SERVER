@@ -247,7 +247,7 @@ function game:drawCard(player)
 		if obj.user_id == user_id then
 			data.card = card
 		end
-		player:send({push_draw_card = data})
+		obj:send({push_draw_card = data})
 	end
 
 	--通知玩家出牌了
