@@ -907,6 +907,16 @@ function game:back_room(user_id)
 	for user_pos,v in pairs(self.put_cards) do
 		table.insert(rsp_msg.put_cards,{cards = v,user_pos = user_pos})
 	end
+	local handle_nums = {}
+	for _,obj in ipairs(self.room.player_list) do
+		local handle_num = 0
+		if obj.card_list then
+			handle_num= #obj.card_list
+		end
+		local arg = {user_pos=obj.user_pos,handle_num= handle_num}
+		table.insert(handle_nums,arg)
+	end
+	rsp_msg.handle_nums = handle_nums
 
 	player:send({push_all_room_info = rsp_msg})
 
