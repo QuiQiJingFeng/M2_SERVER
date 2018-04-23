@@ -35,6 +35,7 @@ function Player:init(info)
     self.an_gang_num = 0
     self.reward_num = 0
     self.disconnect = false
+    self.put_cards = {}
 end
 
 function Player:update(info)

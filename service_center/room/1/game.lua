@@ -55,6 +55,8 @@ function game:start(room)
 	self.cur_play_card = nil
 	--胡牌列表
 	self.hu_list = {}
+	-- 每个玩家出的牌的列表
+	self.put_cards = {}
 	--玩家当前局积分清零
 	for _,player in ipairs(self.room.player_list) do
 		player.cur_score = 0
@@ -308,6 +310,11 @@ game["PLAY_CARD"] = function(self,player,data)
 	--记录下当前出牌人和当前出的牌
 	self.cur_play_user = player
 	self.cur_play_card = data.card
+
+	if not self.put_cards[player.user_pos] then
+		self.put_cards[player.user_pos] = {}
+	end
+	table.insert(self.put_cards[player.user_pos],data.card)
 
 	local card_type = math.floor(data.card / 10) + 1
 	local card_value = data.card % 10
@@ -895,6 +902,12 @@ function game:back_room(user_id)
 	rsp_msg.cur_round = self.room.cur_round
 	if self.cur_play_user then
 		rsp_msg.cur_play_pos = self.cur_play_user.user_pos
+	end
+
+	--每个玩家出的牌
+	rsp_msg.put_cards = {}
+	for user_pos,v in pairs(self.put_cards) do
+		rsp_msg.put_cards[user_pos] = {cards = v}
 	end
 
 	player:send({push_all_room_info = rsp_msg})

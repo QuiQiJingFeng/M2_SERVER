@@ -71,7 +71,7 @@ cCardValue"
 Result
 success
 	auth_fail
-Â-
+“.
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -241,7 +241,9 @@ card_stack	 (2.msg.user.GPItemR	cardStack
 
 disconnect
  (R
-disconnect"‡
+disconnect"
+PutCard
+cards (Rcards"·
 PushAllRoomInfo8
 room_setting (2.msg.user.RoomSettingRroomSetting
 	card_list (RcardList.
@@ -250,7 +252,8 @@ disconnect"‡
 cur_play_pos (R
 curPlayPos
 zpos (Rzpos
-	cur_round (RcurRound"Y
+	cur_round (RcurRound.
+	put_cards (2.msg.user.PutCardRputCards"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
