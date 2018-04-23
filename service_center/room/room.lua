@@ -154,6 +154,11 @@ function room:refreshRoomInfo()
 	self:broadcastAllPlayers("refresh_room_info",rsp_msg)
 end
 
+function room:pushAllRoomInfo()
+	local rsp_msg = self:getRoomInfo()
+	self:broadcastAllPlayers("push_all_room_info",rsp_msg)
+end
+
 function room:broadcastAllPlayers(proto_name,proto_data)
 	for _,player in ipairs(self.player_list) do
 		player:send({[proto_name]=proto_data})
