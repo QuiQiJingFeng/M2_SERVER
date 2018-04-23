@@ -891,15 +891,13 @@ end
 --返回房间,推送当局的游戏信息
 function game:back_room(user_id)
 	local player = self.room:getPlayerByUserId(user_id)
-	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
-	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack","gold_num","disconnect")
-	local rsp_msg = {}
-	rsp_msg.room_setting = room_setting
+
+
+	local refresh_room_info = self.room:getRoomInfo()
+    local rsp_msg = {refresh_room_info = refresh_room_info}
 	rsp_msg.card_list = player.card_list
-	rsp_msg.players = players_info
 	rsp_msg.operator = self.waite_operators[player.user_pos]
 	rsp_msg.zpos = self.zpos
-	rsp_msg.cur_round = self.room.cur_round
 	if self.cur_play_user then
 		rsp_msg.cur_play_pos = self.cur_play_user.user_pos
 	end
@@ -907,7 +905,7 @@ function game:back_room(user_id)
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}
 	for user_pos,v in pairs(self.put_cards) do
-		rsp_msg.put_cards[user_pos] = {cards = v}
+		table.insert(rsp_msg.put_cards,{cards = v,user_pos = user_pos})
 	end
 
 	player:send({push_all_room_info = rsp_msg})

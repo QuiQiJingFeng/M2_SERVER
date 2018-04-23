@@ -71,12 +71,12 @@ cCardValue"
 Result
 success
 	auth_fail
-“.
+ò+
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
 from (Rfrom
-type (Rtype"”
+type (Rtype"Å
 UserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -90,7 +90,9 @@ cCardValue"
 
 disconnect
  (R
-disconnect"…
+disconnect/
+
+card_stack (2.msg.user.GPItemR	cardStack"…
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -225,35 +227,18 @@ winner_pos (R	winnerPos"m
 user_id (RuserId
 user_pos (RuserPos
 
-is_connect (R	isConnect"ª
-
-PlayerInfo
-user_id (RuserId
-	user_name (	RuserName
-user_pic (	RuserPic
-user_ip (	RuserIp
-user_pos (RuserPos
-is_sit (RisSit
-gold_num (RgoldNum
-score (Rscore/
-
-card_stack	 (2.msg.user.GPItemR	cardStack
-
-disconnect
- (R
-disconnect"
-PutCard
-cards (Rcards"·
-PushAllRoomInfo8
-room_setting (2.msg.user.RoomSettingRroomSetting
-	card_list (RcardList.
-players (2.msg.user.PlayerInfoRplayers
-operator (	Roperator 
-cur_play_pos (R
+is_connect (R	isConnect":
+PutCard
+user_pos (RuserPos
+cards (Rcards"÷
+PushAllRoomInfoE
+refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
+	card_list (RcardList
+operator (	Roperator 
+cur_play_pos (R
 curPlayPos
-zpos (Rzpos
-	cur_round (RcurRound.
-	put_cards (2.msg.user.PutCardRputCards"Y
+zpos (Rzpos.
+	put_cards (2.msg.user.PutCardRputCards"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
