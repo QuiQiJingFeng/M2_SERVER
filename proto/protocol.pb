@@ -230,7 +230,7 @@ winner_pos (R	winnerPos"m
 is_connect (R	isConnect":
 PutCard
 user_pos (RuserPos
-cards (Rcards"E
+cards (Rcards"E
 	HandleNum
 user_pos (RuserPos
 
