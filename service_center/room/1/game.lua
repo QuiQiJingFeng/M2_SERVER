@@ -882,7 +882,7 @@ function game:gameOver(player,over_type,operate,tempResult)
     data.over_round = self.room.over_round
 	data.cur_round = self.room.cur_round
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
-
+    self.room:updatePlayersToDb()
 	self:clear()
 	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
