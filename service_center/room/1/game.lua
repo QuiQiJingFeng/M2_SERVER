@@ -895,6 +895,11 @@ function game:back_room(user_id)
 
 	local refresh_room_info = self.room:getRoomInfo()
     local rsp_msg = {refresh_room_info = refresh_room_info}
+
+    if not self.waite_operators then
+    	player:send({push_all_room_info = rsp_msg})
+    end
+
 	rsp_msg.card_list = player.card_list
 	rsp_msg.operator = self.waite_operators[player.user_pos]
 	rsp_msg.zpos = self.zpos
@@ -977,18 +982,6 @@ function game:clear()
 	game_meta.__newindex = game_meta
 
 	self.room = room
-	self.waite_operators = {}
-	--胡牌列表
-	self.hu_list = {}
-	-- 每个玩家出的牌的列表
-	self.put_cards = {}
-	--玩家当前局积分清零
-	for _,player in ipairs(self.room.player_list) do
-		player.cur_score = 0
-		player.card_stack = {}
-		player.handle_cards = {}
-		player.card_list = {}
-	end
 	self.zpos = zpos
 end
 
