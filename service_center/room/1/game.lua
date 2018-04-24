@@ -898,8 +898,11 @@ function game:back_room(user_id)
 	rsp_msg.card_list = player.card_list
 	rsp_msg.operator = self.waite_operators[player.user_pos]
 	rsp_msg.zpos = self.zpos
-	if self.cur_play_user then
-		rsp_msg.cur_play_pos = self.cur_play_user.user_pos
+
+	for user_pos,str in pairs(self.waite_operators) do
+		if str == "WAIT_PLAY_CARD" then
+			rsp_msg.cur_play_pos = user_pos
+		end
 	end
 
 	--每个玩家出的牌
