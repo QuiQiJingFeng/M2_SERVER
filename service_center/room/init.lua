@@ -102,13 +102,13 @@ function CMD.back_room(content)
             player.disconnect = false
             room:pushAllRoomInfo()
         end
-    elseif room.game then
-        room:userReconnect(player)
-        room.game:back_room(user_id)
-    elseif not room.game then
+    elseif room.over_round == room.cur_round then
         --如果某局结束,但是还没有开始新的一局
         room:userReconnect(player)
         room:pushAllRoomInfo()
+    elseif room.game then
+        room:userReconnect(player)
+        room.game:back_room(user_id)
     end
     return "success"
 end
