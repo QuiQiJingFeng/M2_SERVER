@@ -286,8 +286,8 @@ end
 
 --出牌
 game["PLAY_CARD"] = function(self,player,data)
-
-	if self.waite_operators[player.user_pos] ~= "WAIT_PLAY_CARD" then 
+	
+	if not string.find(self.waite_operators[player.user_pos],"WAIT_PLAY_CARD") then 
 		return "invaild_operator" 
 	end
 	if not data.card then 
@@ -397,7 +397,7 @@ game["PENG"] = function(self,player,data)
 	local operator = 2
 	self:noticePushPlayCard(player,operator)
 
-	self.waite_operators[player.user_pos] = "WAIT_PLAY_CARD"
+	self.waite_operators[player.user_pos] = "WAIT_PLAY_CARD_FROM_PENG"
 
 	return "success"
 end
@@ -472,7 +472,7 @@ game["GANG"] = function(self,player,data)
 	local operate = self.waite_operators[player.user_pos]
 
 	--如果操作是等待出牌,并且可以进行暗杠,则可以进去
-	if operate == "WAIT_PLAY_CARD" and (gang_type == TYPE.AN_GANG or gang_type == TYPE.PENG_GANG ) then
+	if string.find(operate,"WAIT_PLAY_CARD") and (gang_type == TYPE.AN_GANG or gang_type == TYPE.PENG_GANG ) then
 	elseif not string.find(self.waite_operators[player.user_pos],"WAIT_GANG") then
 		return "invaild_operator"
 	end
@@ -639,7 +639,7 @@ game["HU"] = function(self,player,data)
 	local operate = self.waite_operators[player.user_pos]
 	local gang_hu = string.find(self.waite_operators[player.user_pos],"WAIT_HU")
 
-	if not (operate == "WAIT_PLAY_CARD" or gang_hu) then
+	if not (string.find(operate,"WAIT_PLAY_CARD") or gang_hu) then
 		return "invaild_operator"
 	end
 
@@ -680,7 +680,7 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 	if over_type == GAME_OVER_TYPE.NORMAL then
 		local count = seat_num - 1
 		--如果是自摸胡  赢每个玩家2*底分
-		if operate == "WAIT_PLAY_CARD" then
+		if string.find(operate,"WAIT_PLAY_CARD") then
 			player.cur_score = player.cur_score + self.base_score * 2 * count
 			for _,obj in ipairs(players) do
 				if player.user_id ~= obj.user_id then
@@ -779,7 +779,7 @@ function game:updatePlayerScore(player,over_type,operate,tempResult)
 
 	if over_type == GAME_OVER_TYPE.NORMAL then
 		data.winner_pos = player.user_pos
-		if operate == "WAIT_PLAY_CARD" then
+		if string.find(operate,"WAIT_PLAY_CARD") then
 			data.winner_type = constant["WINNER_TYPE"].ZIMO
 		elseif operate == "WAIT_HU" then
 			data.winner_type = constant["WINNER_TYPE"].QIANG_GANG
@@ -900,7 +900,7 @@ function game:back_room(user_id)
 	rsp_msg.zpos = self.zpos
 
 	for user_pos,str in pairs(self.waite_operators) do
-		if str == "WAIT_PLAY_CARD" then
+		if string.find(str,"WAIT_PLAY_CARD") then
 			rsp_msg.cur_play_pos = user_pos
 		end
 	end
@@ -920,6 +920,7 @@ function game:back_room(user_id)
 		table.insert(handle_nums,arg)
 	end
 	rsp_msg.handle_nums = handle_nums
+	rsp_msg.put_card = self.cur_play_card
 
 	player:send({push_all_room_info = rsp_msg})
 
