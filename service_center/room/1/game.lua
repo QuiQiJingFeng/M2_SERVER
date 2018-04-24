@@ -18,8 +18,8 @@ local TYPE = {
 local game = {}
 local game_meta = {}
 setmetatable(game,game_meta)
-game.__index = game_meta
-game.__newindex = game_meta
+game_meta.__index = game_meta
+game_meta.__newindex = game_meta
 
 local GAME_OVER_TYPE = {
 	NORMAL = 1, --正常胡牌
@@ -919,9 +919,9 @@ function game:back_room(user_id)
 		local handle_num = 0
 		if obj.card_list then
 			handle_num= #obj.card_list
+			local arg = {user_pos=obj.user_pos,handle_num= handle_num}
+			table.insert(handle_nums,arg)
 		end
-		local arg = {user_pos=obj.user_pos,handle_num= handle_num}
-		table.insert(handle_nums,arg)
 	end
 	rsp_msg.handle_nums = handle_nums
 	rsp_msg.put_card = self.cur_play_card
@@ -970,11 +970,29 @@ end
 
 function game:clear()
 	self:distroy()
+	local room = self.room
+	local zpos = self.zpos
+	
 	--清空数据
 	local game_meta = {}
 	setmetatable(game,game_meta)
-	game.__index = game_meta
-	game.__newindex = game_meta
+	game_meta.__index = game_meta
+	game_meta.__newindex = game_meta
+
+	self.room = room
+	self.waite_operators = {}
+	--胡牌列表
+	self.hu_list = {}
+	-- 每个玩家出的牌的列表
+	self.put_cards = {}
+	--玩家当前局积分清零
+	for _,player in ipairs(self.room.player_list) do
+		player.cur_score = 0
+		player.card_stack = {}
+		player.handle_cards = {}
+		player.card_list = {}
+	end
+	self.zpos = zpos
 end
 
 
