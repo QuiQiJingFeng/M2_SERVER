@@ -898,6 +898,7 @@ function game:back_room(user_id)
 
     if not self.waite_operators then
     	player:send({push_all_room_info = rsp_msg})
+    	return
     end
 
 	rsp_msg.card_list = player.card_list
