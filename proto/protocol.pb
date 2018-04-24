@@ -249,7 +249,7 @@ reduce_num (R	reduceNum4
 handleNums
 put_card	 (RputCard*
 cur_play_operator
- (RcurPlayOperator"Y
+ (	RcurPlayOperator"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
