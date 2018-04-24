@@ -905,6 +905,7 @@ function game:back_room(user_id)
 	for user_pos,str in pairs(self.waite_operators) do
 		if string.find(str,"WAIT_PLAY_CARD") then
 			rsp_msg.cur_play_pos = user_pos
+			rsp_msg.cur_play_operator = str
 		end
 	end
 
