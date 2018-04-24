@@ -17,9 +17,6 @@ local TYPE = {
 }
 local game = {}
 local game_meta = {}
-setmetatable(game,game_meta)
-game_meta.__index = game_meta
-game_meta.__newindex = game_meta
 
 local GAME_OVER_TYPE = {
 	NORMAL = 1, --正常胡牌
@@ -972,7 +969,7 @@ function game:clear()
 	self:distroy()
 	local room = self.room
 	local zpos = self.zpos
-	
+
 	--清空数据
 	local game_meta = {}
 	setmetatable(game,game_meta)
@@ -995,6 +992,8 @@ function game:clear()
 	self.zpos = zpos
 end
 
-
+setmetatable(game,game_meta)
+game_meta.__index = game_meta
+game_meta.__newindex = game_meta
 
 return game
