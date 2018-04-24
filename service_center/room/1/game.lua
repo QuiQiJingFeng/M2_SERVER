@@ -613,6 +613,9 @@ game["GUO"] = function(self,player,data)
 	if not operate then
 		return "invaild_operator"
 	end
+	if string.find(operate,"WAIT_PLAY_CARD") then
+		return "invaild_operator"
+	end
 	self.waite_operators[player.user_pos] = nil
 
 	--检测是否有下一个人胡牌
