@@ -47,6 +47,7 @@ function engine:clear()
 	self:settingConfig()
 end
 
+
 --设置列表
 function engine:settingConfig(config)
 	if not config then
@@ -607,6 +608,11 @@ function engine:getRecordData(pos,key)
 	place:getRecordData(key)
 end
 
+-- 获取某一张牌的数量
+function engine:getCardNum(pos,card)
+	local place = self.__places[pos]
+	return place:getCardNum(card)
+end
 
 --获取所有牌型对应的值
 function engine:getAllCardType()

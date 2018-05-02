@@ -113,7 +113,7 @@ function game:start(room)
 		rsp_msg.user_pos = pos
 		rsp_msg.random_nums = random_nums
 		rsp_msg.cur_round = engine:getCurRound()
-
+		-- 亮四打1
 		if self.liang_si_da_yi then
 			local four_card_list = {}
 			for idx=1,engine:getPlaceNum() do
@@ -126,6 +126,7 @@ function game:start(room)
 				table.insert(four_card_list,obj)
 			end
 			rsp_msg.four_card_list = four_card_list
+			self.four_card_list = four_card_list
 		end
 
 
@@ -257,6 +258,26 @@ game["PLAY_CARD"] = function(self,player,data)
 	local stack_list = engine:playCard(user_pos,data.card)
 	if not stack_list then
 		return "invaild_operator"
+	end
+	-- 亮四打一 不能出那四张牌
+	if self.liang_si_da_yi then
+		for _,item in ipairs(self.four_card_list) do
+			-- 检查亮的四张牌中有几张 这个牌
+			local card_num = 0
+			for _,value in ipairs(item.cards) do
+				if value == data.card then
+					card_num = card_num + 1
+				end
+			end
+
+			if card_num > 0 then
+				local num = engine:getCardNum(item.user_pos,card)
+				if num <= card_num then
+					return "invaild_operator"
+				end
+			end
+		end
+		
 	end
 
 	self.waite_operators[user_pos] = nil

@@ -318,4 +318,9 @@ function Place:getRecordData(key)
 	return self.__recordData[key]
 end
 
+function Place:getCardNum(card)
+	local cardType,cardValue = self:caculateTypeAndValue(card)
+	return self.__handleCardBuild[cardType][10]
+end
+
 return Place
