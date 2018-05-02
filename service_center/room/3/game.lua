@@ -113,6 +113,23 @@ function game:start(room)
 		rsp_msg.user_pos = pos
 		rsp_msg.random_nums = random_nums
 		rsp_msg.cur_round = engine:getCurRound()
+
+		if self.liang_si_da_yi then
+			local four_card_list = {}
+			for idx=1,engine:getPlaceNum() do
+				local obj = {user_pos = idx,cards = {}}
+				-- 亮4张牌
+				for i=1,4 do
+					local card = deal_cards[idx][i]
+					table.insert(obj.cards,card)
+				end
+				table.insert(four_card_list,obj)
+			end
+			rsp_msg.four_card_list = four_card_list
+		end
+
+
+
 		player:send({deal_card = rsp_msg})
 	end
 
@@ -326,6 +343,10 @@ game["GANG"] = function(self,player,data)
 		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
+	-- 暗杠锁死 ,锁死之后不能再点炮和抢杠胡
+	if self.an_gang_suo_si then
+		engine:settingConfig({isHu = false,qiangGangHu = false})
+	end
 
 	--通知所有人,有人杠了
 	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
@@ -429,6 +450,11 @@ game["HU"] = function(self,player,data)
 				zui_score = zui_score + quemen_num
 			end
 		end
+		-- 自摸+1嘴
+		if self.jia_zui and refResult.isZiMo then
+			zui_score = zui_score + 1
+		end
+
 		hufen = hufen + zui_score
 
 		if self.dui_dui_hu and refResult.isQiDui then

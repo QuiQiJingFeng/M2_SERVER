@@ -63,7 +63,9 @@ function engine:settingConfig(config)
  		-- 抢杠胡
  		self.__config.qiangGangHu = true
 	else
-		self.__config = config
+		for k,v in pairs(config) do
+			self.__config[k] = v
+		end
 	end
 end
 
