@@ -163,7 +163,7 @@ function game:game_cmd(content)
 end
 
 --发牌完毕
-game["DEAL_FINISH"] = function(self, player)
+game["DEAL_FINISH"] = function(self, player,data)
 
 	local user_pos = player.user_pos
 	if not self:check_operator(user_pos,"DEAL_FINISH") then
@@ -173,6 +173,10 @@ game["DEAL_FINISH"] = function(self, player)
 	self.waite_operators[user_pos] = nil
 	--计算剩余的数量
 
+	-- 下跑
+	local pao_num = data.pao_num or 0
+	engine:setRecordData(user_pos,"pao_num",pao_num)
+	
 	local _,opt = next(self.waite_operators)
 	if not opt then
 		--庄家出牌
@@ -435,10 +439,10 @@ game["HU"] = function(self,player,data)
 		local total_score = hufen + extra_score
 
 		if refResult.isZiMo then
-			local conf = {mode = "ALL" ,score = total_score}
+			local conf = {mode = "ALL" ,score = total_score,add = "pao_num"}
 			engine:updateScoreFromConf(obj,conf,player.user_pos)
 		else
-			local conf = {mode = "ONE" ,score = total_score}
+			local conf = {mode = "ONE" ,score = total_score,add = "pao_num"}
 			engine:updateScoreFromConf(obj,conf,player.user_pos)
 		end
 
@@ -546,7 +550,7 @@ function game:gameOver(player,over_type,tempResult)
     data.over_round = engine:getOverRound()
 	data.cur_round = engine:getCurRound()
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
-    
+
     -- 同步玩家的个人数据到数据库
     self.room:updatePlayersToDb()
 	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)

@@ -71,7 +71,7 @@ cCardValue"
 Result
 success
 	auth_fail
-¡.
+º.
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -118,7 +118,7 @@ SitDownReq
 pos (Rpos"6
 
 SitDownRsp(
-result (2.msg.user.ResultRresult"Ê
+result (2.msg.user.ResultRresult"ã
 
 GameCmdReq
 command (	Rcommand
@@ -127,7 +127,9 @@ GameCmdReq
 nowType (RnowType
 nowValue (RnowValue
 cardList (RcardList
-cardNums	 (RcardNums"6
+cardNums	 (RcardNums
+pao_num
+ (RpaoNum"6
 
 GameCmdRsp(
 result (2.msg.user.ResultRresult"©

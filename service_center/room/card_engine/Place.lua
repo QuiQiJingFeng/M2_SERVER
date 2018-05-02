@@ -52,6 +52,8 @@ function Place:clear()
 
 	-- 最后一张摸到的牌
 	self.__lastCard = nil
+	-- 记录一些不同麻将所用到的一些数据
+	self.__recordData = {}
 end
 
 function Place:addExtraScore(deltScore)
@@ -306,6 +308,14 @@ function Place:setTotalAnGangNum(num)
 end
 function Place:setTotalMingGangNum(num)
 	self.__totalMingGangNum = num
+end
+
+function Place:setRecordData(key,value)
+	self.__recordData[key] = value
+end
+
+function Place:getRecordData(key)
+	return self.__recordData[key]
 end
 
 return Place

@@ -279,18 +279,31 @@ end
 function engine:updateScoreFromConf(obj,conf,pos)
 	local place = self.__places[pos]
 	if conf.mode == "ALL" then
-		for index,place in ipairs(self.__places) do
+		local total = 0
+		for index,obj in ipairs(self.__places) do
 			if pos ~= index then
-				place:updateScore(conf.score * -1)
-			else
-				place:updateScore(conf.score * (#self.__places-1))
+				local score = conf.score
+				if conf.add then
+					local add1 = obj:getRecordData(conf.add) or 0
+					local add2 = place:getRecordData(conf.add) or 0
+					score = score + add1 + add2
+				end
+				obj:updateScore(score * -1)
+				total = total + score
 			end
 		end
+		place:updateScore(total)
 	elseif conf.mode == "ONE" then
-		local place = self.__places[obj.from]
-		place:updateScore(conf.score * -1)
-		place = self.__places[pos]
-		place:updateScore(conf.score * 1)
+		local obj = self.__places[obj.from]
+		local score = conf.score
+		if conf.add then
+			local add1 = obj:getRecordData(conf.add) or 0
+			local add2 = place:getRecordData(conf.add) or 0
+			score = score + add1 + add2
+		end
+		obj:updateScore(score * -1)
+
+		place:updateScore(score * 1)
 	else
 		return false
 	end
@@ -581,6 +594,17 @@ function engine:setTotalMingGangNum(pos,num)
 	local place = self.__places[pos]
 	place:setTotalMingGangNum(num)
 end
+
+function engine:setRecordData(pos,key,value)
+	local place = self.__places[pos]
+	place:setRecordData(key,value)
+end
+
+function engine:getRecordData(pos,key)
+	local place = self.__places[pos]
+	place:getRecordData(key)
+end
+
 
 --获取所有牌型对应的值
 function engine:getAllCardType()
