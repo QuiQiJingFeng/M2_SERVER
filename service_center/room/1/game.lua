@@ -16,7 +16,6 @@ local TYPE = {
 	HU = 6
 }
 local game = {}
-local game_meta = {}
 
 local GAME_OVER_TYPE = {
 	NORMAL = 1, --正常胡牌
@@ -798,7 +797,7 @@ function game:updatePlayerGold(over_type)
 		return 
 	end
 	local room = self.room
-	local players = room.players
+	local players = room.player_list
 	local cur_round = room.cur_round
 	local round = room.round
 	local seat_num = room.seat_num
@@ -883,7 +882,6 @@ function game:gameOver(player,over_type,operate,tempResult)
 	data.cur_round = self.room.cur_round
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
     self.room:updatePlayersToDb()
-	self:clear()
 	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
 
@@ -971,24 +969,5 @@ function game:distroy()
 		end
 	end
 end
-
-function game:clear()
-	self:distroy()
-	local room = self.room
-	local zpos = self.zpos
-
-	--清空数据
-	local game_meta = {}
-	setmetatable(game,game_meta)
-	game_meta.__index = game_meta
-	game_meta.__newindex = game_meta
-
-	self.room = room
-	self.zpos = zpos
-end
-
-setmetatable(game,game_meta)
-game_meta.__index = game_meta
-game_meta.__newindex = game_meta
 
 return game

@@ -71,7 +71,7 @@ cCardValue"
 Result
 success
 	auth_fail
-Õ-
+¡.
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -216,7 +216,7 @@ card_stack (2.msg.user.GPItemR	cardStack"X
 	over_type (RoverType(
 players (2.msg.user.ItemRplayers
 
-award_list (R	awardList
+award_list (R	awardList
 winner_type (R
 winnerType
 
@@ -234,7 +234,7 @@ is_connect (R	isConnect":
 	HandleNum
 user_pos (RuserPos
 
-handle_num (R	handleNum"“
+handle_num (R	handleNum"ß
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -249,7 +249,9 @@ reduce_num (R	reduceNum4
 handleNums
 put_card	 (RputCard*
 cur_play_operator
- (	RcurPlayOperator"Y
+ (	RcurPlayOperator
+	operators (	R	operators,
+cur_play_operators (	RcurPlayOperators"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos

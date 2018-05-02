@@ -188,6 +188,10 @@ function room:updatePlayersToDb()
         obj.gold_num = player.gold_num
         obj.user_pos = player.user_pos
         obj.is_sit = player.is_sit
+		obj.an_gang_num = player.an_gang_num
+		obj.ming_gang_num = player.ming_gang_num
+		obj.reward_num = player.reward_num
+		obj.hu_num = player.hu_num
         table.insert(player_list,obj)
     end
     data.room_id = self.room_id
@@ -236,17 +240,17 @@ end
 
 function room:distory(type)
 	room.state = ROOM_STATE.ROOM_DISTROY
-    if room.game then
-        room.game:clear()
-    end
     if room.over_round >= 1 then
+    	if room.game then
+    		room.game:distory()
+    		room.game = nil
+    	end
     	--通知总结算
     	local rsp_msg = {}
     	rsp_msg.room_id = self.room_id
     	rsp_msg.sattle_list = self:getPlayerInfo("user_id","user_pos","hu_num","ming_gang_num","an_gang_num","reward_num")
     	self:broadcastAllPlayers("notice_total_sattle",rsp_msg)
     end
-
     --通知房间被销毁
     skynet.call(".agent_manager","lua","distroyRoom")
     room.player_list = {}
