@@ -904,7 +904,11 @@ function game:back_room(user_id)
 	rsp_msg.operator = self.waite_operators[player.user_pos]
 	rsp_msg.zpos = self.zpos
 	rsp_msg.reduce_num = #self.card_list
-	rsp_msg.put_pos = self.cur_play_user.user_pos
+	local put_pos
+	if self.cur_play_user then
+		put_pos = self.cur_play_user.user_pos
+	end
+	rsp_msg.put_pos = put_pos
 	for user_pos,str in pairs(self.waite_operators) do
 		if string.find(str,"WAIT_PLAY_CARD") then
 			rsp_msg.cur_play_pos = user_pos
