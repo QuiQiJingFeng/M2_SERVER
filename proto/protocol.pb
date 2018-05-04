@@ -222,7 +222,7 @@ card_stack (2.msg.user.GPItemR	cardStack"X
 	over_type (RoverType(
 players (2.msg.user.ItemRplayers
 
-award_list (R	awardList
+award_list (R	awardList
 winner_type (R
 winnerType
 
