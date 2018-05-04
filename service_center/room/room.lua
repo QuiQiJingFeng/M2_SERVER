@@ -212,6 +212,7 @@ function room:startGame()
         local data = {}
         data.room_id = self.room_id
 	    data.expire_time = self.expire_time
+	    data.state = self.state
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 	end
 
@@ -245,6 +246,10 @@ function room:distory(type)
     		room.game:distory()
     		room.game = nil
     	end
+    	local data = {}
+        data.room_id = self.room_id
+	    data.state = self.state
+	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
     	--通知总结算
     	local rsp_msg = {}
     	rsp_msg.room_id = self.room_id
