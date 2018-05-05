@@ -246,6 +246,7 @@ function room:distroy(type)
     		room.game:distroy()
     		room.game = nil
     	end
+    	
     	local data = {}
         data.room_id = self.room_id
 	    data.state = self.state
