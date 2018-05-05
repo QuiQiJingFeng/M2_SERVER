@@ -129,7 +129,11 @@ function command:checkLoginToken(user_id,token)
 end
 
 function command:checkIsInGame(user_id)
-    local sql = string.format("select * from room_list where player_list like '%%%s%%'",user_id)
+    -- 因为删除房间是每个小时删除一次,所以这里应该 排除那些待删除的记录
+
+    local pre_day = os.date("%Y-%m-%d %H:%M:%S",math.ceil(skynet.time() - 24 * 60 * 60));
+
+    local sql = string.format("select * from room_list where time > '%s' and player_list like '%%%s%%'",pre_day,user_id)
     local data = do_query(sql)
     return data[1]
 end
