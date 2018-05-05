@@ -239,11 +239,11 @@ function room:startGame()
     self.recover_state = nil
 end
 
-function room:distory(type)
-	room.state = ROOM_STATE.ROOM_DISTROY
+function room:distroy(type)
+	self.state = ROOM_STATE.ROOM_DISTROY
     if room.over_round >= 1 then
     	if room.game then
-    		room.game:distory()
+    		room.game:distroy()
     		room.game = nil
     	end
     	local data = {}

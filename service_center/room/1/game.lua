@@ -872,8 +872,8 @@ function game:gameOver(player,over_type,operate,tempResult)
 		player.is_sit = false
 	end
 
-	if room.cur_round == room.round then
-		room:distory(constant.DISTORY_TYPE.FINISH_GAME)
+	if room.cur_round >= room.round then
+		room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
 	end
 
     local data = {}
