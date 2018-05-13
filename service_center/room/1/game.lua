@@ -375,7 +375,7 @@ game["HU"] = function(self,player,data)
 
 	local award_num = self.award_num
 	--每一张码 赢每个玩家2*底分
-	if tempResult.iHuiNum == 0 then
+	if refResult.iHuiNum == 0 then
 		--如果没有红中,则额外奖励两张码
 		award_num = award_num + 2
 	end
@@ -471,7 +471,7 @@ function game:updatePlayerGold(over_type)
 end
 
 --游戏结束
-function game:gameOver(player,over_type,operate,tempResult)
+function game:gameOver(player,over_type,operate,refResult)
 	print("FYD=======>>>游戏结束")
 
 	local room = self.room
