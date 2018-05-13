@@ -582,9 +582,9 @@ function game:gameOver(player,over_type,tempResult)
 	self.room.over_round = engine:getOverRound()
 	-- 更新下明杠暗杠以及胡牌的计数
 	for _,obj in ipairs(players) do
-		obj.an_gang_num = engine:getTotalAnGangNum()
-		obj.ming_gang_num = engine:getTotalMingGangNum()
-		obj.hu_num = engine:getTotalHuNum()
+		obj.an_gang_num = engine:getTotalAnGangNum(obj.user_pos)
+		obj.ming_gang_num = engine:getTotalMingGangNum(obj.user_pos)
+		obj.hu_num = engine:getTotalHuNum(obj.user_pos)
 	end
 
  	if engine:isGameEnd() then
