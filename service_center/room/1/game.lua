@@ -380,7 +380,7 @@ game["HU"] = function(self,player,data)
 		award_num = award_num + 2
 	end
 
-	local award_list = engin:getPoolLastCards(award_num)
+	local award_list = engine:getPoolLastCards(award_num)
 	-- 中码数量
 	local num = 0
 	for _,card in ipairs(award_list) do
