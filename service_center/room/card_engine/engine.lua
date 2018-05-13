@@ -280,7 +280,7 @@ function engine:pengCard(pos)
 	return place:peng(from,card)
 end
 
-function engine:updateScoreFromConf(conf,pos)
+function engine:updateScoreFromConf(obj,conf,pos)
 	local place = self.__places[pos]
 	if conf.mode == "ALL" then
 		local total = 0

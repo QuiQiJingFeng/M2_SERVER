@@ -277,13 +277,13 @@ game["GANG"] = function(self,player,data)
 	-- 杠的分数计算
 	if obj.type == engine:getConstant("TYPE","MING_GANG") then
 		local conf = {mode = "ONE" ,score = self.base_score * 3}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
 		local conf = {mode = "ALL" ,score = self.base_score * 1}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
 		local conf = {mode = "ALL",score = self.base_score * 2}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
   
 	--通知所有人,有人杠了
@@ -358,19 +358,19 @@ game["HU"] = function(self,player,data)
 	-- 自摸赢每个玩家2*底分
 	if refResult.isZiMo then
 		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
 	if self.hi_point and refResult.huiNum == 4 then 
 		--摸到四张红中胡牌，赢每个玩家2*底分
 		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 	
 	if self.seven_pairs and refResult.isQiDui then
 		--胡七对 赢每个玩家2*底分
 		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
 	local award_num = self.award_num
@@ -397,7 +397,7 @@ game["HU"] = function(self,player,data)
 	-- 每个码赢每个玩家2*底分
 	if num > 0 then
 		local conf = {mode = "ALL" ,score = self.base_score * 2 * num}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
 	local info = self.room:getPlayerInfo("user_id","user_pos")

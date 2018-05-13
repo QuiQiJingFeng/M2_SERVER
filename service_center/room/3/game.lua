@@ -355,13 +355,13 @@ game["GANG"] = function(self,player,data)
 	-- 杠的分数计算
 	if obj.type == engine:getConstant("TYPE","MING_GANG") then
 		local conf = {mode = "ONE" ,score = 1}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
 		local conf = {mode = "ONE" ,score = 1}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
 		local conf = {mode = "ALL",score = 2}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
 	-- 暗杠锁死 ,锁死之后不能再点炮和抢杠胡
@@ -487,10 +487,10 @@ game["HU"] = function(self,player,data)
 
 	if refResult.isZiMo then
 		local conf = {mode = "ALL" ,score = total_score,add = "pao_num"}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	else
 		local conf = {mode = "ONE" ,score = total_score,add = "pao_num"}
-		engine:updateScoreFromConf(conf,player.user_pos)
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
 	local info = self.room:getPlayerInfo("user_id","user_pos")
