@@ -147,8 +147,6 @@ end
 --检测流局
 function engine:flowBureau()
 	local num = #self.__cardPool
-	print("FYD--->>NUM = ",num)
-	print("__flowBureauNum = ",self.__flowBureauNum)
 	if num  <= self.__flowBureauNum then
 		return true
 	end
@@ -157,7 +155,7 @@ function engine:flowBureau()
 end
 
 -- 摸牌 result FLOW/card
-function engine:drawCard(pos)
+function engine:drawCard(pos,specail)
 	--检查是否流局
 	local is_flow = self:flowBureau()
 	if is_flow then
@@ -166,6 +164,9 @@ function engine:drawCard(pos)
 	end
 	local place = self.__places[pos]
 	local card = table.remove(self.__cardPool,1)
+	if specail then
+		card = specail
+	end
 	place:addCard(card)
 	return card
 end

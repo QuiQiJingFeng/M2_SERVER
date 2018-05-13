@@ -15,7 +15,7 @@ end
 
 function main()
 	local isQiDui = nil
-	local huiCard = nil
+	local huiCard = 35
 	for type =1,4 do
 		for value=1,10 do
 			if not handleCardBuild[type] then
@@ -25,12 +25,21 @@ function main()
 		end
 	end
 
-	local cardList = {11,11,12,12,13,13,1,2,12,12,3,4,4,4}
+	local cardList = {1,2,3,5,5,9,9,9,4,4,6,6,35,35}
 	for i,card in ipairs(cardList) do
 		addCard(card)
 	end
+	local config = {}
+	-- 是否可以七对胡
+	config.isQiDui = isQiDui
+	-- 癞子牌
+	config.huiCard = huiCard
+	 -- 抢杠胡
+	config.qiangGangHu = true
+	-- 四红中胡牌
+	config.hiPoint = true 
 
-	local result = algorithm:checkHu(handleCardBuild,5,isQiDui,huiCard)
+	local result = algorithm:checkHu(handleCardBuild,35,config)
 	print("FYD---->>>result ==>")
 	print(result)
 end

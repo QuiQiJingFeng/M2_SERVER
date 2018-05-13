@@ -1,4 +1,4 @@
-local utils = require("utils")
+local utils = require "card_engine/utils"
 local algorithm = {}
 
 --FisherYates洗牌算法
@@ -33,13 +33,13 @@ function algorithm:checkHu(handleCards,card,config)
 	--校验一下
 	local iTotalCardNum = 0
 	for i=1,#handleCards do
-		local iTypeCardNum = 0;
+		local typeCardNum = 0;
 		for j=1,9 do
-			iTypeCardNum = iTypeCardNum + handleCards[i][j];
+			typeCardNum = typeCardNum + handleCards[i][j];
 			iTotalCardNum = iTotalCardNum + handleCards[i][j];
 		end
-		if iTypeCardNum ~= handleCards[i][10] then
-			print(string.format("TypeCardNum Error iTypeCardNum[%d] [%d][%d]\n",iTypeCardNum,i,handleCards[i][10]));
+		if typeCardNum ~= handleCards[i][10] then
+			print(string.format("TypeCardNum Error typeCardNum[%d] [%d][%d]\n",typeCardNum,i,handleCards[i][10]));
 			return false
 		end
 	end
@@ -71,7 +71,6 @@ function algorithm:checkHu(handleCards,card,config)
 	end
 
 	if huiCard then
-		print("癞子牌为:",huiCard)
 		--会牌的类型和值
 		local cardType,cardValue = caculateTypeAndValue(huiCard)
 		local huiNum = handleCards[cardType][cardValue];
@@ -114,9 +113,9 @@ function algorithm:analyze(handleCards,type,refResult)
 			break
 		end
 	end
+
 	local cardNum = handleCards[type][index]
 	local card = (type-1) * 10 + index
-	print("检查牌值 ==> ",card," 数量=",handleCards[type][index])
 	-- 检查刻子
 	if handleCards[type][index] >= 3 then
 		handleCards[type][index] = handleCards[type][index] - 3
@@ -156,43 +155,41 @@ function algorithm:analyze(handleCards,type,refResult)
 			--癞子数量-1
 			refResult.huiNum = refResult.huiNum - 1
 			--检测如果有一张会牌的情况下 组合成连的情况
-			-- a肯定是存在的 并且大于0的,但是bc就不一定了,b/c 有可能为nil 也有可能为0
-			local a = handleCards[type][index] 
-			local b = handleCards[type][index+1] or 0
-			local c = handleCards[type][index+2] or 0
-			local num = 1
-			if b > 0 then num = num + 1 end
-			if c > 0 then num = num + 1 end
-
-			-- 2 缺 1(癞子)
-			if num == 2 then
+			--A X C
+			if index < 8 and handleCards[type][index+1]==0 and handleCards[type][index+2]>0 then
 				handleCards[type][index] = handleCards[type][index] -1;
-				if b > 0 then
-					handleCards[type][index+1] = handleCards[type][index+1] -1;
-				elseif c > 0 then
-					handleCards[type][index+2] = handleCards[type][index+2] -1;
-				end
+				handleCards[type][index+2] = handleCards[type][index+2] -1;
+				handleCards[type][10] = handleCards[type][10] - 2;
+				result = self:analyze(handleCards,type,refResult);
+				handleCards[type][index] = handleCards[type][index] + 1;
+				handleCards[type][index+2] = handleCards[type][index+2] + 1;
+				handleCards[type][10] = handleCards[type][10] + 2;
+				if result then
+					return result;
+			 	end
+			--A B X  /  X A B
+			elseif index < 9 and handleCards[type][index+1]>0 then
+				handleCards[type][index] = handleCards[type][index] - 1;
+				handleCards[type][index+1] = handleCards[type][index+1] - 1;
 				handleCards[type][10] = handleCards[type][10] - 2;
 
-				result = self:analyze(handleCards,type,refResult);
+				result=self:analyze(handleCards,type,refResult);
 
 				handleCards[type][index] = handleCards[type][index] + 1;
-				if b > 0 then
-					handleCards[type][index+1] = handleCards[type][index+1] + 1;
-				elseif c > 0 then
-					handleCards[type][index+2] = handleCards[type][index+2] + 1;
-				end
+				handleCards[type][index+1] = handleCards[type][index+1] + 1;
 				handleCards[type][10] = handleCards[type][10] + 2;
 
 				if result then
-					-- 吃或者碰都可以
 					return result;
 				end
 			end
-			
-			-- 1 缺 2
-			if num == 1 and refResult.huiNum > 0 then
+
+			--A X X
+			--如果有一张有效牌 和两个会牌 可以组成3刻 或者连
+			if index <= 9 and handleCards[type][index] == 1 and refResult.huiNum > 0 then
+
 				refResult.huiNum = refResult.huiNum - 1
+
 				handleCards[type][index] = handleCards[type][index] - 1;
 				handleCards[type][10] = handleCards[type][10] - 1;
 
@@ -200,11 +197,11 @@ function algorithm:analyze(handleCards,type,refResult)
 
 				handleCards[type][index] = handleCards[type][index] + 1;
 				handleCards[type][10] = handleCards[type][10] + 1;
-				refResult.huiNum = refResult.huiNum + 1
+
 				if result then
-					-- 吃或者碰都可以
 					return result;
 				end
+				refResult.huiNum = refResult.huiNum + 1
 			end
 			refResult.huiNum = refResult.huiNum + 1
 		end
