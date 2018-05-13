@@ -33,13 +33,12 @@ function game:start(room)
 	self.convert = self.room.other_setting[5] == 1
 
 	if room.cur_round == 1 then
-		engine:init(room.seat_num)
+		engine:init(room.seat_num,room.round)
 	end
 	-- 清空上局的数据
 	engine:clear()
 
 	-- 同步room的 over_round/cur_round=>到engine
-	engine:setOverRound(room.over_round)
 	engine:setCurRound(room.cur_round)
 
 	-- 同步玩家的总胡数、暗杠、明杠数量
