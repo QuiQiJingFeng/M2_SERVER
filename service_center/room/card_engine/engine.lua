@@ -47,7 +47,6 @@ function engine:clear()
 	self:settingConfig()
 end
 
-
 --设置列表
 function engine:settingConfig(config)
 	if not config then
@@ -62,7 +61,9 @@ function engine:settingConfig(config)
 		-- 癞子牌
 		self.__config.huiCard = nil
  		-- 抢杠胡
- 		self.__config.qiangGangHu = true
+		self.__config.qiangGangHu = true
+		-- 四红中胡牌
+		self.__config.hiPoint = nil 
 	else
 		for k,v in pairs(config) do
 			self.__config[k] = v
@@ -226,7 +227,7 @@ function engine:playCard(pos,card)
 
 		if self.__config.isHu then
 			local handleCards = obj:getHandleCardBuild()
-			local hu = algorithm:checkHu(handleCards,card,self.__config.isQiDui,self.__config.huiCard)
+			local hu = algorithm:checkHu(handleCards,card,self.__config)
 			local item4 = "HU"
 			if hu then
 				table.insert(stack,item4)
@@ -279,7 +280,7 @@ function engine:pengCard(pos)
 	return place:peng(from,card)
 end
 
-function engine:updateScoreFromConf(obj,conf,pos)
+function engine:updateScoreFromConf(conf,pos)
 	local place = self.__places[pos]
 	if conf.mode == "ALL" then
 		local total = 0
@@ -333,7 +334,7 @@ function engine:gangCard(pos,card)
 			local obj = self.__places[idx]
 			local stack = stackItem.operators
 			local handleCards = obj:getHandleCardBuild()
-			local hu = algorithm:checkHu(handleCards,card,false,self.__config.huiCard)
+			local hu = algorithm:checkHu(handleCards,card,self.__config)
 			local item = "HU"
 			if hu then
 				table.insert(stack,item)
@@ -440,7 +441,7 @@ function engine:caculateFan(refResult,card,place,handleCards)
 	local huCardList = {}
 	for i=1,37 do
 		if i % 10 ~= 0 then
-			local hu = algorithm:checkHu(tempHandleCards,i,self.__config.isQiDui,self.__config.huiCard)
+			local hu = algorithm:checkHu(tempHandleCards,i,self.__config)
 			if hu then
 				table.insert(huCardList,i)
 			end
@@ -474,7 +475,8 @@ end
 function engine:huCard(pos,card)
 	local place = self.__places[pos]
 	local handleCards = place:getHandleCardBuild()
-	local hu,refResult = algorithm:checkHu(handleCards,card,self.__config.isQiDui,self.__config.huiCard)
+	
+	local hu,refResult = algorithm:checkHu(handleCards,card,self.__config)
 	if not hu then
 		return false
 	end
@@ -666,6 +668,19 @@ function engine:getAllCardType()
 		[49] = "🀪"
 	}
 	return allCardType
+end
+
+-- 获取牌库中倒数n张牌
+function engine:getPoolLastCards(n)
+	local list = {}
+	local reduceNum = #self.__cardPool
+	for i=1,n do
+		local card = self.__cardPool[reduceNum + 1 - i]
+		if card then
+			table.insert(list,card)
+		end
+	end
+	return list
 end
 
 return engine

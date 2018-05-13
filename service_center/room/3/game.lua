@@ -189,12 +189,13 @@ game["DEAL_FINISH"] = function(self, player,data)
 	end
 	
 	self.waite_operators[user_pos] = nil
-	--计算剩余的数量
+	
 
 	-- 下跑
 	local pao_num = data.pao_num or 0
 	engine:setRecordData(user_pos,"pao_num",pao_num)
-	
+
+	--计算剩余的数量
 	local _,opt = next(self.waite_operators)
 	if not opt then
 		--庄家出牌
@@ -211,7 +212,6 @@ function game:drawCard(player)
 	local result = engine:drawCard(draw_pos)
 	--检查是否流局
 	if "FLOW" == result then
-		--TODO
 		self:gameOver(player,GAME_OVER_TYPE.FLOW)
 		return 
 	end
@@ -219,8 +219,8 @@ function game:drawCard(player)
  	local card = result
 	--通知有人摸牌
 	for _,obj in ipairs(self.room.player_list) do
-		local data = {user_id = user_id,user_pos = draw_pos}
-		if obj.user_id == user_id then
+		local data = {user_id = player.user_id,user_pos = draw_pos}
+		if obj.user_id == player.user_id then
 			data.card = card
 		end
 		obj:send({push_draw_card = data})
@@ -355,13 +355,13 @@ game["GANG"] = function(self,player,data)
 	-- 杠的分数计算
 	if obj.type == engine:getConstant("TYPE","MING_GANG") then
 		local conf = {mode = "ONE" ,score = 1}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
+		engine:updateScoreFromConf(conf,player.user_pos)
 	elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
 		local conf = {mode = "ONE" ,score = 1}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
+		engine:updateScoreFromConf(conf,player.user_pos)
 	elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
 		local conf = {mode = "ALL",score = 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
+		engine:updateScoreFromConf(conf,player.user_pos)
 	end
 
 	-- 暗杠锁死 ,锁死之后不能再点炮和抢杠胡
@@ -438,83 +438,82 @@ game["HU"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	if obj then
-		--通知所有人,有人胡了
-		local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
-		self.room:broadcastAllPlayers("notice_special_event",data)
 
-		local hufen = self.base_score
+	--通知所有人,有人胡了
+	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
+	self.room:broadcastAllPlayers("notice_special_event",data)
 
-		local zui_score = 1  --报听的一分
-		if self.men_qing and refResult.fans["MEN_QING"] then
-			zui_score = zui_score + 1
-		end
+	local hufen = self.base_score
 
-		if self.an_ka then
-			local anka_num = refResult.fans["AN_KA"] 
-			if anka_num and anka_num > 0 then
-				zui_score = zui_score + anka_num
-			end
-		end
-
-		if self.qia_zhang and refResult.fans["QIA_ZHANG"] then
-			zui_score = zui_score + 1
-		end
-
-		if self.pian_ci and refResult.fans["BIAN_ZHANG"] then
-			zui_score = zui_score + 1
-		end
-
-		if self.que_men then
-			local quemen_num = refResult.fans["AN_KA"]
-			if quemen_num > 0 then
-				zui_score = zui_score + quemen_num
-			end
-		end
-		-- 自摸+1嘴
-		if self.jia_zui and refResult.isZiMo then
-			zui_score = zui_score + 1
-		end
-
-		hufen = hufen + zui_score
-
-		if self.dui_dui_hu and refResult.isQiDui then
-			hufen = hufen + 1
-		end
-
-		local extra_score = engine:getExtraScore(player.user_pos)
-		local total_score = hufen + extra_score
-
-		if refResult.isZiMo then
-			local conf = {mode = "ALL" ,score = total_score,add = "pao_num"}
-			engine:updateScoreFromConf(obj,conf,player.user_pos)
-		else
-			local conf = {mode = "ONE" ,score = total_score,add = "pao_num"}
-			engine:updateScoreFromConf(obj,conf,player.user_pos)
-		end
-
-		local info = self.room:getPlayerInfo("user_id","user_pos")
-		for _,obj in ipairs(info) do
-			obj.cur_score = engine:getCurScore(obj.user_pos)
-			obj.score = engine:getTotalScore(obj.user_pos)
-			obj.card_list = engine:getHandleCardList(obj.user_pos)
-		end
-
-		local data = {over_type = over_type,players = info}
-
-		data.winner_pos = player.user_pos
-		if refResult.isZiMo then
-			data.winner_type = constant["WINNER_TYPE"].ZIMO
-		else
-			data.winner_type = constant["WINNER_TYPE"].DIAN_PAO
-		end
- 
-		data.last_round = engine:isGameEnd()
-
-		self.room:broadcastAllPlayers("notice_game_over",data)
-
-		self:gameOver(player,GAME_OVER_TYPE.NORMAL,refResult)
+	local zui_score = 1  --报听的一分
+	if self.men_qing and refResult.fans["MEN_QING"] then
+		zui_score = zui_score + 1
 	end
+
+	if self.an_ka then
+		local anka_num = refResult.fans["AN_KA"] 
+		if anka_num and anka_num > 0 then
+			zui_score = zui_score + anka_num
+		end
+	end
+
+	if self.qia_zhang and refResult.fans["QIA_ZHANG"] then
+		zui_score = zui_score + 1
+	end
+
+	if self.pian_ci and refResult.fans["BIAN_ZHANG"] then
+		zui_score = zui_score + 1
+	end
+
+	if self.que_men then
+		local quemen_num = refResult.fans["AN_KA"]
+		if quemen_num > 0 then
+			zui_score = zui_score + quemen_num
+		end
+	end
+	-- 自摸+1嘴
+	if self.jia_zui and refResult.isZiMo then
+		zui_score = zui_score + 1
+	end
+
+	hufen = hufen + zui_score
+
+	if self.dui_dui_hu and refResult.isQiDui then
+		hufen = hufen + 1
+	end
+
+	local extra_score = engine:getExtraScore(player.user_pos)
+	local total_score = hufen + extra_score
+
+	if refResult.isZiMo then
+		local conf = {mode = "ALL" ,score = total_score,add = "pao_num"}
+		engine:updateScoreFromConf(conf,player.user_pos)
+	else
+		local conf = {mode = "ONE" ,score = total_score,add = "pao_num"}
+		engine:updateScoreFromConf(conf,player.user_pos)
+	end
+
+	local info = self.room:getPlayerInfo("user_id","user_pos")
+	for _,obj in ipairs(info) do
+		obj.cur_score = engine:getCurScore(obj.user_pos)
+		obj.score = engine:getTotalScore(obj.user_pos)
+		obj.card_list = engine:getHandleCardList(obj.user_pos)
+	end
+
+	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info}
+
+	data.winner_pos = player.user_pos
+	if refResult.isZiMo then
+		data.winner_type = constant["WINNER_TYPE"].ZIMO
+	else
+		data.winner_type = constant["WINNER_TYPE"].DIAN_PAO
+	end
+
+	data.last_round = engine:isGameEnd()
+
+	self.room:broadcastAllPlayers("notice_game_over",data)
+
+	self:gameOver(player,GAME_OVER_TYPE.NORMAL,refResult)
 
 	return "success"
 end

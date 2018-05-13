@@ -25,7 +25,8 @@ local function addCard(handleCards,card)
 	handleCards[cardType][cardValue] = handleCards[cardType][cardValue] + 1
 end
 
-function algorithm:checkHu(handleCards,card,isQiDui,huiCard)
+function algorithm:checkHu(handleCards,card,config)
+	local isQiDui,huiCard,hiPoint = config.isQiDui,config.huiCard,config.hiPoint
 
 	handleCards = utils:clone(handleCards)
 	local refResult = {handleStack = {},jiangOK=false,isZiMo = true,isQiDui = false,huiNum = 0,huiCard=huiCard}
@@ -68,13 +69,19 @@ function algorithm:checkHu(handleCards,card,isQiDui,huiCard)
 		refResult.isQiDui = true
 		return true,refResult
 	end
-	
+
 	if huiCard then
 		print("癞子牌为:",huiCard)
 		--会牌的类型和值
 		local cardType,cardValue = caculateTypeAndValue(huiCard)
 		local huiNum = handleCards[cardType][cardValue];
 		refResult.huiNum = huiNum
+		-- 检查四个癞子 胡牌
+		if hiPoint then
+			if huiNum == 4 then
+				return true,refResult
+			end
+		end
 		--更新牌型数量 去掉癞子的数量
 		handleCards[cardType][10] = handleCards[cardType][10] - huiNum
 		--将癞子的个数设置为0
