@@ -14,7 +14,7 @@ local function addCard(card)
 end
 
 function main()
-	local isQiDui = false
+	local isQiDui = nil
 	local huiCard = nil
 	for type =1,4 do
 		for value=1,10 do
@@ -25,12 +25,12 @@ function main()
 		end
 	end
 
-	local cardList = {11,11,22,22,33,33,2,2,12,12,3,3,4,4}
+	local cardList = {11,11,12,12,13,13,1,2,12,12,3,4,4,4}
 	for i,card in ipairs(cardList) do
 		addCard(card)
 	end
 
-	local result = algorithm:checkHu(handleCardBuild,isQiDui,huiCard)
+	local result = algorithm:checkHu(handleCardBuild,5,isQiDui,huiCard)
 	print("FYD---->>>result ==>")
 	print(result)
 end
