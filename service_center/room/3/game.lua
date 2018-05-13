@@ -73,9 +73,9 @@ function game:start(room)
 	engine:buildPool()
 
 	local extra_cards = {}
-	-- for i=41,48 do
-	-- 	table.insert(extra_cards,i)
-	-- end
+	for i=41,48 do
+		table.insert(extra_cards,i)
+	end
 
 	--带风
 	if self.dai_feng then
