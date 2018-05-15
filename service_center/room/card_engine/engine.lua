@@ -486,8 +486,8 @@ function engine:huCard(pos,card)
 	refResult.fans = fans
 
 	self:curRoundOver(constant.OVER_TYPE.NORMAL)
-	engine:updateHuNum(pos,num)
-	
+	engine:updateHuNum(pos,1)
+
 	local from = nil 
 	if not refResult.isZiMo then
 		from = self.__lastPutPos
