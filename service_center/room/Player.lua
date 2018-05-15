@@ -27,7 +27,7 @@ function Player:init(info)
 	self.score = info.score or 0               --积分
 	self.cur_score = 0                         --当前局的积分
 	self.fd = info.fd                          --玩家的fd
-	self.gold_num = info.gold_num			   --玩家的金币数量
+	self.gold_num = info.gold_num or 100	   --玩家的金币数量
 	self.user_pos = info.user_pos
 	self.is_sit = info.is_sit
     self.hu_num = 0
