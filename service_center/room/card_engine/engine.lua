@@ -486,6 +486,8 @@ function engine:huCard(pos,card)
 	refResult.fans = fans
 
 	self:curRoundOver(constant.OVER_TYPE.NORMAL)
+	engine:updateHuNum(pos,num)
+	
 	local from = nil 
 	if not refResult.isZiMo then
 		from = self.__lastPutPos
@@ -586,6 +588,11 @@ end
 function engine:getTotalMingGangNum(pos)
 	local place = self.__places[pos]
 	return place:getTotalMingGangNum()
+end
+
+function engine:updateHuNum(pos,num)
+	local n = engine:getTotalMingGangNum(pos) + num
+	engine:setTotalHuNum(pos,n)
 end
 
 function engine:setTotalHuNum(pos,num)

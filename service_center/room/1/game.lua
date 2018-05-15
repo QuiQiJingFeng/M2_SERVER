@@ -40,6 +40,7 @@ function game:start(room)
 
 	-- 同步room的 over_round/cur_round=>到engine
 	engine:setCurRound(room.cur_round)
+	engine:setOverRound(room.over_round)
 
 	-- 同步玩家的总胡数、暗杠、明杠数量
 	for _,obj in ipairs(room.player_list) do
@@ -405,7 +406,7 @@ game["HU"] = function(self,player,data)
 		obj.score = engine:getTotalScore(obj.user_pos)
 		obj.card_list = engine:getHandleCardList(obj.user_pos)
 	end
-
+	player.reward_num = #award_list
 	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info,award_list=award_list}
 
 	data.winner_pos = player.user_pos
@@ -478,8 +479,7 @@ function game:gameOver(player,over_type,operate,refResult)
 	for i,player in ipairs(players) do
 		player.is_sit = false
 	end
-
-	--计算金币并通知玩家更新
+ 	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)
 
 	--更新当前已经完成的局数
