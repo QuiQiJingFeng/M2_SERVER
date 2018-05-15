@@ -399,7 +399,7 @@ game["HU"] = function(self,player,data)
 		obj.score = engine:getTotalScore(obj.user_pos)
 		obj.card_list = engine:getHandleCardList(obj.user_pos)
 	end
-	player.reward_num = #award_list
+	player.reward_num = player.reward_num + #award_list
 	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info,award_list=award_list}
 
 	data.winner_pos = player.user_pos
