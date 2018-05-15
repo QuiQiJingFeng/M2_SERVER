@@ -42,13 +42,6 @@ function game:start(room)
 	engine:setCurRound(room.cur_round)
 	engine:setOverRound(room.over_round)
 
-	-- 同步玩家的总胡数、暗杠、明杠数量
-	for _,obj in ipairs(room.player_list) do
-		engine:setTotalHuNum(obj.user_pos,obj.hu_num or 0)
-		engine:setTotalAnGangNum(obj.user_pos,obj.an_gang_num or 0)
-		engine:setTotalMingGangNum(obj.user_pos,obj.ming_gang_num or 0)
-	end
-
 	-- 同步玩家的总积分score=>engine
 	local list = self.room:getPlayerInfo("user_pos","score")
 	for _,info in ipairs(list) do

@@ -300,14 +300,8 @@ function Place:getTotalMingGangNum()
 	return self.__totalMingGangNum
 end
 
-function Place:setTotalHuNum(num)
-	self.__totalHuNum = num
-end
-function Place:setTotalAnGangNum(num)
-	self.__totalAnGangNum = num
-end
-function Place:setTotalMingGangNum(num)
-	self.__totalMingGangNum = num
+function Place:updateHuNum()
+	self.__totalHuNum = self.__totalHuNum + 1
 end
 
 function Place:setRecordData(key,value)
