@@ -445,7 +445,6 @@ function game:updatePlayerGold(over_type)
 				owner.gold_num = owner.gold_num -1*cost
 				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=owner.gold_num}}
 				--通知房间中的所有人,有人的金币发生了变化
-				print("cjson--->>",cjson.encode(gold_list))
 				room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
 			end
 		--平摊
