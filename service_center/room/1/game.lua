@@ -456,7 +456,7 @@ function game:updatePlayerGold(over_type)
 			for i,obj in ipairs(players) do
 				skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
 				obj.gold_num = obj.gold_num -1*per_cost
-				local info = {user_id = obj.user_id,user_pos = obj.user_pos,gold_num = gold_num}
+				local info = {user_id = obj.user_id,user_pos = obj.user_pos,gold_num = obj.gold_num}
 				table.insert(gold_list,info)
 			end
 			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
@@ -566,7 +566,7 @@ function game:distroy()
 
 			    skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
 				obj.gold_num = obj.gold_num -1*per_cost
-				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=gold_num}
+				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=obj.gold_num}
 				table.insert(gold_list,info)
 			end
 			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})

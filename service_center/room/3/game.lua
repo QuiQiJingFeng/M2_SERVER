@@ -538,7 +538,7 @@ function game:updatePlayerGold(over_type)
 			--如果owner不存在 有可能不在游戏中(比如:有人开房给别人玩,自己不玩)
 			if owner then
 				owner.gold_num = owner.gold_num -1*cost
-				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=gold_num}}
+				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=owner.gold_num}}
 				--通知房间中的所有人,有人的金币发生了变化
 				room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
 			end
@@ -550,7 +550,7 @@ function game:updatePlayerGold(over_type)
 			for i,obj in ipairs(players) do
 				skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
 				obj.gold_num = obj.gold_num -1*per_cost
-				local info = {user_id = obj.user_id,user_pos = obj.user_pos,gold_num = gold_num}
+				local info = {user_id = obj.user_id,user_pos = obj.user_pos,gold_num = obj.gold_num}
 				table.insert(gold_list,info)
 			end
 			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
@@ -660,7 +660,7 @@ function game:distroy()
 
 			    skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
 				obj.gold_num = obj.gold_num -1*per_cost
-				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=gold_num}
+				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=obj.gold_num}
 				table.insert(gold_list,info)
 			end
 			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
