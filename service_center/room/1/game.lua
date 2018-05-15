@@ -443,8 +443,9 @@ function game:updatePlayerGold(over_type)
 			--如果owner不存在 有可能不在游戏中(比如:有人开房给别人玩,自己不玩)
 			if owner then
 				owner.gold_num = owner.gold_num -1*cost
-				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=gold_num}}
+				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=owner.gold_num}}
 				--通知房间中的所有人,有人的金币发生了变化
+				print("cjson--->>",cjson.encode(gold_list))
 				room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
 			end
 		--平摊
