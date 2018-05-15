@@ -69,12 +69,13 @@ function algorithm:checkHu(handleCards,card,config)
 		refResult.isQiDui = true
 		return true,refResult
 	end
-
+	local originHuiCardNum = 0
 	if huiCard then
 		--会牌的类型和值
 		local cardType,cardValue = caculateTypeAndValue(huiCard)
 		local huiNum = handleCards[cardType][cardValue];
 		refResult.huiNum = huiNum
+		originHuiCardNum = huiNum
 		-- 检查四个癞子 胡牌
 		if hiPoint then
 			if huiNum == 4 then
@@ -89,6 +90,7 @@ function algorithm:checkHu(handleCards,card,config)
 	if not self:analyze(handleCards,1,refResult) then
 		return false
 	end
+	refResult.huiNum = originHuiCardNum 
 
 	return true,refResult
 end
