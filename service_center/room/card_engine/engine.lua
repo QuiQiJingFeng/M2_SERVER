@@ -42,11 +42,11 @@ function engine:clear()
 	for _,place in ipairs(self.__places) do
 		place:clear()
 	end
+	self.__config = {}
 end
 
 --设置列表
 function engine:settingConfig(config)
-	self.__config = {}
 	if not config then
 		-- 别人出牌的时候是否可以吃碰杠胡
 		self.__config.isChi = false
@@ -65,8 +65,6 @@ function engine:settingConfig(config)
 		self.__config.anTing = true
 		-- 听牌时候是否可以杠
 		self.__config.gangAfterTing = true
-		-- 胡牌是否必须报听
-		self.__config.huMustHasTing = true
 	else
 		for k,v in pairs(config) do
 			self.__config[k] = v
@@ -232,7 +230,6 @@ function engine:playCard(pos,card,antingCard)
 			local item3 = "CHI"
 			table.insert(stack,item3)
 		end
-
 		if self.__config.isHu then
 			local handleCards = obj:getHandleCardBuild()
 			local hu = algorithm:checkHu(handleCards,card,self.__config)
@@ -537,7 +534,6 @@ function engine:tingCard(pos,card)
 	place:addCard(card)
   	
 	local result = self:__tingCard(handleCards)
-	local stackList
 	-- 如果是明听,需要检测其他人的吃碰杠胡
 	if result then
 		place:setTing()
@@ -548,13 +544,15 @@ function engine:tingCard(pos,card)
 			end
 			return true
 		else
-			stackList = self:playCard(pos,card)
+			local stackList = self:playCard(pos,card)
 			if not stackList then
 				return false
+			else
+				return true,stackList
 			end
 		end
 	end
-	return result,stackList
+	return result
 end
 
 function engine:getTing(pos)
@@ -565,7 +563,8 @@ end
 -- 胡牌
 function engine:huCard(pos,card)
 	local place = self.__places[pos]
-	if self.__config.huMustHasTing then
+
+	if self.__config.anTing or self.__config.anTing == false then
 		-- 检查是否听牌
 		if not place:getTing() then
 			return false
