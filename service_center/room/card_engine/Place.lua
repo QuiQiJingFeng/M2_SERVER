@@ -255,7 +255,7 @@ function Place:gang(from,card,lastPutCard)
 	end
 
 	local obj = {value = card,type=gangType,from=from}
-	if gang_type == constant.TYPE.PENG_GANG then
+	if gangType == constant.TYPE.PENG_GANG then
 		--如果是碰杠,则更改碰变成杠
 		for _,item in ipairs(self.__cardStack) do
 			if item.value == card and item.type == constant.TYPE.PENG then
