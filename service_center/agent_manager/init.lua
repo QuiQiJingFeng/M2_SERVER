@@ -79,6 +79,21 @@ function SOCKET.warning(fd, size)
     log.info("socket warning", fd, size)
 end
 
+function CMD.debugProto(user_id,proto_name,proto_msg)
+    -- body
+    local info = userid_to_info[user_id]
+    print("11111111",info)
+    if info and info.room_id then
+        print("222222222")
+        proto_msg.user_id = info.user_id
+        proto_msg.room_id = info.room_id
+        local service_id = roomid_to_agent[info.room_id]
+        local result = skynet.call(service_id, "lua", "request", proto_name,proto_msg)
+        return result
+    end
+    print("333333333333")
+end
+
 --建立连接
 function SOCKET.open(fd, addr)
     local info = {}
@@ -152,7 +167,8 @@ function SOCKET.data(fd, data)
                     send(origin_info.fd, { handle_error = {result="other_player_login"} }, origin_info.secret)
                     skynet.call(GATE_SERVICE,"lua","kick",origin_info.fd)
                 end
-
+                print("user_id --",user_id)
+                print("info -0--",info)
                 userid_to_info[user_id] = info
             else
                 rsp_msg.result = "auth_fail"

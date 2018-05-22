@@ -67,7 +67,7 @@ function game:start(room)
 
 	local extra_cards = {}
 	for i=41,48 do
-		table.insert(extra_cards,i)
+		-- table.insert(extra_cards,i)
 	end
 
 	--带风
@@ -240,7 +240,7 @@ function game:noticePushPlayCard(splayer,operator)
 	end
 end
 
-local function checkLiangSiDaYi()
+function game:checkLiangSiDaYi()
 	if self.liang_si_da_yi then
 		for _,item in ipairs(self.four_card_list) do
 			-- 检查亮的四张牌中有几张 这个牌
@@ -273,7 +273,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	end
 
 	-- 亮四打一 不能出那四张牌
-	if checkLiangSiDaYi() then
+	if self:checkLiangSiDaYi() then
 		return "invaild_operator"
 	end
 
@@ -323,7 +323,7 @@ game["TING_CARD"] = function(self,player,data)
 		return "paramater_error" 
 	end
 	-- 亮四打一 不能出那四张牌
-	if checkLiangSiDaYi() then
+	if self:checkLiangSiDaYi() then
 		return "invaild_operator"
 	end
 
@@ -342,7 +342,9 @@ game["TING_CARD"] = function(self,player,data)
 	end
 	local rsp_msg = {user_pos = user_pos,card = card}
 	self.room:broadcastAllPlayers("notice_ting_card",rsp_msg)
-	
+	if not stack_list then
+		stack_list = {}
+	end
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)
