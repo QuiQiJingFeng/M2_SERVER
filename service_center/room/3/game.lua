@@ -326,13 +326,13 @@ game["TING_CARD"] = function(self,player,data)
 	if self:checkLiangSiDaYi() then
 		return "invaild_operator"
 	end
+	-- 如果当前已经是听牌状态了
+	if engine:getTing(user_pos) then
+		return "invaild_operator"
+	end
 
 	local result,stack_list = engine:tingCard(user_pos,data.card)
 	if not result then
-		return "invaild_operator"
-	end
-	-- 如果当前已经是听牌状态了
-	if engine:getTing(user_pos) then
 		return "invaild_operator"
 	end
 

@@ -82,16 +82,13 @@ end
 function CMD.debugProto(user_id,proto_name,proto_msg)
     -- body
     local info = userid_to_info[user_id]
-    print("11111111",info)
     if info and info.room_id then
-        print("222222222")
         proto_msg.user_id = info.user_id
         proto_msg.room_id = info.room_id
         local service_id = roomid_to_agent[info.room_id]
         local result = skynet.call(service_id, "lua", "request", proto_name,proto_msg)
         return result
     end
-    print("333333333333")
 end
 
 --建立连接

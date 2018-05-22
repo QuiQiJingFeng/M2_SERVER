@@ -201,9 +201,6 @@ function engine:playCard(pos,card,antingCard)
 	if success then 
 		self.__lastPutCard = card
 		self.__lastPutPos = pos
-		if skipCheck then
-			return true
-		end
 	else
 		return false
 	end
@@ -543,6 +540,7 @@ function engine:tingCard(pos,card)
 	local stackList
 	-- 如果是明听,需要检测其他人的吃碰杠胡
 	if result then
+		place:setTing()
 		if self.__config.anTing then
 			local antingCard = 99
 			if not self:playCard(pos,card,antingCard) then
@@ -555,7 +553,6 @@ function engine:tingCard(pos,card)
 				return false
 			end
 		end
-		place:setTing()
 	end
 	return result,stackList
 end
