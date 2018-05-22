@@ -52,6 +52,8 @@ function Player:send(data_content)
         return
     end
 
+    print(cjson.encode(data_content))
+
     -- 转换为protobuf编码
     local success, data, err = pcall(pbc.encode, "S2C", data_content)
     if not success or err then
