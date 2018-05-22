@@ -46,8 +46,8 @@ end
 
 --设置列表
 function engine:settingConfig(config)
+	self.__config = {}
 	if not config then
-		self.__config = {}
 		-- 别人出牌的时候是否可以吃碰杠胡
 		self.__config.isChi = false
 		self.__config.isPeng = true
