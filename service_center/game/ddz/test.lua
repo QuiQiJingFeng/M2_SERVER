@@ -12,12 +12,13 @@ print(string.format("bHu = [%d], arg_value = [%d]", bHu, arg_value))
 
 local bHandThreeCard = false;
 
-for i = 1, 20 do 
-	while(1) do 
-		if(cCards[i] == nil or cCards[i] == 0)continue;
-			
-	end
-end
+-- for i = 1, 20 do 
+-- 	while(1) do 
+-- 		if(cCards[i] == nil or cCards[i] == 0) then
+-- 			continue;
+-- 		end
+-- 	end
+-- end
 
 
 			-- bool  bHandThreeCard = false;

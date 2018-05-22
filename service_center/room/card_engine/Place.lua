@@ -54,6 +54,15 @@ function Place:clear()
 	self.__lastCard = nil
 	-- 记录一些不同麻将所用到的一些数据
 	self.__recordData = {}
+	self.__isTing = false
+end
+
+function Place:setTing()
+	self.__isTing = true
+end
+
+function Place:getTing()
+	return self.__isTing
 end
 
 function Place:addExtraScore(deltScore)
@@ -87,8 +96,9 @@ function Place:addCard(card)
 	self.__handleCardBuild[cardType][10] = self.__handleCardBuild[cardType][10] + 1
 	self.__handleCardBuild[cardType][cardValue] = self.__handleCardBuild[cardType][cardValue] + 1
 end
-
-function Place:removeCard(card,num)
+-- skipRecord 是为了构造数据用的,并不是真正的移除牌,后面会补上的
+-- 时候用到
+function Place:removeCard(card,num,antingCard,skipRecord)
 	num = num or 1
 	local indexs = {}
 	for i=#self.__handleCardList,1,-1 do
@@ -111,6 +121,13 @@ function Place:removeCard(card,num)
 			self.__handleCardBuild[cardType][cardValue] = self.__handleCardBuild[cardType][cardValue] - 1
 		else
 			break
+		end
+	end
+	if not skipRecord then
+		if antingCard then
+			table.insert(self.__putCardList,antingCard)
+		else
+			table.insert(self.__putCardList,card)
 		end
 	end
 	

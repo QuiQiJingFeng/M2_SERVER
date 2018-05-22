@@ -6,7 +6,7 @@ local snax = require "skynet.snax"
 local memory = require "skynet.memory"
 local httpd = require "http.httpd"
 local sockethelper = require "http.sockethelper"
-
+local cjson = require "cjson"
 local arg = table.pack(...)
 assert(arg.n <= 2)
 local ip = (arg.n == 2 and arg[1] or "127.0.0.1")
@@ -163,7 +163,8 @@ function COMMAND.help()
 end
 
 function COMMAND.debugProto(user_id,proto_name,proto_msg)
-	return skynet.call(".agent_manager","lua","debugProto",user_id,proto_name,proto_msg)
+
+	return skynet.call(".agent_manager","lua","debugProto",tonumber(user_id),proto_name,cjson.decode(proto_msg))
 end
 
 function COMMAND.clearcache()
