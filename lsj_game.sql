@@ -14,6 +14,7 @@ CREATE TABLE register
     device_id       varchar(100),            -- 设备ID
     device_type     varchar(100),            -- 设备的型号 MI141
     time            datetime,                -- 注册的时间
+    bind_id         int(10),                 -- web账号绑定的游戏ID
     primary key(user_id,account)
 );
 -- 定义user_id 的自增ID 从10001开始
@@ -147,6 +148,18 @@ CREATE TABLE replay_ids
 );
 -- 定义replay_id 的自增ID 从100开始
 ALTER TABLE replay_ids AUTO_INCREMENT = 100;
+
+-- 激活码列表
+CREATE TABLE active_code_list
+(
+    user_id         int(10),      -- 用户ID
+    active_code     varchar(100),      -- 激活码
+    active_id       int(10),    -- 激活的用户ID
+    active_time     datetime,  -- 激活的时间
+    primary key(active_code)  
+);
+
+
 
 
 
