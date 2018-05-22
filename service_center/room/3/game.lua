@@ -84,6 +84,8 @@ function game:start(room)
 
 	--洗牌
 	engine:sort()
+	engine:settingConfig()
+
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
@@ -238,21 +240,7 @@ function game:noticePushPlayCard(splayer,operator)
 	end
 end
 
---出牌
-game["PLAY_CARD"] = function(self,player,data)
-	local user_pos = player.user_pos
-	if not self:check_operator(user_pos,"PLAY_CARD") then 
-		return "invaild_operator" 
-	end
-	if not data.card then 
-		return "paramater_error" 
-	end
-
-	local stack_list = engine:playCard(user_pos,data.card)
-	if not stack_list then
-		return "invaild_operator"
-	end
-	-- 亮四打一 不能出那四张牌
+local function checkLiangSiDaYi()
 	if self.liang_si_da_yi then
 		for _,item in ipairs(self.four_card_list) do
 			-- 检查亮的四张牌中有几张 这个牌
@@ -266,12 +254,34 @@ game["PLAY_CARD"] = function(self,player,data)
 			if card_num > 0 then
 				local num = engine:getCardNum(item.user_pos,card)
 				if num <= card_num then
-					return "invaild_operator"
+					return true
 				end
 			end
 		end
-		
 	end
+	return false
+end
+
+--出牌
+game["PLAY_CARD"] = function(self,player,data)
+	local user_pos = player.user_pos
+	if not self:check_operator(user_pos,"PLAY_CARD") then 
+		return "invaild_operator" 
+	end
+	if not data.card then 
+		return "paramater_error" 
+	end
+
+	-- 亮四打一 不能出那四张牌
+	if checkLiangSiDaYi() then
+		return "invaild_operator"
+	end
+
+	local stack_list = engine:playCard(user_pos,data.card)
+	if not stack_list then
+		return "invaild_operator"
+	end
+	
 
 	self.waite_operators[user_pos] = nil
 
@@ -284,6 +294,54 @@ game["PLAY_CARD"] = function(self,player,data)
 	local data = {user_id = user_id,card = data.card,user_pos = user_pos}
 	--通知所有人 A 已经出牌
 	self.room:broadcastAllPlayers("notice_play_card",data)
+	
+	local _,item = next(stack_list)
+	if item and #item.operators >= 1 then
+		local check_player = self.room:getPlayerByPos(item.pos)
+		local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
+		check_player:send(rsp_msg)
+		table.insert(item.operators,"GUO")
+		self.waite_operators[item.pos] = { operators = item.operators ,card = item.card}
+		table.remove(stack_list,1)
+		self.stack_list = stack_list
+	else
+		local next_pos = engine:getNextPutPos()
+		local next_player = self.room:getPlayerByPos(next_pos)
+		self:drawCard(next_player)
+	end
+
+	return "success"
+end
+
+-- 听牌
+game["TING_CARD"] = function(self,player,data)
+	local user_pos = player.user_pos
+	if not self:check_operator(user_pos,"PLAY_CARD") then 
+		return "invaild_operator" 
+	end
+	if not data.card then 
+		return "paramater_error" 
+	end
+	-- 亮四打一 不能出那四张牌
+	if checkLiangSiDaYi() then
+		return "invaild_operator"
+	end
+
+	local result,stack_list = engine:tingCard(user_pos,data.card)
+	if not result then
+		return "invaild_operator"
+	end
+	-- 如果当前已经是听牌状态了
+	if engine:getTing(user_pos) then
+		return "invaild_operator"
+	end
+
+	local card = data.card
+	if engine:isAnTing() then
+		card = 99
+	end
+	local rsp_msg = {user_pos = user_pos,card = card}
+	self.room:broadcastAllPlayers("notice_ting_card",rsp_msg)
 	
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
@@ -373,7 +431,9 @@ game["GANG"] = function(self,player,data)
 	end
 
 	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
-
+	if not stack_list then
+		stack_list = {}
+	end
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)

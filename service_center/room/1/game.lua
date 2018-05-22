@@ -55,7 +55,7 @@ function game:start(room)
 	--洗牌
 	engine:sort()
 
-	engine:settingConfig({isHu=false,isQiDui=self.seven_pairs,huiCard=35,hiPoint=true})
+	engine:settingConfig({isPeng = true,isGang = true,isQiDui=self.seven_pairs,huiCard=35,hiPoint=true,qiangGangHu=true})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
@@ -207,7 +207,9 @@ game["PLAY_CARD"] = function(self,player,data)
 	local data = {user_id = user_id,card = data.card,user_pos = user_pos}
 	--通知所有人 A 已经出牌
 	self.room:broadcastAllPlayers("notice_play_card",data)
-
+	if not stack_list then
+		stack_list = {}
+	end
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)

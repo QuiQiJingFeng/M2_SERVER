@@ -42,9 +42,6 @@ function engine:clear()
 	for _,place in ipairs(self.__places) do
 		place:clear()
 	end
-
-	--设置默认配置
-	self:settingConfig()
 end
 
 --设置列表
@@ -64,11 +61,21 @@ function engine:settingConfig(config)
 		self.__config.qiangGangHu = true
 		-- 四红中胡牌
 		self.__config.hiPoint = nil 
+		-- 明听还是暗听 默认是暗听
+		self.__config.anTing = true
+		-- 听牌时候是否可以杠
+		self.__config.gangAfterTing = true
+		-- 胡牌是否必须报听
+		self.__config.huMustHasTing = true
 	else
 		for k,v in pairs(config) do
 			self.__config[k] = v
 		end
 	end
+end
+
+function engine:isAnTing()
+	return self.__config.anTing
 end
 
 -- 添加额外的牌型,构建最终的牌库
@@ -188,12 +195,15 @@ function engine:getLastPutCard()
 end
 
 -- 出牌
-function engine:playCard(pos,card)
+function engine:playCard(pos,card,antingCard)
 	local place = self.__places[pos]
-	local success = place:removeCard(card,1)
+	local success = place:removeCard(card,1,antingCard)
 	if success then 
 		self.__lastPutCard = card
 		self.__lastPutPos = pos
+		if skipCheck then
+			return true
+		end
 	else
 		return false
 	end
@@ -322,6 +332,37 @@ function engine:gangCard(pos,card)
 		from = self.__lastPutPos
 	end
 	local place = self.__places[pos]
+
+	if self.__config.gangAfterTing then
+		if self:getTing(pos) then
+			local handleCards
+			--暗杠
+			if from == self.__lastPutPos then
+				if not place:removeCard(card,4) then
+					return false
+				end
+				handleCards = utils:clone(place:getHandleCardBuild())
+				for i=1,4 do
+					place:addCard(card)
+				end
+			else
+				if not place:removeCard(card,3) then
+					return false
+				end
+				handleCards = utils:clone(place:getHandleCardBuild())
+				for i=1,3 do
+					place:addCard(card)
+				end
+			end
+
+			local result = self:__tingCard(handleCards)
+			--如果杠了之后还能听牌，则可以杠,否则不能杠
+			if not result then
+				return false
+			end
+		end
+	end
+
 	local obj = place:gang(from,card,self.__lastPutCard)
 	--如果杠成功了,那么检查其他人是否有抢杠胡
 	local stackList = {}
@@ -433,7 +474,7 @@ function engine:caculateFan(refResult,card,place,handleCards)
 
 	local tempHandleCards = utils:clone(handleCards)
 	if #place:getHandleCardList() % 3 == 2 then
-		place:removeCard(card,1)
+		place:removeCard(card,1,nil,true)
 		tempHandleCards = utils:clone(place:getHandleCardBuild())
 		place:addCard(card)
 	end
@@ -473,8 +514,66 @@ function engine:caculateFan(refResult,card,place,handleCards)
 	return fans
 end
 
+function engine:__tingCard(handleCards)
+	local result = false
+	local allCards = self:getAllCardType()
+	for i=1,40 do
+		local card = allCards[i] and i or nil 
+		if card then
+			local hu,refResult = algorithm:checkHu(handleCards,card,self.__config)
+			if hu then
+				result = true
+				break
+			end
+		end
+	end
+	return result
+end
+
+function engine:tingCard(pos,card)
+	-- 检测是否听牌
+	local place = self.__places[pos]
+	
+	place:removeCard(card,1,nil,true)
+	local handleCards = place:getHandleCardBuild()
+	handleCards = utils:clone(handleCards)
+	place:addCard(card)
+  	
+	local result = self:__tingCard(handleCards)
+	local stackList
+	-- 如果是明听,需要检测其他人的吃碰杠胡
+	if result then
+		if self.__config.anTing then
+			local antingCard = 99
+			if not self:playCard(pos,card,antingCard) then
+				return false
+			end
+			return true
+		else
+			stackList = self:playCard(pos,card)
+			if not stackList then
+				return false
+			end
+		end
+		place:setTing()
+	end
+	return result,stackList
+end
+
+function engine:getTing(pos)
+	local place = self.__places[pos]
+	return place:getTing()
+end
+
+-- 胡牌
 function engine:huCard(pos,card)
 	local place = self.__places[pos]
+	if self.__config.huMustHasTing then
+		-- 检查是否听牌
+		if not place:getTing() then
+			return false
+		end
+	end
 	local handleCards = place:getHandleCardBuild()
 	
 	local hu,refResult = algorithm:checkHu(handleCards,card,self.__config)
