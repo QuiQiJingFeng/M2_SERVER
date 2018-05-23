@@ -25,6 +25,7 @@ constant.TYPE = {
 constant.FANTYPE = {
 	QIA_ZHANG = "QIA_ZHANG",
 	BIAN_ZHANG = "BIAN_ZHANG",
+	DAN_DIAO = "DAN_DIAO",
 	QUE_MEN = "QUE_MEN",
 	MEN_QING = "MEN_QING",
 	AN_KA = "AN_KA",

@@ -129,6 +129,7 @@ function algorithm:analyze(handleCards,type,refResult)
 		handleCards[type][10] = handleCards[type][10] + 3
 
 		if result then
+			table.insert(refResult.handleStack,{type="PENG",value=card})
 			return result
 		end
 	end
@@ -148,6 +149,7 @@ function algorithm:analyze(handleCards,type,refResult)
 			handleCards[type][10] = handleCards[type][10] + 3;
 
 			if result then
+				table.insert(refResult.handleStack,{type="CHI",value=card})
 				return result
 			end
 		end
@@ -167,6 +169,7 @@ function algorithm:analyze(handleCards,type,refResult)
 				handleCards[type][index+2] = handleCards[type][index+2] + 1;
 				handleCards[type][10] = handleCards[type][10] + 2;
 				if result then
+					table.insert(refResult.handleStack,{type="CHI",value=card})
 					return result;
 			 	end
 			--A B X  /  X A B
@@ -182,6 +185,7 @@ function algorithm:analyze(handleCards,type,refResult)
 				handleCards[type][10] = handleCards[type][10] + 2;
 
 				if result then
+					table.insert(refResult.handleStack,{type="CHI",value=card})
 					return result;
 				end
 			end
@@ -201,6 +205,7 @@ function algorithm:analyze(handleCards,type,refResult)
 				handleCards[type][10] = handleCards[type][10] + 1;
 
 				if result then
+					table.insert(refResult.handleStack,{type="CHI",value=card})
 					return result;
 				end
 				refResult.huiNum = refResult.huiNum + 1
@@ -233,6 +238,7 @@ function algorithm:analyze(handleCards,type,refResult)
 		handleCards[type][index] = handleCards[type][index] + jiangNum
 		handleCards[type][10] = handleCards[type][10] + jiangNum
 		if result then
+			table.insert(refResult.handleStack,{type="JIANG",value=card})
 			return result
 		end
 		-- 如果jiangNum == 1 则补上一张癞子牌
@@ -263,6 +269,7 @@ function algorithm:analyze(handleCards,type,refResult)
 			handleCards[type][10] = handleCards[type][10] + cardNum;
 
 			if result then
+				table.insert(refResult.handleStack,{type="JIANG",value=card})
 				return result;
 			end
 

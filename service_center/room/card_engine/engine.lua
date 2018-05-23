@@ -451,7 +451,7 @@ function engine:caculateFan(refResult,card,place,handleCards)
 	local fans = {}
 	-- 如果可以胡牌,则开始计算番数
 
-	-- 暗卡
+	-- 暗卡 三个相同花色，相同的牌数组成的为一个暗卡（刻字）。还有自己摸到的才算暗卡。 碰杠都不算暗卡（暗杠也不算暗卡）
 	local anKaNum = 0
 	for _,obj in ipairs(refResult.handleStack) do
 		if obj.type == "PENG" then
@@ -520,9 +520,9 @@ function engine:caculateFan(refResult,card,place,handleCards)
 					fans[constant.FANTYPE.BIAN_ZHANG] = true
 				end
 			else
-				-- 单调一张也属于掐张
+				--单调一张 
 				if card == obj.value then
-					fans[constant.FANTYPE.QIA_ZHANG] = true
+					fans[constant.FANTYPE.DAN_DIAO] = true
 				end
 			end
 		end

@@ -516,6 +516,10 @@ game["HU"] = function(self,player,data)
 		zui_score = zui_score + 1
 	end
 
+	if self.qia_zhang and refResult.fans["DAN_DIAO"] then
+		zui_score = zui_score + 1
+	end
+
 	if self.pian_ci and refResult.fans["BIAN_ZHANG"] then
 		zui_score = zui_score + 1
 	end
