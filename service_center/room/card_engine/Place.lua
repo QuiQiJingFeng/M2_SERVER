@@ -331,7 +331,7 @@ end
 
 function Place:getCardNum(card)
 	local cardType,cardValue = self:caculateTypeAndValue(card)
-	return self.__handleCardBuild[cardType][10]
+	return self.__handleCardBuild[cardType][cardValue]
 end
 
 return Place

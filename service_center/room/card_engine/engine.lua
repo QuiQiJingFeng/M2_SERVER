@@ -45,30 +45,42 @@ function engine:clear()
 	self.__config = {}
 end
 
+function engine:setDefaultConfig()
+	-- 别人出牌的时候是否可以吃碰杠胡(明听也算出牌)
+	self.__config.isChi = false
+	self.__config.isPeng = true
+	self.__config.isGang = true
+	self.__config.isHu = true
+	-- 是否可以七对胡
+	self.__config.isQiDui = false
+	-- 癞子牌
+	self.__config.huiCard = nil
+		-- 抢杠胡
+	self.__config.qiangGangHu = true
+	-- 四癞子胡牌
+	self.__config.hiPoint = nil
+	-- 是否限制只能一个癞子胡牌
+	self.__config.onlyOneHuiCardHu = false
+
+	-- 明听还是暗听 默认是暗听
+	self.__config.anTing = true
+	-- 胡牌是否必须听牌
+	self.__config.huMustTing = true
+	-- 听牌时候是否可以杠
+	self.__config.gangAfterTing = true
+end
+
 --设置列表
-function engine:settingConfig(config)
-	if not config then
-		-- 别人出牌的时候是否可以吃碰杠胡
-		self.__config.isChi = false
-		self.__config.isPeng = true
-		self.__config.isGang = true
-		self.__config.isHu = true
-		-- 是否可以七对胡
-		self.__config.isQiDui = false
-		-- 癞子牌
-		self.__config.huiCard = nil
- 		-- 抢杠胡
-		self.__config.qiangGangHu = true
-		-- 四红中胡牌
-		self.__config.hiPoint = nil 
-		-- 明听还是暗听 默认是暗听
-		self.__config.anTing = true
-		-- 听牌时候是否可以杠
-		self.__config.gangAfterTing = true
-	else
-		for k,v in pairs(config) do
-			self.__config[k] = v
-		end
+function engine:setConfig(config)
+	self.__config = {}
+	for k,v in pairs(config) do
+		self.__config[k] = v
+	end
+end
+
+function engine:updateConfig(config)
+	for k,v in pairs(config) do
+		self.__config[k] = v
 	end
 end
 
@@ -564,12 +576,21 @@ end
 function engine:huCard(pos,card)
 	local place = self.__places[pos]
 
-	if self.__config.anTing or self.__config.anTing == false then
+	if self.__config.huMustTing then
 		-- 检查是否听牌
 		if not place:getTing() then
 			return false
 		end
 	end
+
+	--如果只能一个癞子胡牌
+	if self.__config.onlyOneHuiCardHu then
+		local num = place:getCardNum(self.__config.huiCard)
+		if num > 1 then
+			return false
+		end
+	end
+
 	local handleCards = place:getHandleCardBuild()
 	
 	local hu,refResult = algorithm:checkHu(handleCards,card,self.__config)
@@ -577,13 +598,14 @@ function engine:huCard(pos,card)
 		return false
 	end
 
+
 	local fans = engine:caculateFan(refResult,card,place,handleCards)
 	refResult.fans = fans
 
 	self:curRoundOver(constant.OVER_TYPE.NORMAL)
 	place:updateHuNum()
 
-	local from = nil 
+	local from = pos 
 	if not refResult.isZiMo then
 		from = self.__lastPutPos
 	end
