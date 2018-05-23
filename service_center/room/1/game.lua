@@ -63,7 +63,7 @@ function game:start(room)
 	engine:setflowBureauNum(self.award_num)
 
 	if skynet.getenv("mode") == "debug" then
-		local data = require "1/conf.lua"
+		local data = require "1/conf"
 		engine:setDebugPool(data.pool)
 		engine:setCurRoundBanker(data.zpos)
 	end
