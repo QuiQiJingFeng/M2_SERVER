@@ -515,8 +515,8 @@ function engine:caculateFan(refResult,card,place,handleCards)
 				if card == obj.value + 1 then
 					fans[constant.FANTYPE.QIA_ZHANG] = true
 				end
-				-- 边张
-				if (card == obj.value or card == obj.value + 2) and (obj.value % 10 == 1 or obj.value % 10 == 7) then
+				-- 边张 
+				if (card == obj.value + 2 and card % 10 == 3) or (card == obj.value and card % 10 == 7) then
 					fans[constant.FANTYPE.BIAN_ZHANG] = true
 				end
 			else
@@ -593,7 +593,6 @@ function engine:huCard(pos,card)
 			return false
 		end
 	end
-
 	--如果只能一个癞子胡牌
 	if self.__config.onlyOneHuiCardHu then
 		local num = place:getCardNum(self.__config.huiCard)
@@ -781,14 +780,14 @@ function engine:getAllCardType()
 		[36] = "🀅",
 		[37] = "🀆",
 		
-		[41] = "🀢",
-		[42] = "🀣",
-		[43] = "🀤",
-		[44] = "🀥",
-		[45] = "🀦",
-		[46] = "🀧",
-		[47] = "🀨",
-		[48] = "🀩",
+		[41] = "🀦",
+		[42] = "🀧",
+		[43] = "🀨",
+		[44] = "🀩",
+		[45] = "🀢",
+		[46] = "🀣",
+		[47] = "🀤",
+		[48] = "🀥",
 		[49] = "🀪"
 	}
 	return allCardType

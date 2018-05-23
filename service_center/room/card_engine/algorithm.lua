@@ -269,7 +269,7 @@ function algorithm:analyze(handleCards,type,refResult)
 			handleCards[type][10] = handleCards[type][10] + cardNum;
 
 			if result then
-				table.insert(refResult.handleStack,{type="JIANG",value=card})
+				table.insert(refResult.handleStack,{type="PENG",value=card})
 				return result;
 			end
 

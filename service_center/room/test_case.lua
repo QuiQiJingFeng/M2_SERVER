@@ -29,7 +29,11 @@ end
 
 local test = {}
 
-local function drewCards(list1,list2)
+local function drewCards(list1,list2,list3,list4)
+	list1 = list1 or {}
+	list2 = list2 or {}
+	list3 = list3 or {}
+	list4 = list4 or {}
 	local cardList = list1
 	for i,v in ipairs(cardList) do
 	    engine:drawCard(1,v)
@@ -38,6 +42,16 @@ local function drewCards(list1,list2)
 	local cardList2 = list2
 	for i,v in ipairs(cardList2) do
 	    engine:drawCard(2,v)
+	end
+
+	local cardList3 = list3
+	for i,v in ipairs(cardList3) do
+	    engine:drawCard(3,v)
+	end
+
+	local cardList4 = list4
+	for i,v in ipairs(cardList4) do
+	    engine:drawCard(4,v)
 	end
 end
 -- 碰、杠的测试用例
@@ -443,6 +457,38 @@ function test.case9()
 	assert(engine:getTotalScore(4) == -13)
 end
 
+-- 测试麻将的番
+function test.case10()
+	engine:init(3)
+	local config = {isChi = false,isPeng = true,isGang=true}
+	engine:setConfig(config)
+	local args = {
+			{1,2,3,11,12,13,14,15,16,13,13,13,19},
+			{1,2,3,5,6,7,11,12,13,15,15, 19,18},
+			{1,3, 5,6,7, 11,12,13, 15,15, 17,18,19},
+	 }
+	drewCards(table.unpack(args))
+
+	engine:drawCard(1,19)
+	local obj,refResult = engine:huCard(1,19)
+	assert(obj,"ERROR_HU_CARD")
+	assert(refResult.fans["MEN_QING"],"门清")
+	assert(refResult.fans["QUE_MEN"]==1,"缺门")
+	assert(refResult.fans["DAN_DIAO"],"单调")
+	assert(refResult.fans["AN_KA"] == 1,"暗卡")
+
+	engine:drawCard(2,17)
+	local obj,refResult = engine:huCard(2,17)
+	assert(obj,"ERROR_HU_CARD")
+	assert(refResult.fans["BIAN_ZHANG"],"边张")
+
+	engine:drawCard(3,2)
+	local obj,refResult = engine:huCard(3,2)
+	assert(obj,"ERROR_HU_CARD")
+	assert(refResult.fans["QIA_ZHANG"],"掐张")
+
+end
+
 for i=1,10 do
 	local str = "case"..i
 	local func = test[str]
@@ -454,5 +500,4 @@ for i=1,10 do
 	print("测试用例["..i.."]通过！！！")
 end
 
-
-
+ 
