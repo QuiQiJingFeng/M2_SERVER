@@ -69,7 +69,9 @@ for k,v in pairs(card_list) do
 end
 
 for i=1,#temp_list do
-	local value = math.random(1,#temp_list)
+	local idx = math.random(1,#temp_list)
+	local value = table.remove(temp_list,idx)
+
 	table.insert(pool,value)
 end
  
