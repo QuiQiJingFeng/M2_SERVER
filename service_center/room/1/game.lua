@@ -62,6 +62,12 @@ function game:start(room)
 	-- 设置流局的张数
 	engine:setflowBureauNum(self.award_num)
 
+	if skynet.getenv("mode") == "debug" then
+		local data = require "1/conf.lua"
+		engine:setDebugPool(data.pool)
+		engine:setCurRoundBanker(data.zpos)
+	end
+
 	-- 获取本局的庄家
 	local banker_pos = engine:getCurRoundBanker()
 	-- 随机骰子

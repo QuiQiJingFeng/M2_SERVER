@@ -33,6 +33,10 @@ function engine:buildPool()
 	end
 end
 
+function engine:setDebugPool(debugPool)
+	self.__cardPool = debugPool
+end
+
 function engine:clear()
 	self.__mode = constant.BankerMode.YING
 	self.__curBankerPos = nil
@@ -100,6 +104,7 @@ function engine:getCardPool()
 	return self.__cardPool
 end
 
+
 -- 获取牌库中牌的数量
 function engine:getPoolCardNum()
 	return #self.__cardPool
@@ -122,6 +127,10 @@ function engine:getCurRoundBanker()
 		self.__curBankerPos = math.random(1,self.__placeNum)
 	end
 	return self.__curBankerPos
+end
+
+function engine:setCurRoundBanker(pos)
+	self.__curBankerPos = pos
 end
 
 -- 更新下一局庄家的位置
