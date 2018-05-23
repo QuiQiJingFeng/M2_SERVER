@@ -48,10 +48,10 @@ card_list[35] = 4
 
 local handle1 = {1,2,3,4,4,4,4,5,5,5,6,6,6}
 local handle2 = {11,12,13,14,14,14,14,15,15,15,16,16,16}
-
-local utils = require "utils"
-local pool = utils:mergeNewTable(handle1,handle2)
-
+for i,v in ipairs(handle2) do
+	table.insert(handle1,v)
+end
+local pool = handle1
 for _,value in ipairs(pool) do
 	local num = card_list[value]
 	card_list[value] = num - 1
