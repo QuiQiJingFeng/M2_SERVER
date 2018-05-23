@@ -237,13 +237,13 @@ function CMD.distroy_room(content)
         if room.state ~= constant.ROOM_STATE.GAME_PREPARE or user_id ~= owner_id then
             return "no_permission_distroy"
         else
-            room:distory(constant.DISTORY_TYPE.OWNER_DISTROY)
+            room:distroy(constant.DISTORY_TYPE.OWNER_DISTROY)
             return "success"
         end
     end
     --如果是申请解散房间
     if type ==  constant.DISTORY_TYPE.ALL_AGREE then
-        room.can_distory = true
+        room.can_distroy = true
         local players = room.player_list
         room.confirm_map = room.confirm_map or {}
         local confirm_map = room.confirm_map
@@ -265,8 +265,8 @@ function CMD.distroy_room(content)
                     --如果这个房间已经被解散了
                     return 
                 end
-                local can_distory = room.can_distory
-                if not can_distory then
+                local can_distroy = room.can_distroy
+                if not can_distroy then
                     print("这个房间已经被人拒绝解散了")
                     --如果这个房间已经被人拒绝解散了
                     return 
@@ -288,8 +288,8 @@ function CMD.confirm_distroy_room(content)
     local user_id = content.user_id
     local room_id = content.room_id
     local confirm = content.confirm
-    local can_distory = room.can_distory
-    if not can_distory then
+    local can_distroy = room.can_distroy
+    if not can_distroy then
         --非法的请求
         return "no_support_command"
     end
@@ -311,8 +311,8 @@ function CMD.confirm_distroy_room(content)
 
         --如果所有人都点了确定
         if num == player_num then
-            room.can_distory = nil
-            room:distory(constant.DISTORY_TYPE.ALL_AGREE)
+            room.can_distroy = nil
+            room:distroy(constant.DISTORY_TYPE.ALL_AGREE)
         end
     else
         local s_player = room:getPlayerByUserId(user_id)
@@ -325,7 +325,7 @@ function CMD.confirm_distroy_room(content)
             end
         end
         room.confirm_map = {}
-        room.can_distory = nil
+        room.can_distroy = nil
     end
 
     return "success"
@@ -349,7 +349,7 @@ end
 local function checkExpireRoom()
     local now = skynet.time()
     if room.expire_time and room.expire_time < now then
-        room:distory(constant.DISTORY_TYPE.EXPIRE_TIME)
+        room:distroy(constant.DISTORY_TYPE.EXPIRE_TIME)
     else
         --每隔1分钟检查一下失效的房间
         skynet.timeout(60 * 100, checkExpireRoom)   
