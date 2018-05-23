@@ -84,7 +84,7 @@ function game:start(room)
 
 	--洗牌
 	engine:sort()
-	engine:settingConfig()
+	engine:setDefaultConfig()
 
 
 	-- 设置庄家模式
@@ -419,7 +419,7 @@ game["GANG"] = function(self,player,data)
 
 	-- 暗杠锁死 ,锁死之后不能再点炮和抢杠胡
 	if self.an_gang_suo_si then
-		engine:settingConfig({isHu = false,qiangGangHu = false})
+		engine:updateConfig({isHu = false,qiangGangHu = false})
 	end
 
 	--通知所有人,有人杠了

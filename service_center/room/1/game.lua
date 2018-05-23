@@ -55,7 +55,7 @@ function game:start(room)
 	--洗牌
 	engine:sort()
 
-	engine:settingConfig({isPeng = true,isGang = true,isQiDui=self.seven_pairs,huiCard=35,hiPoint=true,qiangGangHu=true})
+	engine:setConfig({isPeng = true,isGang = true,isQiDui=self.seven_pairs,huiCard=35,hiPoint=true,qiangGangHu=true})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
