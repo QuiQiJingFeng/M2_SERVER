@@ -164,8 +164,6 @@ function SOCKET.data(fd, data)
                     send(origin_info.fd, { handle_error = {result="other_player_login"} }, origin_info.secret)
                     skynet.call(GATE_SERVICE,"lua","kick",origin_info.fd)
                 end
-                print("user_id --",user_id)
-                print("info -0--",info)
                 userid_to_info[user_id] = info
             else
                 rsp_msg.result = "auth_fail"
