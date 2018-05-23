@@ -46,12 +46,25 @@ for i=1,30 do
 end
 card_list[35] = 4
 
-local handle1 = {1,2,3,4,4,4,4,5,5,5,6,6,6}
-local handle2 = {11,12,13,14,14,14,14,15,15,15,16,16,16}
+,
+			
+local handle1 = {4,5,6,7,8,9,23,24,25,26,27,29,29}
+local handle2 = {1,2,3,11,12,13,14,15,16,17,18,28,28}
+
 for i,v in ipairs(handle2) do
 	table.insert(handle1,v)
 end
 local pool = handle1
+
+table.insert(pool,28) -- 第一个人摸了个 28  
+-->第一个人出28
+--第二个人碰 并且出牌18
+table.insert(pool,27) -- 第一个人又摸了个27 --》 出牌27
+table.insert(pool,28) -- 第二个人摸了个28  这个时候第二个人可以碰杠
+--第二个人碰杠
+--这个时候第一个人可以抢杠胡
+
+
 for _,value in ipairs(pool) do
 	local num = card_list[value]
 	card_list[value] = num - 1
