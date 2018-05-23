@@ -30,22 +30,18 @@ end
 local test = {}
 
 local function drewCards(list1,list2)
-	print("开始发牌:")
 	local cardList = list1
 	for i,v in ipairs(cardList) do
 	    engine:drawCard(1,v)
 	end
-	print("A玩家手牌:",table.concat(cardList,","))
 
 	local cardList2 = list2
 	for i,v in ipairs(cardList2) do
 	    engine:drawCard(2,v)
 	end
-	print("B玩家手牌:",table.concat(cardList2,","))
 end
 -- 碰、杠的测试用例
 function test.case1()
-	print("--------检测碰杠----------")
 	local args = {
 					{11,11,11,11,12,13,15,15,17,18,18,18,19},
 					{1,1,1,2,2,2,3,3,3,5,5,12,21}
@@ -68,7 +64,6 @@ function test.case1()
 		end
 	end
 	assert(num == 1,"stack obj error")
-	print("暗杠测试通过")
 
 	--A摸一张牌
 	engine:drawCard(1,28)
@@ -92,8 +87,6 @@ function test.case1()
 		end
 	end
 	assert(num == 1,"stack obj error")
-	print("明杠测试通过")
-
 
 	engine:drawCard(1,5)
 	engine:playCard(1,5)
@@ -112,7 +105,6 @@ function test.case1()
 		end
 	end
 	assert(num == 1,"stack obj error")
-	print("碰测试通过")
 
 	engine:playCard(2,1)
 
@@ -135,8 +127,6 @@ function test.case1()
 		end
 	end
 	assert(num == 1,"stack obj error")
-	print("碰杠测试通过")
-	print("用例1测试通过")
 end
 
 -- 暗听  先听牌再胡牌
@@ -160,11 +150,7 @@ function test.case2()
 	assert(ishu,"huCard ERROR")
 	assert(engine:getOverRound() == 1,"over round error")
 	assert(engine:getCurRound() == 1,"cur round error")
-	
 
-
-	print("-- 暗听  先听牌再胡牌 测试通过")
-	print("用例2 测试通过")
 end
 -- 暗听 没有听牌 直接胡
 function test.case3()
@@ -181,8 +167,6 @@ function test.case3()
 	engine:drawCard(1,21)
 	local ishu = engine:huCard(1,21)
 	assert(not ishu,"huCard ERROR")
-	print("-- 暗听 没有听牌 直接胡 测试通过")
-	print("用例3 测试通过")
 end
 
 -- 明听 先听 听的牌被别人胡
@@ -217,8 +201,6 @@ function test.case4()
 	assert(obj,"huCard ERROR")
 	assert(obj.from == 2,"hu from ERROR")
 	assert(obj.value == 21,"hu value ERROR")
-	print("明听 先听 听的牌被别人胡 测试通过")
-	print("用例4测试通过")
 end
 
 -- 测试抢杠胡(抢杠胡是自摸的碰杠被人抢了)
@@ -271,9 +253,7 @@ function test.case5()
  		end
  	end
  	assert(hu,"ERROR")
- 	print("抢杠胡测试通过")
- 	print("测试用例5通过")
-end
+ end
 
 -- 测试4个癞子胡牌
 function test.case6()
@@ -291,8 +271,6 @@ function test.case6()
 	local obj = engine:huCard(1,4)
 	assert(obj.type == 6,"HU ERROR")
 	assert(obj.value == 4,"HU ERROR")
-	print("四个癞子胡牌测试通过")
-	print("测试用例6通过")
 end
 
 --测试癞子胡牌 测试七对胡
@@ -306,18 +284,17 @@ function test.case7()
 		{1,1,2,2,13,13,4,4,5,5,6,6,7}
 	 }
 	drewCards(table.unpack(args))
-
+	--普通癞子胡(多个癞子)牌测试
 	engine:drawCard(1,3)
 	local obj = engine:huCard(1,3)
 	assert(obj.type == 6,"HU ERROR")
 	assert(obj.value == 3,"HU ERROR")
 	assert(obj.from == 1,"HU ERROR")
-	print('普通癞子胡(多个癞子)牌测试通过')
-
+	
+	--多癞子不能胡牌测试
 	engine:updateConfig({onlyOneHuiCardHu = true})
 	local obj = engine:huCard(1,3)
 	assert(not obj,"胡牌错误，多个癞子不能胡牌")
-	print('多癞子不能胡牌 测试通过')
 
 	--测试七对胡
 	engine:drawCard(2,7)
@@ -329,9 +306,6 @@ function test.case7()
 	engine:updateConfig({isQiDui=false})
 	local obj = engine:huCard(2,7)
 	assert(not obj,"胡牌错误,七对开关没有开，无法胡七对")
-	print("七对胡测试通过")
-
-	print("测试用例7通过")
 end
 
 -- 检测流局
@@ -358,8 +332,6 @@ function test.case8()
 	end
 	local curNum = engine:getPoolCardNum()
 	assert(curNum == 30)
-	print('流局测试通过')
-	print("测试用例8 测试通过")
 end
 
 -- 测试积分
@@ -469,8 +441,6 @@ function test.case9()
 	assert(engine:getTotalScore(2) == -14)
 	assert(engine:getTotalScore(3) == -13)
 	assert(engine:getTotalScore(4) == -13)
-	print("积分更新测试通过----")
-	print("用例9测试通过")
 end
 
 for i=1,10 do
@@ -481,6 +451,7 @@ for i=1,10 do
 	end
 	init()
 	func()
+	print("测试用例["..i.."]通过！！！")
 end
 
 
