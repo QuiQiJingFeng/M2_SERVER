@@ -287,7 +287,7 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	--花牌  补花 
 	if data.card > 40 then
-		engine:addExtraScore(user_pos,1)
+		engine:updateRecordData(user_pos,"hua",1)
 	end
 
 	local user_id = player.user_id
@@ -537,14 +537,11 @@ game["HU"] = function(self,player,data)
 		hufen = hufen + 1
 	end
 
-	local extra_score = engine:getExtraScore(player.user_pos)
-	local total_score = hufen + extra_score
-
 	if refResult.isZiMo then
-		local conf = {mode = "ALL" ,score = total_score,add = "pao_num"}
+		local conf = {mode = "ALL" ,score = hufen,add = "pao_num",oneAdd="hua"}
 		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	else
-		local conf = {mode = "ONE" ,score = total_score,add = "pao_num"}
+		local conf = {mode = "ONE" ,score = hufen,add = "pao_num",oneAdd="hua"}
 		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 

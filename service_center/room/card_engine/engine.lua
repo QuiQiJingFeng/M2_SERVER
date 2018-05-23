@@ -100,6 +100,11 @@ function engine:getCardPool()
 	return self.__cardPool
 end
 
+-- 获取牌库中牌的数量
+function engine:getPoolCardNum()
+	return #self.__cardPool
+end
+
 -- 洗牌
 function engine:sort()
 	algorithm:fisherYates(self.__cardPool)
@@ -171,8 +176,8 @@ function engine:flowBureau()
 	return false
 end
 
--- 摸牌 result FLOW/card
-function engine:drawCard(pos,specail)
+-- 摸牌 result FLOW/card last 是否从最后一个开始摸
+function engine:drawCard(pos,specail,last)
 	--检查是否流局
 	local is_flow = self:flowBureau()
 	if is_flow then
@@ -180,6 +185,10 @@ function engine:drawCard(pos,specail)
 		return "FLOW"
 	end
 	local place = self.__places[pos]
+	local idx = 1
+	if last then
+		idx = nil
+	end
 	local card = table.remove(self.__cardPool,1)
 	if specail then
 		card = specail
@@ -296,8 +305,8 @@ function engine:pengCard(pos)
 	end
 	return place:peng(from,card)
 end
-
-function engine:updateScoreFromConf(obj,conf,pos)
+-- multi 乘  add 加 expo 2的指数(不断的翻倍)
+function engine:updateScoreFromConf(data,conf,pos)
 	local place = self.__places[pos]
 	if conf.mode == "ALL" then
 		local total = 0
@@ -309,13 +318,27 @@ function engine:updateScoreFromConf(obj,conf,pos)
 					local add2 = place:getRecordData(conf.add) or 0
 					score = score + add1 + add2
 				end
+				if conf.oneAdd then
+					local add = place:getRecordData(conf.oneAdd) or 0
+					score = score + add
+				end
+				if conf.multi then
+					local multi1 = obj:getRecordData(conf.multi) or 0
+					local multi2 = place:getRecordData(conf.multi) or 0
+					score = score * (multi1 + multi2)
+				end
+				if conf.expo then
+					local expo1 = obj:getRecordData(conf.expo) or 0
+					local expo2 = place:getRecordData(conf.expo) or 0
+					score = score * 2^(expo1 + expo2)
+				end
 				obj:updateScore(score * -1)
 				total = total + score
 			end
 		end
 		place:updateScore(total)
 	elseif conf.mode == "ONE" then
-		local obj = self.__places[obj.from]
+		local obj = self.__places[data.from]
 		local score = conf.score
 		if conf.add then
 			local add1 = obj:getRecordData(conf.add) or 0
@@ -421,18 +444,6 @@ end
 function engine:getPlaceCards( pos )
 	local place = self.__places[pos]
 	return place:getHandleCardList()
-end
-
--- 添加额外分
-function engine:addExtraScore(pos,extraScore)
-	local place = self.__places[pos]
-	place:addExtraScore(extraScore)
-end
-
--- 获取额外分
-function engine:getExtraScore(pos)
-	local place = self.__places[pos]
-	return place:getExtraScore()
 end
 
 function engine:caculateFan(refResult,card,place,handleCards)
@@ -715,6 +726,12 @@ end
 function engine:getRecordData(pos,key)
 	local place = self.__places[pos]
 	place:getRecordData(key)
+end
+
+function engine:updateRecordData(pos,key,value)
+	local place = self.__places[pos]
+	local origin = place:getRecordData(key) or 0
+	place:setRecordData(key,origin+value)
 end
 
 -- 获取某一张牌的数量
