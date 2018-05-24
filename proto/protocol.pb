@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-ë0
+¼1
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -242,7 +242,10 @@ is_connect (R	isConnect":
 	HandleNum
 user_pos (RuserPos
 
-handle_num (R	handleNum"½
+handle_num (R	handleNum"L
+	ItemStack$
+item (2.msg.user.GPItemRitem
+user_pos (RuserPos"À
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -261,9 +264,9 @@ handleNums
 put_pos (RputPos
 	operators (	R	operators,
 cur_play_operators (	RcurPlayOperators
-card (Rcard/
+card (Rcard2
 
-card_stack (2.msg.user.GPItemR	cardStack"Y
+card_stack (2.msg.user.ItemStackR	cardStack"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
