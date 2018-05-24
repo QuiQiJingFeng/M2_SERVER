@@ -134,6 +134,10 @@ function Place:removeCard(card,num,antingCard,skipRecord)
 	return true
 end
 
+function Place:removePutCard()
+	table.remove(self.__putCardList)
+end
+
 -- 检查吃
 function Place:checkChi(card)
 	local cardType,cardValue = self:caculateTypeAndValue(card)
@@ -224,7 +228,7 @@ function Place:peng(from,card)
 		return false
 	end
 
-	local success = self:removeCard(card,2)
+	local success = self:removeCard(card,2,nil,true)
 	if not success then
 		return false
 	end
@@ -249,7 +253,7 @@ function Place:gang(from,card,lastPutCard)
 		return false
 	end
 
-	local success = self:removeCard(card,rmNum)
+	local success = self:removeCard(card,rmNum,nil,false)
 	if not success then
 		return false
 	end

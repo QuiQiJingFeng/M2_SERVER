@@ -315,7 +315,13 @@ function engine:pengCard(pos)
 	if not card then
 		return false
 	end
-	return place:peng(from,card)
+	local obj =  place:peng(from,card)
+	if obj then
+		--如果碰牌成功,从牌堆中删除一张牌
+		local pl = self.__places[from]
+		pl:removePutCard(from)
+	end
+	return obj
 end
 -- multi 乘  add 加 expo 2的指数(不断的翻倍)
 function engine:updateScoreFromConf(data,conf,pos)
@@ -447,6 +453,9 @@ function engine:gangCard(pos,card)
 		obj = "QIANG_GANG"
 	else
 		obj = place:gang(from,card,self.__lastPutCard)
+		if obj then
+			pl:removePutCard(from)
+		end
 	end
 
 	return obj,stackList
