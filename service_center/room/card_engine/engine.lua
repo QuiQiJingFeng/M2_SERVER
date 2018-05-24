@@ -59,8 +59,11 @@ function engine:setDefaultConfig()
 	self.__config.isQiDui = false
 	-- 癞子牌
 	self.__config.huiCard = nil
-		-- 抢杠胡
+	-- 抢杠胡
 	self.__config.qiangGangHu = true
+	-- 有癞子是否可以抢杠胡
+	self.__config.qiangGangHuHasHui = nil
+
 	-- 四癞子胡牌
 	self.__config.hiPoint = nil
 	-- 是否限制只能一个癞子胡牌
@@ -404,20 +407,31 @@ function engine:gangCard(pos,card)
 	local obj = place:gang(from,card,self.__lastPutCard)
 	--如果杠成功了,那么检查其他人是否有抢杠胡
 	local stackList = {}
+
 	if obj and self.__config.qiangGangHu then
 		for idx= pos + 1,pos + self.__placeNum -1 do
 			if idx > self.__placeNum then
 				idx = idx - self.__placeNum
 			end
-	 		local stackItem = {pos = idx,card = card,operators = {}}
-			table.insert(stackList,stackItem)
-			local obj = self.__places[idx]
-			local stack = stackItem.operators
-			local handleCards = obj:getHandleCardBuild()
-			local hu = algorithm:checkHu(handleCards,card,self.__config)
-			local item = "HU"
-			if hu then
-				table.insert(stack,item)
+			local canThrough = true
+			if not self.__config.qiangGangHuHasHui and self.__config.huiCard then
+				--如果抢杠胡不能带癞子牌
+				local num = self:getCardNum(idx,self.__config.huiCard)
+				if num > 0 then
+					canThrough = false
+				end
+			end
+			if canThrough then
+		 		local stackItem = {pos = idx,card = card,operators = {}}
+				table.insert(stackList,stackItem)
+				local obj = self.__places[idx]
+				local stack = stackItem.operators
+				local handleCards = obj:getHandleCardBuild()
+				local hu = algorithm:checkHu(handleCards,card,self.__config)
+				local item = "HU"
+				if hu then
+					table.insert(stack,item)
+				end
 			end
 		end
 	end
