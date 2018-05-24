@@ -291,7 +291,7 @@ delt_score (R	deltScore"R
 result (	Rresult"\
 NoticeOtherDistoryRoom!
 distroy_time (RdistroyTime
-confirm_map (	R
+confirm_map (R
 confirmMap"1
 ConfirmDistroyRoomReq
 confirm (Rconfirm"/
