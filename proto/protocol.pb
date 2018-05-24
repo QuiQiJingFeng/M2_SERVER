@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-§0
+ë0
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -285,8 +285,11 @@ delt_score (R	deltScore"R
 room_id (RroomId
 type (Rtype"(
 DistroyRoomRsp
-result (	Rresult"
-NoticeOtherDistoryRoom"1
+result (	Rresult"\
+NoticeOtherDistoryRoom!
+distroy_time (RdistroyTime
+confirm_map (	R
+confirmMap"1
 ConfirmDistroyRoomReq
 confirm (Rconfirm"/
 ConfirmDistroyRoomRsp
