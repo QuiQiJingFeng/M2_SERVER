@@ -295,6 +295,13 @@ game["GANG"] = function(self,player,data,isGuo)
 		--通知所有人,有人杠了
 		local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
 		self.room:broadcastAllPlayers("notice_special_event",data)
+
+		local info = self.room:getPlayerInfo("user_id","user_pos")
+		for _,obj in ipairs(info) do
+			obj.cur_score = engine:getCurScore(obj.user_pos)
+			obj.score = engine:getTotalScore(obj.user_pos)
+			obj.card_list = engine:getHandleCardList(obj.user_pos)
+		end
 	
 		local list = engine:getRecentDeltScore()
 		local data = self.room:getPlayerInfo("user_id","user_pos")
@@ -528,6 +535,8 @@ function game:back_room(user_id)
 	local refresh_room_info = self.room:getRoomInfo()
     local rsp_msg = {refresh_room_info = refresh_room_info}
 	rsp_msg.card_list = engine:getHandleCardList(player.user_pos)
+	rsp_msg.card_stack = engine:getHandleCardStack(player.user_pos)
+
 	if self.waite_operators[player.user_pos] then
 		rsp_msg.operators = self.waite_operators[player.user_pos].operators
 	end
@@ -545,6 +554,7 @@ function game:back_room(user_id)
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}
 	rsp_msg.handle_nums = {}
+
 	for pos=1,engine:getPlaceNum() do
 		local cards = engine:getPutCard(pos)
 		table.insert(rsp_msg.put_cards,{cards = cards,user_pos = pos})

@@ -265,19 +265,17 @@ function CMD.distroy_room(content)
         confirm_map[user_id] = true
         
         for i,player in ipairs(players) do
-            if user_id ~= player.user_id then --通知其他人有人申请解散房间
-                local distroy_time = math.ceil(skynet.time() + constant["AUTO_CONFIRM"])
-                room.distroy_time = distroy_time
-                local data = {}
-                for user_id,v in pairs(confirm_map) do
-                    if v then
-                        local info = room:getPlayerByUserId(user_id)
-                        table.insert(data,info.user_name)
-                    end
+            local distroy_time = math.ceil(skynet.time() + constant["AUTO_CONFIRM"])
+            room.distroy_time = distroy_time
+            local data = {}
+            for user_id,v in pairs(confirm_map) do
+                if v then
+                    local info = room:getPlayerByUserId(user_id)
+                    table.insert(data,info.user_name)
                 end
-                
-                player:send({notice_other_distroy_room={distroy_time = distroy_time,confirm_map=data}})
             end
+            
+            player:send({notice_other_distroy_room={distroy_time = distroy_time,confirm_map=data}})
         end
 
         --2分钟 如果玩家仍然没有同意,则自动同意
@@ -354,9 +352,7 @@ function CMD.confirm_distroy_room(content)
         --如果有人不同意,则通知其他人 谁不同意
         local players = room.player_list
         for i,player in ipairs(players) do
-            if user_id ~= player.user_id then
-                player:send({notice_other_refuse={user_id=s_player.user_id,user_pos=s_player.user_pos}})
-            end
+            player:send({notice_other_refuse={user_id=s_player.user_id,user_pos=s_player.user_pos}})
         end
         room.confirm_map = {}
         room.can_distroy = nil
