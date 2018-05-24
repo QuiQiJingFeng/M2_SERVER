@@ -536,7 +536,7 @@ function game:back_room(user_id)
     local rsp_msg = {refresh_room_info = refresh_room_info}
 	rsp_msg.card_list = engine:getHandleCardList(player.user_pos)
 
-	local card_stack = room:getPlayerInfo("user_pos")
+	local card_stack = self.room:getPlayerInfo("user_pos")
 	for i,obj in ipairs(list) do
 		obj.item = engine:getHandleCardStack(obj.user_pos)
 	end
