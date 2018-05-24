@@ -278,10 +278,8 @@ game["GANG"] = function(self,player,data,isGuo)
 	if isGuo then
 		engine:updateConfig({qiangGangHu=true})
 	end
- 	
+ 	self.waite_operators[player.user_pos] = nil
  	if obj ~= "QIANG_GANG" then
-		self.waite_operators[player.user_pos] = nil
-
 		-- 杠的分数计算
 		if obj.type == engine:getConstant("TYPE","MING_GANG") then
 			local conf = {mode = "ONE" ,score = self.base_score * 3}
@@ -344,6 +342,7 @@ game["GUO"] = function(self,player,data)
 			self.waite_operators[item.pos] = { operators = item.operators }
 		else
 			local obj = self.room:getPlayerByPos(item.pos)
+			self.waite_operators[item.pos] = { operators = item.operators }
 			game["GANG"](game,obj,{card = item.card},true)
 		end
 		table.remove(self.stack_list,1)
