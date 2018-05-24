@@ -234,13 +234,13 @@ function CMD.distroy_room(content)
     local type = content.type
     --在游戏当中
     if room.game and room.cur_round >= 1 then
-        type == constant.DISTORY_TYPE.ALL_AGREE
+        type = constant.DISTORY_TYPE.ALL_AGREE
     else
         --如果不在游戏当中,房主可以直接解散房间
         if user_id == owner_id then
-            type == constant.DISTORY_TYPE.OWNER_DISTROY
+            type = constant.DISTORY_TYPE.OWNER_DISTROY
         else
-            type == constant.DISTORY_TYPE.ALL_AGREE
+            type = constant.DISTORY_TYPE.ALL_AGREE
         end
     end
 
