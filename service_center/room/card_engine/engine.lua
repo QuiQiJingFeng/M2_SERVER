@@ -318,8 +318,8 @@ function engine:pengCard(pos)
 	local obj =  place:peng(from,card)
 	if obj then
 		--如果碰牌成功,从牌堆中删除一张牌
-		local pl = self.__places[from]
-		pl:removePutCard(from)
+		local place2 = self.__places[from]
+		place2:removePutCard(from)
 	end
 	return obj
 end
@@ -454,7 +454,7 @@ function engine:gangCard(pos,card)
 	else
 		obj = place:gang(from,card,self.__lastPutCard)
 		if obj then
-			pl:removePutCard(from)
+			place:removePutCard(from)
 		end
 	end
 
