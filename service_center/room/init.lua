@@ -266,7 +266,7 @@ function CMD.distroy_room(content)
         
         for i,player in ipairs(players) do
             if user_id ~= player.user_id then --通知其他人有人申请解散房间
-                local distroy_time = skynet.time() + constant["AUTO_CONFIRM"]
+                local distroy_time = math.ceil(skynet.time() + constant["AUTO_CONFIRM"])
                 room.distroy_time = distroy_time
                 local data = {}
                 for user_id,v in pairs(confirm_map) do
@@ -341,8 +341,8 @@ function CMD.confirm_distroy_room(content)
                 local info = room:getPlayerByUserId(user_id)
                 table.insert(data,info.user_name)
             end
-            
-            player:send({notice_other_distroy_room={distroy_time = room.distroy_time},confirm_map=data})
+
+            room:broadcastAllPlayers("notice_other_distroy_room",{distroy_time = room.distroy_time},confirm_map=data})
         end
     else
         local s_player = room:getPlayerByUserId(user_id)
