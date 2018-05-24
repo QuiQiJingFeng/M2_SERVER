@@ -303,7 +303,7 @@ game["GANG"] = function(self,player,data,isGuo)
 		end
 	
 		local list = engine:getRecentDeltScore()
-		local data = self.room:getPlayerInfo("user_id","user_pos")
+		local data = self.room:getPlayerInfo("user_id","user_pos","score")
 		for idx,info in ipairs(data) do
 			data[idx].delt_score = list[info.user_pos]
 		end
@@ -375,6 +375,7 @@ game["HU"] = function(self,player,data)
 	if not obj then
 		return "invaild_operator"
 	end
+
 	-- 自摸赢每个玩家2*底分
 	if refResult.isZiMo then
 		local conf = {mode = "ALL" ,score = self.base_score * 2}
@@ -526,7 +527,6 @@ function game:gameOver(player,over_type,operate,refResult)
     self.room:updatePlayersToDb()
 	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
-
 
 --返回房间,推送当局的游戏信息
 function game:back_room(user_id)
