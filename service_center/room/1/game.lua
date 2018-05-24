@@ -296,11 +296,9 @@ game["GANG"] = function(self,player,data,isGuo)
 		local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
 		self.room:broadcastAllPlayers("notice_special_event",data)
 
-		local info = self.room:getPlayerInfo("user_id","user_pos")
-		for _,obj in ipairs(info) do
+		for _,obj in ipairs(self.room.player_list) do
 			obj.cur_score = engine:getCurScore(obj.user_pos)
 			obj.score = engine:getTotalScore(obj.user_pos)
-			obj.card_list = engine:getHandleCardList(obj.user_pos)
 		end
 	
 		local list = engine:getRecentDeltScore()
@@ -421,12 +419,12 @@ game["HU"] = function(self,player,data)
 		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
-	local info = self.room:getPlayerInfo("user_id","user_pos")
-	for _,obj in ipairs(info) do
+	for _,obj in ipairs(self.room.player_list) do
 		obj.cur_score = engine:getCurScore(obj.user_pos)
 		obj.score = engine:getTotalScore(obj.user_pos)
-		obj.card_list = engine:getHandleCardList(obj.user_pos)
 	end
+
+	local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score")
 	player.reward_num = player.reward_num + #award_list
 	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info,award_list=award_list}
 
