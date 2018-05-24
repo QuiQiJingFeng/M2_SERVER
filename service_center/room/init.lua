@@ -342,7 +342,7 @@ function CMD.confirm_distroy_room(content)
                 table.insert(data,info.user_name)
             end
 
-            room:broadcastAllPlayers("notice_other_distroy_room",{distroy_time = room.distroy_time},confirm_map=data})
+            room:broadcastAllPlayers("notice_other_distroy_room",{distroy_time = room.distroy_time,confirm_map=data})
         end
     else
         local s_player = room:getPlayerByUserId(user_id)
