@@ -232,6 +232,18 @@ function CMD.distroy_room(content)
     local room_id = content.room_id
     local owner_id = room.owner_id
     local type = content.type
+    --在游戏当中
+    if room.game and room.cur_round >= 1 then
+        type == constant.DISTORY_TYPE.ALL_AGREE
+    else
+        --如果不在游戏当中,房主可以直接解散房间
+        if user_id == owner_id then
+            type == constant.DISTORY_TYPE.OWNER_DISTROY
+        else
+            type == constant.DISTORY_TYPE.ALL_AGREE
+        end
+    end
+
     --如果是房主解散房间
     if type == constant.DISTORY_TYPE.OWNER_DISTROY then
         if room.state ~= constant.ROOM_STATE.GAME_PREPARE or user_id ~= owner_id then
@@ -254,12 +266,20 @@ function CMD.distroy_room(content)
         
         for i,player in ipairs(players) do
             if user_id ~= player.user_id then --通知其他人有人申请解散房间
-                player:send({notice_other_distroy_room={}})
+                local distroy_time = skynet.time() + constant["AUTO_CONFIRM"]
+                room.distroy_time = distroy_time
+                local data = {}
+                for user_id,v in pairs(confirm_map) do
+                    local info = room:getPlayerByUserId(user_id)
+                    table.insert(data,info.user_name)
+                end
+                
+                player:send({notice_other_distroy_room={distroy_time = distroy_time},confirm_map=data})
             end
         end
 
         --2分钟 如果玩家仍然没有同意,则自动同意
-        skynet.timeout(constant["AUTO_CONFIRM"],function() 
+        skynet.timeout(constant["AUTO_CONFIRM"]*100,function() 
                 if room.state == ROOM_STATE.ROOM_DISTROY then
                     print("这个房间已经被解散了")
                     --如果这个房间已经被解散了
@@ -312,7 +332,17 @@ function CMD.confirm_distroy_room(content)
         --如果所有人都点了确定
         if num == player_num then
             room.can_distroy = nil
+            room.distroy_time = nil
+            room.confirm_map = {}
             room:distroy(constant.DISTORY_TYPE.ALL_AGREE)
+        else
+            local data = {}
+            for user_id,v in pairs(confirm_map) do
+                local info = room:getPlayerByUserId(user_id)
+                table.insert(data,info.user_name)
+            end
+            
+            player:send({notice_other_distroy_room={distroy_time = room.distroy_time},confirm_map=data})
         end
     else
         local s_player = room:getPlayerByUserId(user_id)
