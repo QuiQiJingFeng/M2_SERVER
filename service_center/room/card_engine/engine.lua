@@ -379,7 +379,7 @@ function engine:gangCard(pos,card)
 			local handleCards
 			--暗杠
 			if from == self.__lastPutPos then
-				if not place:removeCard(card,4) then
+				if not place:removeCard(card,4,nil,true) then
 					return false
 				end
 				handleCards = utils:clone(place:getHandleCardBuild())
@@ -387,7 +387,7 @@ function engine:gangCard(pos,card)
 					place:addCard(card)
 				end
 			else
-				if not place:removeCard(card,3) then
+				if not place:removeCard(card,3,nil,true) then
 					return false
 				end
 				handleCards = utils:clone(place:getHandleCardBuild())
@@ -404,11 +404,14 @@ function engine:gangCard(pos,card)
 		end
 	end
 
-	local obj = place:gang(from,card,self.__lastPutCard)
-	--如果杠成功了,那么检查其他人是否有抢杠胡
+	local gangType = place:checkGang(card)
+	if not gangType then
+		return false
+	end
+	--如果可以杠
+	--在杠之前要检查其他人是否有抢杠胡
 	local stackList = {}
-
-	if obj and self.__config.qiangGangHu then
+	if gangType and self.__config.qiangGangHu then
 		for idx= pos + 1,pos + self.__placeNum -1 do
 			if idx > self.__placeNum then
 				idx = idx - self.__placeNum
@@ -434,6 +437,16 @@ function engine:gangCard(pos,card)
 				end
 			end
 		end
+	end
+
+	local obj
+	if #stackList >= 1 then
+		--意味着杠被人抢了
+		local stackItem = {pos = pos,card = card,operators = {"GANG"}}
+		table.insert(stackList,stackItem)
+		obj = "QIANG_GANG"
+	else
+		obj = place:gang(from,card,self.__lastPutCard)
 	end
 
 	return obj,stackList

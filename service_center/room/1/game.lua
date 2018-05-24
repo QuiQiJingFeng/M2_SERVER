@@ -263,41 +263,50 @@ game["PENG"] = function(self,player,data)
 end
 
 --杠
-game["GANG"] = function(self,player,data)
+game["GANG"] = function(self,player,data,isGuo)
 	local card = data.card 
 	if not self:check_operator(player.user_pos,"GANG") then
 		return "invaild_operator"
+	end
+	if isGuo then
+		engine:updateConfig({qiangGangHu=false})
 	end
 	local obj,stack_list = engine:gangCard(player.user_pos,card)
 	if not obj then
 		return "invaild_operator"
 	end
- 
-	self.waite_operators[player.user_pos] = nil
-
-	-- 杠的分数计算
-	if obj.type == engine:getConstant("TYPE","MING_GANG") then
-		local conf = {mode = "ONE" ,score = self.base_score * 3}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
-		local conf = {mode = "ALL" ,score = self.base_score * 1}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
-		local conf = {mode = "ALL",score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	if isGuo then
+		engine:updateConfig({qiangGangHu=true})
 	end
-  
-	--通知所有人,有人杠了
-	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
-	self.room:broadcastAllPlayers("notice_special_event",data)
+ 	
+ 	if obj ~= "QIANG_GANG" then
+		self.waite_operators[player.user_pos] = nil
+
+		-- 杠的分数计算
+		if obj.type == engine:getConstant("TYPE","MING_GANG") then
+			local conf = {mode = "ONE" ,score = self.base_score * 3}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
+			local conf = {mode = "ALL" ,score = self.base_score * 1}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
+			local conf = {mode = "ALL",score = self.base_score * 2}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		end
+	  
+		--通知所有人,有人杠了
+		local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
+		self.room:broadcastAllPlayers("notice_special_event",data)
 	
-	local list = engine:getRecentDeltScore()
-	local data = self.room:getPlayerInfo("user_id","user_pos")
-	for idx,info in ipairs(data) do
-		data[idx].delt_score = list[info.user_pos]
+		local list = engine:getRecentDeltScore()
+		local data = self.room:getPlayerInfo("user_id","user_pos")
+		for idx,info in ipairs(data) do
+			data[idx].delt_score = list[info.user_pos]
+		end
+
+		self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 	end
 
-	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)
@@ -323,15 +332,21 @@ game["GUO"] = function(self,player,data)
 	end
 
 	self.waite_operators[player.user_pos] = nil
-
 	--检测是否该下一个人操作
 	local _,item = next(self.stack_list)
 	if item then
-		local check_player = self.room:getPlayerByPos(item.pos)
-		local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
-		check_player:send(rsp_msg)
-		table.insert(item.operators,"GUO")
-		self.waite_operators[item.pos] = { operators = item.operators }
+		print("FYD----->>>",cjson.encode(item.operators))
+		if item.operators[1] ~= "GANG" then
+			local check_player = self.room:getPlayerByPos(item.pos)
+			local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
+			check_player:send(rsp_msg)
+			table.insert(item.operators,"GUO")
+			self.waite_operators[item.pos] = { operators = item.operators }
+		else
+			local obj = self.room:getPlayerByPos(item.pos)
+			game["GANG"](game,obj,{card = item.card},true)
+		end
+		table.remove(self.stack_list,1)
 		return "success"
 	end
 	-- 下一个人出牌
