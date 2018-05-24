@@ -260,7 +260,7 @@ function CMD.distroy_room(content)
         room.confirm_map = room.confirm_map or {}
         local confirm_map = room.confirm_map
         for i,obj in ipairs(players) do
-            confirm_map[obj.user_id] = false
+            confirm_map[obj.user_id] = nil
         end
         confirm_map[user_id] = true
         
@@ -270,8 +270,10 @@ function CMD.distroy_room(content)
                 room.distroy_time = distroy_time
                 local data = {}
                 for user_id,v in pairs(confirm_map) do
-                    local info = room:getPlayerByUserId(user_id)
-                    table.insert(data,info.user_name)
+                    if v then
+                        local info = room:getPlayerByUserId(user_id)
+                        table.insert(data,info.user_name)
+                    end
                 end
                 
                 player:send({notice_other_distroy_room={distroy_time = distroy_time,confirm_map=data}})
@@ -338,8 +340,10 @@ function CMD.confirm_distroy_room(content)
         else
             local data = {}
             for user_id,v in pairs(confirm_map) do
-                local info = room:getPlayerByUserId(user_id)
-                table.insert(data,info.user_name)
+                if v then
+                    local info = room:getPlayerByUserId(user_id)
+                    table.insert(data,info.user_name)
+                end
             end
 
             room:broadcastAllPlayers("notice_other_distroy_room",{distroy_time = room.distroy_time,confirm_map=data})
