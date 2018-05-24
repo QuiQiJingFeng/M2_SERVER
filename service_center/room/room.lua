@@ -259,8 +259,9 @@ function room:distroy(type)
     end
     --通知房间被销毁
     skynet.call(".agent_manager","lua","distroyRoom")
-    room.player_list = {}
+    
     self:broadcastAllPlayers("notice_player_distroy_room",{room_id=self.room_id,type=type})
+    room.player_list = {}
 end
 
 function room:getSitNums()
