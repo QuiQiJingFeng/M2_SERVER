@@ -340,7 +340,7 @@ function CMD.confirm_distroy_room(content)
             for user_id,v in pairs(confirm_map) do
                 if v then
                     local info = room:getPlayerByUserId(user_id)
-                    table.insert(data,info.user_name)
+                    table.insert(data,info.user_id)
                 end
             end
 
