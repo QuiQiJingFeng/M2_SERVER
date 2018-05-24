@@ -299,6 +299,7 @@ game["GANG"] = function(self,player,data,isGuo)
 		for _,obj in ipairs(self.room.player_list) do
 			obj.cur_score = engine:getCurScore(obj.user_pos)
 			obj.score = engine:getTotalScore(obj.user_pos)
+			obj.card_list = engine:getHandleCardList(obj.user_pos)
 		end
 	
 		local list = engine:getRecentDeltScore()
@@ -422,9 +423,10 @@ game["HU"] = function(self,player,data)
 	for _,obj in ipairs(self.room.player_list) do
 		obj.cur_score = engine:getCurScore(obj.user_pos)
 		obj.score = engine:getTotalScore(obj.user_pos)
+		obj.card_list = engine:getHandleCardList(obj.user_pos)
 	end
 
-	local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score")
+	local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 	player.reward_num = player.reward_num + #award_list
 	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info,award_list=award_list}
 
