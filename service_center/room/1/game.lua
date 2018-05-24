@@ -539,8 +539,9 @@ function game:back_room(user_id)
 
 	if self.waite_operators[player.user_pos] then
 		rsp_msg.operators = self.waite_operators[player.user_pos].operators
+		rsp_msg.card = self.waite_operators[player.user_pos].card
 	end
-	rsp_msg.card = self.waite_operators[player.user_pos].card
+	
 	rsp_msg.zpos = engine:getCurRoundBanker()
 	rsp_msg.put_pos = engine:getLastPutPos()
 	rsp_msg.reduce_num = #engine:getCardPool()
