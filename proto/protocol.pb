@@ -77,7 +77,7 @@ cCardValue"
 GPItem
 value (Rvalue
 from (Rfrom
-type (Rtype"Å
+type (Rtype"”
 UserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -91,9 +91,7 @@ cCardValue"
 
 disconnect
  (R
-disconnect/
-
-card_stack (2.msg.user.GPItemR	cardStack"…
+disconnect"…
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -244,7 +242,7 @@ is_connect (R	isConnect":
 	HandleNum
 user_pos (RuserPos
 
-handle_num (R	handleNum"Œ
+handle_num (R	handleNum"½
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -263,7 +261,9 @@ handleNums
 put_pos (RputPos
 	operators (	R	operators,
 cur_play_operators (	RcurPlayOperators
-card (Rcard"Y
+card (Rcard/
+
+card_stack (2.msg.user.GPItemR	cardStack"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
