@@ -527,8 +527,7 @@ function game:back_room(user_id)
 
 	local refresh_room_info = self.room:getRoomInfo()
     local rsp_msg = {refresh_room_info = refresh_room_info}
-
-	rsp_msg.card_list = player.card_list
+	rsp_msg.card_list = engine:getHandleCardStack(player.user_pos)
 	if self.waite_operators[player.user_pos] then
 		rsp_msg.operators = self.waite_operators[player.user_pos].operators
 	end
