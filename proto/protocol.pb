@@ -287,7 +287,7 @@ delt_score (R	deltScore"R
 DistroyRoomRsp
 result (	Rresult"\
 NoticeOtherDistoryRoom!
-distroy_time (RdistroyTime
+distroy_time (RdistroyTime
 confirm_map (	R
 confirmMap"1
 ConfirmDistroyRoomReq
