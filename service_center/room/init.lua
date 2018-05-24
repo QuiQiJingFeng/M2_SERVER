@@ -274,7 +274,7 @@ function CMD.distroy_room(content)
                     table.insert(data,info.user_name)
                 end
                 
-                player:send({notice_other_distroy_room={distroy_time = distroy_time},confirm_map=data})
+                player:send({notice_other_distroy_room={distroy_time = distroy_time,confirm_map=data}})
             end
         end
 
