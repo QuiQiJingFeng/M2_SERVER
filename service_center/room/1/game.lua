@@ -529,7 +529,9 @@ function game:back_room(user_id)
     local rsp_msg = {refresh_room_info = refresh_room_info}
 
 	rsp_msg.card_list = player.card_list
-	rsp_msg.operators = self.waite_operators[player.user_pos].operators
+	if self.waite_operators[player.user_pos] then
+		rsp_msg.operators = self.waite_operators[player.user_pos].operators
+	end
 	rsp_msg.card = self.waite_operators[player.user_pos].card
 	rsp_msg.zpos = engine:getCurRoundBanker()
 	rsp_msg.put_pos = engine:getLastPutPos()
