@@ -132,7 +132,7 @@ function command:checkIsInGame(user_id)
     -- 因为删除房间是每个小时删除一次,所以这里应该 排除那些待删除的记录
 
     local time = math.ceil(skynet.time());
-    local sql = string.format("select * from room_list where (expire_time > %d and player_list like '%%%d%%') or state <> 4",time,user_id)
+    local sql = string.format("select * from room_list where (expire_time > %d and player_list like '%%%d%%') and state <> 4",time,user_id)
     local data = do_query(sql)
     return data[1]
 end
