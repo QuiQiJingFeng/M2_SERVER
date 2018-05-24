@@ -241,16 +241,17 @@ end
 
 function room:distroy(type)
 	self.state = ROOM_STATE.ROOM_DISTROY
+	-- 解散房间的时候更新状态,web端需要从数据库获取
+	local data = {}
+    data.room_id = self.room_id
+    data.state = self.state
+    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
+
     if room.over_round >= 1 then
     	if room.game then
     		room.game:distroy()
     		room.game = nil
     	end
-    	
-    	local data = {}
-        data.room_id = self.room_id
-	    data.state = self.state
-	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
     	--通知总结算
     	local rsp_msg = {}
     	rsp_msg.room_id = self.room_id
