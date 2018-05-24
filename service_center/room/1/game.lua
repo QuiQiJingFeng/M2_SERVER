@@ -39,7 +39,7 @@ function game:start(room)
 	engine:clear()
 
 	-- 同步room的 over_round/cur_round=>到engine
-	engine:setCurRound(room.cur_round)
+	engine:setCurRound(room.cur_round-1)
 	engine:setOverRound(room.over_round)
 
 	-- 同步玩家的总积分score=>engine
