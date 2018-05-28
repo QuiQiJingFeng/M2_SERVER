@@ -255,7 +255,7 @@ function room:distroy(type)
     	--通知总结算
     	local rsp_msg = {}
     	rsp_msg.room_id = self.room_id
-    	rsp_msg.sattle_list = self:getPlayerInfo("user_id","user_pos","hu_num","ming_gang_num","an_gang_num","reward_num")
+    	rsp_msg.sattle_list = self:getPlayerInfo("user_id","user_pos","hu_num","ming_gang_num","an_gang_num","reward_num","score")
     	self:broadcastAllPlayers("notice_total_sattle",rsp_msg)
     end
     --通知房间被销毁
