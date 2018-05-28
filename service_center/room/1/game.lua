@@ -141,7 +141,8 @@ game["DEAL_FINISH"] = function(self, player)
 	if not self:check_operator(user_pos,"DEAL_FINISH") then
 		return "invaild_operator"
 	end
-	self.waite_operators[user_pos] = nil
+	-- 有一个人确定发牌完毕则进入庄家出牌环节
+	self.waite_operators = {}
 	local _,opt = next(self.waite_operators)
 	if not opt then
 		--庄家出牌
