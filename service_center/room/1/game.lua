@@ -310,7 +310,9 @@ game["GANG"] = function(self,player,data,isGuo)
 
 		self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 	end
-
+	if not stack_list then
+		stack_list = {}
+	end
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)
@@ -376,6 +378,11 @@ game["HU"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
+	--通知所有人,有人胡了
+	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
+	self.room:broadcastAllPlayers("notice_special_event",data)
+	
+
 	-- 自摸赢每个玩家2*底分
 	if refResult.isZiMo then
 		local conf = {mode = "ALL" ,score = self.base_score * 2}
@@ -396,7 +403,7 @@ game["HU"] = function(self,player,data)
 
 	local award_num = self.award_num
 	--每一张码 赢每个玩家2*底分
-	if refResult.iHuiNum == 0 then
+	if refResult.huiNum == 0 then
 		--如果没有红中,则额外奖励两张码
 		award_num = award_num + 2
 	end

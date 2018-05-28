@@ -55,7 +55,7 @@ function game:start(room)
 
 	-- 同步room的 over_round/cur_round=>到engine
 	engine:setOverRound(room.over_round)
-	engine:setCurRound(room.cur_round)
+	engine:setCurRound(room.cur_round-1)
 
 	-- 同步玩家的总积分score=>engine
 	local list = self.room:getPlayerInfo("user_pos","score")
@@ -67,7 +67,7 @@ function game:start(room)
 
 	local extra_cards = {}
 	for i=41,48 do
-		-- table.insert(extra_cards,i)
+		table.insert(extra_cards,i)
 	end
 
 	--带风
@@ -89,8 +89,14 @@ function game:start(room)
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
+	--摸到剩余14张牌的时候，还没有玩家胡牌，则荒庄。
+	engine:setflowBureauNum(14)
 
-	engine:setflowBureauNum(0)
+	if skynet.getenv("mode") == "debug" then
+		local data = require "3/conf"
+		engine:setDebugPool(data.pool)
+		engine:setCurRoundBanker(data.zpos)
+	end
 
 	-- 获取本局的庄家
 	local banker_pos = engine:getCurRoundBanker()
@@ -124,14 +130,15 @@ function game:start(room)
 			self.four_card_list = four_card_list
 		end
 
-
-
 		player:send({deal_card = rsp_msg})
 	end
 
 	--等待玩家操作的列表
 	self.waite_operators = {}
 	self.stack_list = {}
+
+	-- 是否第一次开杠、补花
+	self.first_gang_hua = false
 
 	--等待所有玩家发回发牌完毕的命令
 	for idx=1,engine:getPlaceNum() do
@@ -185,7 +192,6 @@ game["DEAL_FINISH"] = function(self, player,data)
 	
 	self.waite_operators[user_pos] = nil
 	
-
 	-- 下跑
 	local pao_num = data.pao_num or 0
 	engine:setRecordData(user_pos,"pao_num",pao_num)
@@ -240,22 +246,25 @@ function game:noticePushPlayCard(splayer,operator)
 	end
 end
 
-function game:checkLiangSiDaYi()
+function game:checkLiangSiDaYi(pos,card)
 	if self.liang_si_da_yi then
 		for _,item in ipairs(self.four_card_list) do
-			-- 检查亮的四张牌中有几张 这个牌
-			local card_num = 0
-			for _,value in ipairs(item.cards) do
-				if value == data.card then
-					card_num = card_num + 1
+			if item.user_pos == pos then
+				-- 检查亮的四张牌中有几张 这个牌
+				local card_num = 0
+				for _,value in ipairs(item.cards) do
+					if value == card then
+						card_num = card_num + 1
+					end
 				end
-			end
 
-			if card_num > 0 then
-				local num = engine:getCardNum(item.user_pos,card)
-				if num <= card_num then
-					return true
+				if card_num > 0 then
+					local num = engine:getCardNum(item.user_pos,card)
+					if num <= card_num then
+						return true
+					end
 				end
+				break;
 			end
 		end
 	end
@@ -273,7 +282,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	end
 
 	-- 亮四打一 不能出那四张牌
-	if self:checkLiangSiDaYi() then
+	if self:checkLiangSiDaYi(user_pos,data.card) then
 		return "invaild_operator"
 	end
 
@@ -287,6 +296,11 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	--花牌  补花 
 	if data.card > 40 then
+		--当第一次开杠或者补花时候，且荒庄数再往前移两张
+		if not self.first_gang_hua then
+			self.first_gang_hua = true
+			engine:setflowBureauNum(16)
+		end
 		engine:updateRecordData(user_pos,"hua",1)
 	end
 
@@ -323,7 +337,7 @@ game["TING_CARD"] = function(self,player,data)
 		return "paramater_error" 
 	end
 	-- 亮四打一 不能出那四张牌
-	if self:checkLiangSiDaYi() then
+	if self:checkLiangSiDaYi(user_pos,data.card) then
 		return "invaild_operator"
 	end
 	-- 如果当前已经是听牌状态了
@@ -371,10 +385,27 @@ game["PENG"] = function(self,player,data)
 	end
 
 	self.waite_operators[player.user_pos] = nil
-	
+
 	local obj = engine:pengCard(player.user_pos)
 	if not obj then
 		return "invaild_operator"
+	end
+	-- 检测该牌是否属于亮四打一
+	local liangsi = self:checkLiangSiDaYi(player.user_pos,obj.value)
+	if liangsi then
+		-- 如果某张牌属于亮四打一的牌,则将其从亮四打一的牌中去掉
+		for _,item in ipairs(self.four_card_list) do
+			if item.user_pos == player.user_pos then
+				local rm_num = 2
+				for i=#item.cards,1,-1 do
+					local card = item.cards[i]
+					if card == obj.value and rm_num > 0 then
+						table.remove(item.cards,idx)
+						rm_num = rm_num - 1
+					end
+				end
+			end
+		end
 	end
  
 	--通知所有人,有人碰了
@@ -392,39 +423,74 @@ game["PENG"] = function(self,player,data)
 end
 
 --杠
-game["GANG"] = function(self,player,data)
+game["GANG"] = function(self,player,data,isGuo)
 	local card = data.card 
 	if not self:check_operator(player.user_pos,"GANG") then
 		return "invaild_operator"
+	end
+	if isGuo then
+		engine:updateConfig({qiangGangHu=false})
 	end
 	local obj,stack_list = engine:gangCard(player.user_pos,card)
 	if not obj then
 		return "invaild_operator"
 	end
- 
+	if isGuo then
+		engine:updateConfig({qiangGangHu=true})
+	end
 	self.waite_operators[player.user_pos] = nil
-
-
-	-- 杠的分数计算
-	if obj.type == engine:getConstant("TYPE","MING_GANG") then
-		local conf = {mode = "ONE" ,score = 1}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
-		local conf = {mode = "ONE" ,score = 1}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
-		local conf = {mode = "ALL",score = 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	-- 检测该牌是否属于亮四打一
+	local liangsi = self:checkLiangSiDaYi(player.user_pos,obj.value)
+	if liangsi and obj ~= "QIANG_GANG" then
+		-- 将亮四打一中所有该牌值的牌删掉
+		for _,item in ipairs(self.four_card_list) do
+			if item.user_pos == player.user_pos then
+				for i=#item.cards,1,-1 do
+					local card = item.cards[i]
+					if card == obj.value then
+						table.remove(item.cards,idx)
+					end
+				end
+			end
+		end
 	end
+	
+	if obj ~= "QIANG_GANG" then
+		-- 杠的分数计算
+		if obj.type == engine:getConstant("TYPE","MING_GANG") then
+			local conf = {mode = "ONE" ,score = 1}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
+			local conf = {mode = "ONE" ,score = 1}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
+			local conf = {mode = "ALL",score = 2}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		end
 
-	-- 暗杠锁死 ,锁死之后不能再点炮和抢杠胡
-	if self.an_gang_suo_si then
-		engine:updateConfig({isHu = false,qiangGangHu = false})
+		-- 暗杠锁死 ,锁死之后不能再点炮和抢杠胡
+		if self.an_gang_suo_si then
+			engine:updateConfig({isHu = false,qiangGangHu = false})
+		end
+
+		--通知所有人,有人杠了
+		local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
+		self.room:broadcastAllPlayers("notice_special_event",data)
+		
+		for _,obj in ipairs(self.room.player_list) do
+			obj.cur_score = engine:getCurScore(obj.user_pos)
+			obj.score = engine:getTotalScore(obj.user_pos)
+			obj.card_list = engine:getHandleCardList(obj.user_pos)
+		end
+
+		local list = engine:getRecentDeltScore()
+		local data = self.room:getPlayerInfo("user_id","user_pos","score")
+		for idx,info in ipairs(data) do
+			data[idx].delt_score = list[info.user_pos]
+		end
+
+		self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 	end
-
-	--通知所有人,有人杠了
-	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
-	self.room:broadcastAllPlayers("notice_special_event",data)
 	
 	local list = engine:getRecentDeltScore()
 	local data = self.room:getPlayerInfo("user_id","user_pos")
@@ -447,6 +513,11 @@ game["GANG"] = function(self,player,data)
 		self.stack_list = stack_list
 	else
 		--杠了之后再摸一张牌
+		--当第一次开杠或者补花时候，且荒庄数再往前移两张
+		if not self.first_gang_hua then
+			self.first_gang_hua = true
+			engine:setflowBureauNum(16)
+		end
 		self:drawCard(player)
 	end
  
@@ -464,11 +535,18 @@ game["GUO"] = function(self,player,data)
 	--检测是否该下一个人操作
 	local _,item = next(self.stack_list)
 	if item then
-		local check_player = self.room:getPlayerByPos(item.pos)
-		local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
-		check_player:send(rsp_msg)
-		table.insert(item.operators,"GUO")
-		self.waite_operators[item.pos] = { operators = item.operators }
+		if item.operators[1] ~= "GANG" then
+			local check_player = self.room:getPlayerByPos(item.pos)
+			local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
+			check_player:send(rsp_msg)
+			table.insert(item.operators,"GUO")
+			self.waite_operators[item.pos] = { operators = item.operators }
+		else
+			local obj = self.room:getPlayerByPos(item.pos)
+			self.waite_operators[item.pos] = { operators = item.operators }
+			game["GANG"](game,obj,{card = item.card},true)
+		end
+		table.remove(self.stack_list,1)
 		return "success"
 	end
 	-- 下一个人出牌
@@ -630,7 +708,19 @@ function game:gameOver(player,over_type,tempResult)
 	for i,player in ipairs(players) do
 		player.is_sit = false
 	end
-
+	if over_type == GAME_OVER_TYPE.FLOW then
+		--流局 商丘麻将需要重置积分
+		engine:resetOriginScore()
+		for _,obj in ipairs(self.room.player_list) do
+			obj.cur_score = engine:getCurScore(obj.user_pos)
+			obj.score = engine:getTotalScore(obj.user_pos)
+			obj.card_list = engine:getHandleCardList(obj.user_pos)
+		end
+		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
+		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
+		data.last_round = engine:isGameEnd()
+		self.room:broadcastAllPlayers("notice_game_over",data)
+	end
 	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)
 
@@ -665,10 +755,19 @@ function game:back_room(user_id)
 
 	local refresh_room_info = self.room:getRoomInfo()
     local rsp_msg = {refresh_room_info = refresh_room_info}
+	rsp_msg.card_list = engine:getHandleCardList(player.user_pos)
 
-	rsp_msg.card_list = player.card_list
-	rsp_msg.operators = self.waite_operators[player.user_pos].operators
-	rsp_msg.card = self.waite_operators[player.user_pos].card
+	local card_stack = self.room:getPlayerInfo("user_pos")
+	for i,obj in ipairs(card_stack) do
+		obj.item = engine:getHandleCardStack(obj.user_pos)
+	end
+	rsp_msg.card_stack = card_stack
+
+	if self.waite_operators[player.user_pos] then
+		rsp_msg.operators = self.waite_operators[player.user_pos].operators
+		rsp_msg.card = self.waite_operators[player.user_pos].card
+	end
+	
 	rsp_msg.zpos = engine:getCurRoundBanker()
 	rsp_msg.put_pos = engine:getLastPutPos()
 	rsp_msg.reduce_num = #engine:getCardPool()
@@ -682,6 +781,7 @@ function game:back_room(user_id)
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}
 	rsp_msg.handle_nums = {}
+
 	for pos=1,engine:getPlaceNum() do
 		local cards = engine:getPutCard(pos)
 		table.insert(rsp_msg.put_cards,{cards = cards,user_pos = pos})
