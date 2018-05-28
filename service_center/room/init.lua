@@ -367,12 +367,13 @@ function CMD.request(req_name,req_content)
         if room.game then
             local func2 = room.game[req_name]
             if func2 then
+                print("REQ->",req_name,cjson.encode(req_content))
                 return func2(room.game,req_content)
             end
         end
         return "no_support_command"
     end
-    print("REQ->",req_name,cjson.encode(req_content))
+
     return func(req_content)
 end
 
