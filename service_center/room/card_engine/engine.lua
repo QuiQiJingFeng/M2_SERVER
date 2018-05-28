@@ -444,13 +444,13 @@ function engine:gangCard(pos,card)
 			end
 			if canThrough then
 		 		local stackItem = {pos = idx,card = card,operators = {}}
-				table.insert(stackList,stackItem)
 				local obj = self.__places[idx]
 				local stack = stackItem.operators
 				local handleCards = obj:getHandleCardBuild()
 				local hu = algorithm:checkHu(handleCards,card,self.__config)
 				local item = "HU"
 				if hu then
+					table.insert(stackList,stackItem)
 					table.insert(stack,item)
 				end
 			end
