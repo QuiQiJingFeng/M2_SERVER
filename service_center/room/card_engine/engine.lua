@@ -34,7 +34,7 @@ function engine:buildPool()
 end
 
 function engine:setDebugPool(debugPool)
-	self.__cardPool = debugPool
+	self.__cardPool = utils:clone(debugPool)
 end
 
 function engine:clear()
