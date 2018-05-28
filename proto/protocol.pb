@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-Ò1
+è1
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -304,7 +304,7 @@ confirmMap"1
 user_pos (RuserPos"F
 NoticePlayerDistroyRoom
 room_id (RroomId
-type (Rtype"º
+type (Rtype"Ð
 
 SattleItem
 user_id (RuserId
@@ -313,7 +313,8 @@ SattleItem
 ming_gang_num (RmingGangNum
 an_gang_num (R	anGangNum
 
-reward_num (R	rewardNum"c
+reward_num (R	rewardNum
+score (Rscore"c
 NoticeTotalSattle
 room_id (RroomId5
 sattle_list (2.msg.user.SattleItemR
