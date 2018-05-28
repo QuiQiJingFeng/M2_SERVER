@@ -509,7 +509,7 @@ function game:gameOver(player,over_type,operate,refResult)
 			obj.card_list = engine:getHandleCardList(obj.user_pos)
 		end
 		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
-		local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info}
+		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
 		data.last_round = engine:isGameEnd()
 
 		self.room:broadcastAllPlayers("notice_game_over",data)
