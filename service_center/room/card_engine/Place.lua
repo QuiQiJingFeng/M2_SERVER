@@ -76,6 +76,18 @@ end
 function Place:getDeltScore()
 	return self.__deltScore
 end
+
+-- 记录牌局开始前的积分,某些荒庄要重置掉杠分需要用到
+function Place:recordOriginScore()
+	self.__originCurScore = self.__curScore
+	self.__originTotalScore = self.__totalScore
+end
+
+-- 重置积分
+function Place:resetOriginScore()
+	self.__curScore = self.__originCurScore
+	self.__totalScore = self.__originTotalScore
+end
  
 function Place:updateScore(deltScore)
 	self.__deltScore = deltScore

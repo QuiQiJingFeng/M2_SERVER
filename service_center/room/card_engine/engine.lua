@@ -154,6 +154,18 @@ end
 -- 当前局开始
 function engine:curRoundStart()
 	self.__curRound = self.__curRound + 1
+
+	-- 需要记录下当前局所有人的总积分,用来在某些游戏荒庄的时候需要重置杠分
+	for _,place in ipairs(self.__places) do
+		place:recordOriginScore()
+	end
+end
+
+-- 重置积分到回合开始前
+function engine:resetOriginScore()
+	for _,place in ipairs(self.__places) do
+		place:resetOriginScore()
+	end
 end
 
 --发牌
