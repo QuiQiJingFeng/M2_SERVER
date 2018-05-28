@@ -501,6 +501,19 @@ function game:gameOver(player,over_type,operate,refResult)
 	for i,player in ipairs(players) do
 		player.is_sit = false
 	end
+
+	if over_type == GAME_OVER_TYPE.FLOW then
+		for _,obj in ipairs(self.room.player_list) do
+			obj.cur_score = engine:getCurScore(obj.user_pos)
+			obj.score = engine:getTotalScore(obj.user_pos)
+			obj.card_list = engine:getHandleCardList(obj.user_pos)
+		end
+		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
+		local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info}
+		data.last_round = engine:isGameEnd()
+
+		self.room:broadcastAllPlayers("notice_game_over",data)
+	end
  	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)
 
