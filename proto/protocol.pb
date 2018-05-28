@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-¼1
+Ò1
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -272,12 +272,13 @@ card_stack (2.msg.user.ItemStackR	cardStack"Y
 user_pos (RuserPos
 gold_num (RgoldNum"A
 UpdateCostGold/
-	gold_list (2.msg.user.GoldItemRgoldList"^
+	gold_list (2.msg.user.GoldItemRgoldList"t
 	ScoreItem
 user_id (RuserId
 user_pos (RuserPos
 
-delt_score (R	deltScore"R
+delt_score (R	deltScore
+score (Rscore"R
 RefreshPlayerCurScore9
 cur_score_list (2.msg.user.ScoreItemRcurScoreList"%
 HandleError
