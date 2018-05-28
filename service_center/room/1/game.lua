@@ -181,13 +181,14 @@ end
 function game:noticePushPlayCard(splayer,operator)
 	local players = self.room.player_list
 	for i,player in ipairs(players) do
-		local rsp_msg = {user_id=player.user_id,user_pos=player.user_pos}
+		local rsp_msg = {user_id=splayer.user_id,user_pos=splayer.user_pos}
 		if player.user_id == splayer.user_id then
 			rsp_msg.card_list = engine:getHandleCardList(player.user_pos)
 			rsp_msg.card_stack = engine:getHandleCardStack(player.user_pos)
+			rsp_msg.operator = operator
+			player:send({push_play_card=rsp_msg})
+			break;
 		end
-		rsp_msg.operator = operator
-		player:send({push_play_card=rsp_msg})
 	end
 end
 
