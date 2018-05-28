@@ -372,7 +372,7 @@ function CMD.request(req_name,req_content)
         end
         return "no_support_command"
     end
-    print("REQ->",cjson.encode(req_content))
+    print("REQ->",req_name,cjson.encode(req_content))
     return func(req_content)
 end
 
