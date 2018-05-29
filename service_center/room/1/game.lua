@@ -384,24 +384,6 @@ game["HU"] = function(self,player,data)
 	self.room:broadcastAllPlayers("notice_special_event",data)
 	
 
-	-- 自摸赢每个玩家2*底分
-	if refResult.isZiMo then
-		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	end
-
-	if self.hi_point and refResult.huiNum == 4 then 
-		--摸到四张红中胡牌，赢每个玩家2*底分
-		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	end
-	
-	if self.seven_pairs and refResult.isQiDui then
-		--胡七对 赢每个玩家2*底分
-		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	end
-
 	local award_num = self.award_num
 	--每一张码 赢每个玩家2*底分
 	if refResult.huiNum == 0 then
@@ -423,11 +405,30 @@ game["HU"] = function(self,player,data)
 	if self.convert and num <= 0 then
 		num =  award_num
 	end
-	-- 每个码赢每个玩家2*底分
-	if num > 0 then
-		local conf = {mode = "ALL" ,score = self.base_score * 2 * num}
+
+	local extra_score = self.base_score * 2 * num
+
+	if self.hi_point and refResult.huiNum == 4 then 
+		--摸到四张红中胡牌，赢每个玩家2*底分
+		extra_score = extra_score + (engine:getPlaceNum()-1) * self.base_score * 2
+	end
+	
+	if self.seven_pairs and refResult.isQiDui then
+		--胡七对 赢每个玩家2*底分
+		extra_score = extra_score + (engine:getPlaceNum()-1) * self.base_score * 2
+	end
+
+	-- 自摸赢每个玩家2*底分
+	if refResult.isZiMo then
+		local conf = {mode = "ALL" ,score = self.base_score * 2 + extra_score}
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	else
+
+		local conf = {mode = "ONE" ,score = (engine:getPlaceNum()-1)*(self.base_score * 2 + extra_score)}
 		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
+
+	
 
 	for _,obj in ipairs(self.room.player_list) do
 		obj.cur_score = engine:getCurScore(obj.user_pos)
@@ -443,7 +444,7 @@ game["HU"] = function(self,player,data)
 	if refResult.isZiMo then
 		data.winner_type = constant["WINNER_TYPE"].ZIMO
 	else
-		data.winner_type = constant["WINNER_TYPE"].DIAN_PAO
+		data.winner_type = constant["WINNER_TYPE"].QIANG_GANG
 	end
 
 	data.last_round = engine:isGameEnd()
