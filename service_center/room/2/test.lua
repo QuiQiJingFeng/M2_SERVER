@@ -1,16 +1,30 @@
 
-local judgeCard = require("judgeCard")
 
 
-local arr_card = {3, 3, 3, 4, 4, 4, 5, 5, 5, 7, 8, 7}
-local arg_value = 0
+math.randomseed(os.time())
 
-local bHu = judgeCard:JudgeCardShape(arr_card, 5, arg_value)
+for i = 0, 1000000 do 
+ 	local aa = math.floor(math.random(100) % 3  + 1 )
+ 	-- if aa == 0 then
+ 		print("aa == ", aa)
+ 	-- end
 
-print(string.format("bHu = [%d], arg_value = [%d]", bHu, arg_value))
+end
 
 
-local bHandThreeCard = false;
+
+-- local judgeCard = require("judgeCard")
+
+
+-- local arr_card = {3, 3, 3, 4, 4, 4, 5, 5, 5, 7, 8, 7}
+-- local arg_value = 0
+
+-- local bHu = judgeCard:JudgeCardShape(arr_card, 5, arg_value)
+
+-- print(string.format("bHu = [%d], arg_value = [%d]", bHu, arg_value))
+
+
+-- local bHandThreeCard = false;
 
 -- for i = 1, 20 do 
 -- 	while(1) do 

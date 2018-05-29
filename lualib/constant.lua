@@ -52,6 +52,7 @@ local MJ_CARDS_TYPE = {
 
 
 
+
 constant["ROOM_STATE"] = {
 	GAME_PREPARE = 1,   --游戏准备阶段
 	GAME_PLAYING = 2,	--游戏中
@@ -78,14 +79,11 @@ constant["PUSH_EVENT"] = {
 	-- ddz_msg
 	SERVER_SEND_CARD  = "ServerSendCard",
 	NOTICE_POINT_DEMAND  = "NoticePointDemand",
-	NOTICE_MAIN_PALAYER = "NoticeMainPaleyer",
+	NOTICE_MAIN_PLAYER = "NoticeMainPlayer",
+	-- SERVER_MAIN_PALAYER = "ServerMainPaleyer",
 	NOTICE_SEND_CARD = "NoticeSendCard",
 	SERVER_POINT_DEMAND = "ServerPointDemand",
 	NOTICE_DDZ_GAME_OVER = "NoticeDDZGameOver",
-
-
-	-- 
-
 }
 
 -----------------------游戏类型配置相关--------------------------
@@ -128,10 +126,10 @@ constant["ALL_CARDS"] = {
 		1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,35
 	},
 	[2] = {
-		103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 120, 
-		203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 220, 
-		303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 320, 
-		403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 420, 
+		103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 120, 
+		203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 220, 
+		303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 320, 
+		403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 420, 
 		124, 125
 	},
 	[3] = {

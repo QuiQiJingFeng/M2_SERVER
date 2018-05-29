@@ -26,10 +26,4 @@ conf.card3 = {}
 -- 底牌
 conf.cardMain = {}
 
-
-print("---------------", conf)
-dump(conf)
-
-
-
 return  conf
