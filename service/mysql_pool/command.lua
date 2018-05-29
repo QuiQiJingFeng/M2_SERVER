@@ -49,10 +49,8 @@ local function convertInsertSql(tb_name,data,quote)
             temp_value = temp_value and 1 or 0
          end
 
-         if value ~= "now()" and value ~= "NOW()" then
-            table.insert(updates,string.format("`%s`=VALUES(`%s`)",field,field))
-         end
-         table.insert(values,temp_value)
+        table.insert(updates,string.format("`%s`=VALUES(`%s`)",field,field))
+        table.insert(values,temp_value)
     end
 
     local query = query .."("..table.concat(fileds,",")..") values("..table.concat(values,",")..") ON DUPLICATE KEY UPDATE "..table.concat(updates,",")..";"
