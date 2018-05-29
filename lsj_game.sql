@@ -107,6 +107,7 @@ CREATE TABLE room_list
     server_id       int,                    -- 服务器ID
     state           int,                    -- 当前房间的状态
     expire_time     double,                 -- 房间的释放时间
+    begin_time      datetime,               -- 开始时间
     primary key(room_id)
 );
 

@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-è1
+ˆ2
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -314,11 +314,13 @@ SattleItem
 an_gang_num (R	anGangNum
 
 reward_num (R	rewardNum
-score (Rscore"c
+score (Rscore"‚
 NoticeTotalSattle
 room_id (RroomId5
 sattle_list (2.msg.user.SattleItemR
-sattleList*‹
+sattleList
+
+begin_time (	R	beginTime*‹
 Result
 success
 paramater_error
