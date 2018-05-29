@@ -258,7 +258,7 @@ function room:distroy(type)
     	rsp_msg.room_id = self.room_id
     	rsp_msg.sattle_list = self:getPlayerInfo("user_id","user_pos","hu_num","ming_gang_num","an_gang_num","reward_num","score")
     	
-	    local ret = skynet.call(".mysql_pool","lua","selectTableAll","room_list","room_list="..self.room_id)
+	    local ret = skynet.call(".mysql_pool","lua","selectTableAll","room_list","room_id="..self.room_id)
 	    local info = ret[1]
 	    if not info then
 	        log.error("can't get room_list " .. self.room_id)
