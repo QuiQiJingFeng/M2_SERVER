@@ -76,6 +76,18 @@ end
 function Place:getDeltScore()
 	return self.__deltScore
 end
+
+-- 记录牌局开始前的积分,某些荒庄要重置掉杠分需要用到
+function Place:recordOriginScore()
+	self.__originCurScore = self.__curScore
+	self.__originTotalScore = self.__totalScore
+end
+
+-- 重置积分
+function Place:resetOriginScore()
+	self.__curScore = self.__originCurScore
+	self.__totalScore = self.__originTotalScore
+end
  
 function Place:updateScore(deltScore)
 	self.__deltScore = deltScore
@@ -132,6 +144,10 @@ function Place:removeCard(card,num,antingCard,skipRecord)
 	end
 	
 	return true
+end
+
+function Place:removePutCard()
+	table.remove(self.__putCardList)
 end
 
 -- 检查吃
@@ -224,7 +240,7 @@ function Place:peng(from,card)
 		return false
 	end
 
-	local success = self:removeCard(card,2)
+	local success = self:removeCard(card,2,nil,true)
 	if not success then
 		return false
 	end
@@ -249,7 +265,7 @@ function Place:gang(from,card,lastPutCard)
 		return false
 	end
 
-	local success = self:removeCard(card,rmNum)
+	local success = self:removeCard(card,rmNum,nil,false)
 	if not success then
 		return false
 	end
@@ -331,7 +347,7 @@ end
 
 function Place:getCardNum(card)
 	local cardType,cardValue = self:caculateTypeAndValue(card)
-	return self.__handleCardBuild[cardType][10]
+	return self.__handleCardBuild[cardType][cardValue]
 end
 
 return Place

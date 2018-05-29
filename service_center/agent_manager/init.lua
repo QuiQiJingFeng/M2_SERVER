@@ -22,7 +22,7 @@ local fd_to_info = {}
 local userid_to_info = {}
 local roomid_to_agent = {}
 local room_services = {}
-
+local hearts = {}
 --获取一个唯一的房间号ID
 local function getUnusedRandomId()
     return skynet.call(".mysql_pool","lua","getRandomRoomId")
@@ -144,6 +144,13 @@ function SOCKET.data(fd, data)
     elseif info.state == SECRET_STATE.CONFIRM_SUCCESS then
         -- 心跳包直接返回
         if rawget(content,"heartbeat") then
+            skynet.remove_timeout(hearts[fd])
+            local next_heart = 100*5
+            hearts[fd] = skynet.timeout(next_heart,function() 
+                    --如果3秒之后还没有收到心跳包则 断开连接
+                    skynet.call(GATE_SERVICE,"lua","kick",fd)
+                end)
+            
             send(fd, {session_id = content.session_id, heartbeat = {}},secret)
             return
         end
@@ -164,8 +171,6 @@ function SOCKET.data(fd, data)
                     send(origin_info.fd, { handle_error = {result="other_player_login"} }, origin_info.secret)
                     skynet.call(GATE_SERVICE,"lua","kick",origin_info.fd)
                 end
-                print("user_id --",user_id)
-                print("info -0--",info)
                 userid_to_info[user_id] = info
             else
                 rsp_msg.result = "auth_fail"

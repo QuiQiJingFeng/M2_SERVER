@@ -140,7 +140,7 @@ end
 
 function room:getRoomInfo()
 	local rsp_msg = {}
-	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","cur_score","disconnect","card_stack")
+	local players = self:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","gold_num","score","cur_score","disconnect")
 	local room_setting = self:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting")
 	rsp_msg.room_setting = room_setting
 	rsp_msg.room_id = self.room_id
@@ -199,7 +199,7 @@ function room:updatePlayersToDb()
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 end
 
-function room:startGame()
+function room:startGame(recover)
 	--current round + 1 after game begin
     self.cur_round = self.cur_round + 1
     --update room state after game begin
@@ -213,6 +213,7 @@ function room:startGame()
         data.room_id = self.room_id
 	    data.expire_time = self.expire_time
 	    data.state = self.state
+	    data.begin_time = 'NOW()'
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 	end
 
@@ -235,32 +236,43 @@ function room:startGame()
 
     local path = string.format("%d.game",game_type)
     self.game = require(path)
-    self.game:start(self)
+    self.game:start(self,recover)
     self.recover_state = nil
 end
 
 function room:distroy(type)
 	self.state = ROOM_STATE.ROOM_DISTROY
+	-- 解散房间的时候更新状态,web端需要从数据库获取
+	local data = {}
+    data.room_id = self.room_id
+    data.state = self.state
+    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
+
     if room.over_round >= 1 then
     	if room.game then
     		room.game:distroy()
     		room.game = nil
     	end
-    	
-    	local data = {}
-        data.room_id = self.room_id
-	    data.state = self.state
-	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
     	--通知总结算
     	local rsp_msg = {}
     	rsp_msg.room_id = self.room_id
-    	rsp_msg.sattle_list = self:getPlayerInfo("user_id","user_pos","hu_num","ming_gang_num","an_gang_num","reward_num")
+    	rsp_msg.sattle_list = self:getPlayerInfo("user_id","user_pos","hu_num","ming_gang_num","an_gang_num","reward_num","score")
+    	
+	    local ret = skynet.call(".mysql_pool","lua","selectTableAll","room_list","room_id="..self.room_id)
+	    local info = ret[1]
+	    if not info then
+	        log.error("can't get room_list " .. self.room_id)
+	        return "server_error"
+	    end
+	    rsp_msg.begin_time = info.begin_time
+
     	self:broadcastAllPlayers("notice_total_sattle",rsp_msg)
     end
     --通知房间被销毁
     skynet.call(".agent_manager","lua","distroyRoom")
-    room.player_list = {}
+    
     self:broadcastAllPlayers("notice_player_distroy_room",{room_id=self.room_id,type=type})
+    room.player_list = {}
 end
 
 function room:getSitNums()

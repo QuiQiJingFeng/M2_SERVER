@@ -18,7 +18,7 @@ local GAME_OVER_TYPE = {
 	DISTROY_ROOM = 3,   --房间解散推送结算积分
 }
 
-function game:start(room)
+function game:start(room,recover)
 	print("========game start=========")
 	self.room = room
 	--底分
@@ -32,14 +32,14 @@ function game:start(room)
 	--一码不中当全中
 	self.convert = self.room.other_setting[5] == 1
 
-	if room.cur_round == 1 then
+	if room.cur_round == 1 or recover then
 		engine:init(room.seat_num,room.round)
 	end
 	-- 清空上局的数据
 	engine:clear()
 
 	-- 同步room的 over_round/cur_round=>到engine
-	engine:setCurRound(room.cur_round)
+	engine:setCurRound(room.cur_round-1)
 	engine:setOverRound(room.over_round)
 
 	-- 同步玩家的总积分score=>engine
@@ -55,12 +55,18 @@ function game:start(room)
 	--洗牌
 	engine:sort()
 
-	engine:settingConfig({isPeng = true,isGang = true,isQiDui=self.seven_pairs,huiCard=35,hiPoint=true,qiangGangHu=true})
+	engine:setConfig({isPeng = true,isGang = true,isQiDui=self.seven_pairs,huiCard=35,hiPoint=true,qiangGangHu=true})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
 	-- 设置流局的张数
 	engine:setflowBureauNum(self.award_num)
+
+	if skynet.getenv("mode") == "debug" then
+		local data = require "1/conf"
+		engine:setDebugPool(data.pool)
+		engine:setCurRoundBanker(data.zpos)
+	end
 
 	-- 获取本局的庄家
 	local banker_pos = engine:getCurRoundBanker()
@@ -135,7 +141,8 @@ game["DEAL_FINISH"] = function(self, player)
 	if not self:check_operator(user_pos,"DEAL_FINISH") then
 		return "invaild_operator"
 	end
-	self.waite_operators[user_pos] = nil
+	-- 有一个人确定发牌完毕则进入庄家出牌环节
+	self.waite_operators = {}
 	local _,opt = next(self.waite_operators)
 	if not opt then
 		--庄家出牌
@@ -168,7 +175,7 @@ function game:drawCard(player)
 
 	--通知玩家出牌了
 	self:noticePushPlayCard(player,1)
-	self.waite_operators[draw_pos] = { operators = { "PLAY_CARD","GANG","HU"},card = card}
+	self.waite_operators[draw_pos] = { operators = { "PLAY_CARD"},card = card}
 end
 
 --通知玩家出牌 operator = 1 摸牌出牌  operator = 2 碰牌出牌
@@ -257,41 +264,56 @@ game["PENG"] = function(self,player,data)
 end
 
 --杠
-game["GANG"] = function(self,player,data)
+game["GANG"] = function(self,player,data,isGuo)
 	local card = data.card 
-	if not self:check_operator(player.user_pos,"GANG") then
+	if (not self:check_operator(player.user_pos,"GANG")) and (not self:check_operator(player.user_pos,"PLAY_CARD")) then
 		return "invaild_operator"
+	end
+	if isGuo then
+		engine:updateConfig({qiangGangHu=false})
 	end
 	local obj,stack_list = engine:gangCard(player.user_pos,card)
 	if not obj then
 		return "invaild_operator"
 	end
- 
-	self.waite_operators[player.user_pos] = nil
-
-	-- 杠的分数计算
-	if obj.type == engine:getConstant("TYPE","MING_GANG") then
-		local conf = {mode = "ONE" ,score = self.base_score * 3}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
-		local conf = {mode = "ALL" ,score = self.base_score * 1}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
-		local conf = {mode = "ALL",score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	if isGuo then
+		engine:updateConfig({qiangGangHu=true})
 	end
-  
-	--通知所有人,有人杠了
-	local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
-	self.room:broadcastAllPlayers("notice_special_event",data)
+ 	self.waite_operators[player.user_pos] = nil
+ 	if obj ~= "QIANG_GANG" then
+		-- 杠的分数计算
+		if obj.type == engine:getConstant("TYPE","MING_GANG") then
+			local conf = {mode = "ONE" ,score = self.base_score * 3}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		elseif obj.type == engine:getConstant("TYPE","PENG_GANG") then
+			local conf = {mode = "ALL" ,score = self.base_score * 1}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		elseif obj.type == engine:getConstant("TYPE","AN_GANG") then
+			local conf = {mode = "ALL",score = self.base_score * 2}
+			engine:updateScoreFromConf(obj,conf,player.user_pos)
+		end
+	  
+		--通知所有人,有人杠了
+		local data = {user_id = player.user_id,user_pos = player.user_pos,item = obj}
+		self.room:broadcastAllPlayers("notice_special_event",data)
+
+		for _,obj in ipairs(self.room.player_list) do
+			obj.cur_score = engine:getCurScore(obj.user_pos)
+			obj.score = engine:getTotalScore(obj.user_pos)
+			obj.card_list = engine:getHandleCardList(obj.user_pos)
+		end
 	
-	local list = engine:getRecentDeltScore()
-	local data = self.room:getPlayerInfo("user_id","user_pos")
-	for idx,info in ipairs(data) do
-		data[idx].delt_score = list[info.user_pos]
-	end
+		local list = engine:getRecentDeltScore()
+		local data = self.room:getPlayerInfo("user_id","user_pos","score")
+		for idx,info in ipairs(data) do
+			data[idx].delt_score = list[info.user_pos]
+		end
 
-	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
+		self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
+	end
+	if not stack_list then
+		stack_list = {}
+	end
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)
@@ -317,15 +339,21 @@ game["GUO"] = function(self,player,data)
 	end
 
 	self.waite_operators[player.user_pos] = nil
-
 	--检测是否该下一个人操作
 	local _,item = next(self.stack_list)
 	if item then
-		local check_player = self.room:getPlayerByPos(item.pos)
-		local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
-		check_player:send(rsp_msg)
-		table.insert(item.operators,"GUO")
-		self.waite_operators[item.pos] = { operators = item.operators }
+		if item.operators[1] ~= "GANG" then
+			local check_player = self.room:getPlayerByPos(item.pos)
+			local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
+			check_player:send(rsp_msg)
+			table.insert(item.operators,"GUO")
+			self.waite_operators[item.pos] = { operators = item.operators }
+		else
+			local obj = self.room:getPlayerByPos(item.pos)
+			self.waite_operators[item.pos] = { operators = item.operators }
+			game["GANG"](game,obj,{card = item.card},true)
+		end
+		table.remove(self.stack_list,1)
 		return "success"
 	end
 	-- 下一个人出牌
@@ -339,7 +367,7 @@ end
 --胡牌
 game["HU"] = function(self,player,data)
 
-	if not self:check_operator(player.user_pos,"HU") then
+	if (not self:check_operator(player.user_pos,"HU")) and (not self:check_operator(player.user_pos,"PLAY_CARD")) then
 		return "invaild_operator"
 	end
 	local operate = self.waite_operators[player.user_pos]
@@ -350,27 +378,15 @@ game["HU"] = function(self,player,data)
 	if not obj then
 		return "invaild_operator"
 	end
-	-- 自摸赢每个玩家2*底分
-	if refResult.isZiMo then
-		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	end
 
-	if self.hi_point and refResult.huiNum == 4 then 
-		--摸到四张红中胡牌，赢每个玩家2*底分
-		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	end
+	--通知所有人,有人胡了
+	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
+	self.room:broadcastAllPlayers("notice_special_event",data)
 	
-	if self.seven_pairs and refResult.isQiDui then
-		--胡七对 赢每个玩家2*底分
-		local conf = {mode = "ALL" ,score = self.base_score * 2}
-		engine:updateScoreFromConf(obj,conf,player.user_pos)
-	end
 
 	local award_num = self.award_num
 	--每一张码 赢每个玩家2*底分
-	if refResult.iHuiNum == 0 then
+	if refResult.huiNum == 0 then
 		--如果没有红中,则额外奖励两张码
 		award_num = award_num + 2
 	end
@@ -389,18 +405,38 @@ game["HU"] = function(self,player,data)
 	if self.convert and num <= 0 then
 		num =  award_num
 	end
-	-- 每个码赢每个玩家2*底分
-	if num > 0 then
-		local conf = {mode = "ALL" ,score = self.base_score * 2 * num}
+
+	local extra_score = self.base_score * 2 * num
+
+	if self.hi_point and refResult.huiNum == 4 then 
+		--摸到四张红中胡牌，赢每个玩家2*底分
+		extra_score = extra_score + (engine:getPlaceNum()-1) * self.base_score * 2
+	end
+	
+	if self.seven_pairs and refResult.isQiDui then
+		--胡七对 赢每个玩家2*底分
+		extra_score = extra_score + (engine:getPlaceNum()-1) * self.base_score * 2
+	end
+
+	-- 自摸赢每个玩家2*底分
+	if refResult.isZiMo then
+		local conf = {mode = "ALL" ,score = self.base_score * 2 + extra_score}
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	else
+
+		local conf = {mode = "ONE" ,score = (engine:getPlaceNum()-1)*(self.base_score * 2 + extra_score)}
 		engine:updateScoreFromConf(obj,conf,player.user_pos)
 	end
 
-	local info = self.room:getPlayerInfo("user_id","user_pos")
-	for _,obj in ipairs(info) do
+	
+
+	for _,obj in ipairs(self.room.player_list) do
 		obj.cur_score = engine:getCurScore(obj.user_pos)
 		obj.score = engine:getTotalScore(obj.user_pos)
 		obj.card_list = engine:getHandleCardList(obj.user_pos)
 	end
+
+	local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 	player.reward_num = player.reward_num + #award_list
 	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info,award_list=award_list}
 
@@ -408,7 +444,7 @@ game["HU"] = function(self,player,data)
 	if refResult.isZiMo then
 		data.winner_type = constant["WINNER_TYPE"].ZIMO
 	else
-		data.winner_type = constant["WINNER_TYPE"].DIAN_PAO
+		data.winner_type = constant["WINNER_TYPE"].QIANG_GANG
 	end
 
 	data.last_round = engine:isGameEnd()
@@ -474,6 +510,19 @@ function game:gameOver(player,over_type,operate,refResult)
 	for i,player in ipairs(players) do
 		player.is_sit = false
 	end
+
+	if over_type == GAME_OVER_TYPE.FLOW then
+		for _,obj in ipairs(self.room.player_list) do
+			obj.cur_score = engine:getCurScore(obj.user_pos)
+			obj.score = engine:getTotalScore(obj.user_pos)
+			obj.card_list = engine:getHandleCardList(obj.user_pos)
+		end
+		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
+		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
+		data.last_round = engine:isGameEnd()
+
+		self.room:broadcastAllPlayers("notice_game_over",data)
+	end
  	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)
 
@@ -501,17 +550,25 @@ function game:gameOver(player,over_type,operate,refResult)
 	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
 
-
 --返回房间,推送当局的游戏信息
 function game:back_room(user_id)
 	local player = self.room:getPlayerByUserId(user_id)
 
 	local refresh_room_info = self.room:getRoomInfo()
     local rsp_msg = {refresh_room_info = refresh_room_info}
+	rsp_msg.card_list = engine:getHandleCardList(player.user_pos)
 
-	rsp_msg.card_list = player.card_list
-	rsp_msg.operators = self.waite_operators[player.user_pos].operators
-	rsp_msg.card = self.waite_operators[player.user_pos].card
+	local card_stack = self.room:getPlayerInfo("user_pos")
+	for i,obj in ipairs(card_stack) do
+		obj.item = engine:getHandleCardStack(obj.user_pos)
+	end
+	rsp_msg.card_stack = card_stack
+
+	if self.waite_operators[player.user_pos] then
+		rsp_msg.operators = self.waite_operators[player.user_pos].operators
+		rsp_msg.card = self.waite_operators[player.user_pos].card
+	end
+	
 	rsp_msg.zpos = engine:getCurRoundBanker()
 	rsp_msg.put_pos = engine:getLastPutPos()
 	rsp_msg.reduce_num = #engine:getCardPool()
@@ -525,6 +582,7 @@ function game:back_room(user_id)
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}
 	rsp_msg.handle_nums = {}
+
 	for pos=1,engine:getPlaceNum() do
 		local cards = engine:getPutCard(pos)
 		table.insert(rsp_msg.put_cards,{cards = cards,user_pos = pos})

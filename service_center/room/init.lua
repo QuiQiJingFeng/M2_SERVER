@@ -90,10 +90,9 @@ function CMD.back_room(content)
                 num = num + 1
             end
         end
-        print("num--->>>",num)
         if num >= room.seat_num then
             --开始游戏
-            room:startGame()
+            room:startGame(true)
             room:updatePlayersToDb()
             
             room:userReconnect(player)
@@ -200,7 +199,7 @@ function CMD.disconnect(content)
     if not player then
         return
     end
-    if player.is_sit then
+    if player.is_sit or room.cur_round >= 1 then
         room:userDisconnect(player)
         return
     end
@@ -232,41 +231,61 @@ function CMD.distroy_room(content)
     local room_id = content.room_id
     local owner_id = room.owner_id
     local type = content.type
+    --在游戏当中
+    if room.game and room.cur_round >= 1 then
+        type = constant.DISTORY_TYPE.ALL_AGREE
+    else
+        --如果不在游戏当中,房主可以直接解散房间
+        if user_id == owner_id then
+            type = constant.DISTORY_TYPE.OWNER_DISTROY
+        else
+            type = constant.DISTORY_TYPE.ALL_AGREE
+        end
+    end
+
     --如果是房主解散房间
     if type == constant.DISTORY_TYPE.OWNER_DISTROY then
         if room.state ~= constant.ROOM_STATE.GAME_PREPARE or user_id ~= owner_id then
             return "no_permission_distroy"
         else
-            room:distory(constant.DISTORY_TYPE.OWNER_DISTROY)
+            room:distroy(constant.DISTORY_TYPE.OWNER_DISTROY)
             return "success"
         end
     end
     --如果是申请解散房间
     if type ==  constant.DISTORY_TYPE.ALL_AGREE then
-        room.can_distory = true
+        room.can_distroy = true
         local players = room.player_list
         room.confirm_map = room.confirm_map or {}
         local confirm_map = room.confirm_map
         for i,obj in ipairs(players) do
-            confirm_map[obj.user_id] = false
+            confirm_map[obj.user_id] = nil
         end
         confirm_map[user_id] = true
         
         for i,player in ipairs(players) do
-            if user_id ~= player.user_id then --通知其他人有人申请解散房间
-                player:send({notice_other_distroy_room={}})
+            local distroy_time = math.ceil(skynet.time() + constant["AUTO_CONFIRM"])
+            room.distroy_time = distroy_time
+            local data = {}
+            for user_id,v in pairs(confirm_map) do
+                if v then
+                    local info = room:getPlayerByUserId(user_id)
+                    table.insert(data,info.user_id)
+                end
             end
+            
+            player:send({notice_other_distroy_room={distroy_time = distroy_time,confirm_map=data}})
         end
 
         --2分钟 如果玩家仍然没有同意,则自动同意
-        skynet.timeout(constant["AUTO_CONFIRM"],function() 
+        skynet.timeout(constant["AUTO_CONFIRM"]*100,function() 
                 if room.state == ROOM_STATE.ROOM_DISTROY then
                     print("这个房间已经被解散了")
                     --如果这个房间已经被解散了
                     return 
                 end
-                local can_distory = room.can_distory
-                if not can_distory then
+                local can_distroy = room.can_distroy
+                if not can_distroy then
                     print("这个房间已经被人拒绝解散了")
                     --如果这个房间已经被人拒绝解散了
                     return 
@@ -288,8 +307,8 @@ function CMD.confirm_distroy_room(content)
     local user_id = content.user_id
     local room_id = content.room_id
     local confirm = content.confirm
-    local can_distory = room.can_distory
-    if not can_distory then
+    local can_distroy = room.can_distroy
+    if not can_distroy then
         --非法的请求
         return "no_support_command"
     end
@@ -311,8 +330,20 @@ function CMD.confirm_distroy_room(content)
 
         --如果所有人都点了确定
         if num == player_num then
-            room.can_distory = nil
-            room:distory(constant.DISTORY_TYPE.ALL_AGREE)
+            room.can_distroy = nil
+            room.distroy_time = nil
+            room.confirm_map = {}
+            room:distroy(constant.DISTORY_TYPE.ALL_AGREE)
+        else
+            local data = {}
+            for user_id,v in pairs(confirm_map) do
+                if v then
+                    local info = room:getPlayerByUserId(user_id)
+                    table.insert(data,info.user_id)
+                end
+            end
+
+            room:broadcastAllPlayers("notice_other_distroy_room",{distroy_time = room.distroy_time,confirm_map=data})
         end
     else
         local s_player = room:getPlayerByUserId(user_id)
@@ -320,12 +351,10 @@ function CMD.confirm_distroy_room(content)
         --如果有人不同意,则通知其他人 谁不同意
         local players = room.player_list
         for i,player in ipairs(players) do
-            if user_id ~= player.user_id then
-                player:send({notice_other_refuse={user_id=s_player.user_id,user_pos=s_player.user_pos}})
-            end
+            player:send({notice_other_refuse={user_id=s_player.user_id,user_pos=s_player.user_pos}})
         end
         room.confirm_map = {}
-        room.can_distory = nil
+        room.can_distroy = nil
     end
 
     return "success"
@@ -337,11 +366,13 @@ function CMD.request(req_name,req_content)
         if room.game then
             local func2 = room.game[req_name]
             if func2 then
+                print("REQ->",req_name,cjson.encode(req_content))
                 return func2(room.game,req_content)
             end
         end
         return "no_support_command"
     end
+
     return func(req_content)
 end
 
@@ -349,7 +380,7 @@ end
 local function checkExpireRoom()
     local now = skynet.time()
     if room.expire_time and room.expire_time < now then
-        room:distory(constant.DISTORY_TYPE.EXPIRE_TIME)
+        room:distroy(constant.DISTORY_TYPE.EXPIRE_TIME)
     else
         --每隔1分钟检查一下失效的房间
         skynet.timeout(60 * 100, checkExpireRoom)   

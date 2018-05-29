@@ -72,12 +72,12 @@ cCardValue"
 Result
 success
 	auth_fail
-§0
+ˆ2
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
 from (Rfrom
-type (Rtype"Å
+type (Rtype"”
 UserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -91,9 +91,7 @@ cCardValue"
 
 disconnect
  (R
-disconnect/
-
-card_stack (2.msg.user.GPItemR	cardStack"…
+disconnect"…
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -244,7 +242,10 @@ is_connect (R	isConnect":
 	HandleNum
 user_pos (RuserPos
 
-handle_num (R	handleNum"Œ
+handle_num (R	handleNum"L
+	ItemStack$
+item (2.msg.user.GPItemRitem
+user_pos (RuserPos"À
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -263,18 +264,21 @@ handleNums
 put_pos (RputPos
 	operators (	R	operators,
 cur_play_operators (	RcurPlayOperators
-card (Rcard"Y
+card (Rcard2
+
+card_stack (2.msg.user.ItemStackR	cardStack"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
 gold_num (RgoldNum"A
 UpdateCostGold/
-	gold_list (2.msg.user.GoldItemRgoldList"^
+	gold_list (2.msg.user.GoldItemRgoldList"t
 	ScoreItem
 user_id (RuserId
 user_pos (RuserPos
 
-delt_score (R	deltScore"R
+delt_score (R	deltScore
+score (Rscore"R
 RefreshPlayerCurScore9
 cur_score_list (2.msg.user.ScoreItemRcurScoreList"%
 HandleError
@@ -285,8 +289,11 @@ delt_score (R	deltScore"R
 room_id (RroomId
 type (Rtype"(
 DistroyRoomRsp
-result (	Rresult"
-NoticeOtherDistoryRoom"1
+result (	Rresult"\
+NoticeOtherDistoryRoom!
+distroy_time (RdistroyTime
+confirm_map (R
+confirmMap"1
 ConfirmDistroyRoomReq
 confirm (Rconfirm"/
 ConfirmDistroyRoomRsp
@@ -297,7 +304,7 @@ delt_score (R	deltScore"R
 user_pos (RuserPos"F
 NoticePlayerDistroyRoom
 room_id (RroomId
-type (Rtype"º
+type (Rtype"Ð
 
 SattleItem
 user_id (RuserId
@@ -306,11 +313,14 @@ SattleItem
 ming_gang_num (RmingGangNum
 an_gang_num (R	anGangNum
 
-reward_num (R	rewardNum"c
+reward_num (R	rewardNum
+score (Rscore"‚
 NoticeTotalSattle
 room_id (RroomId5
 sattle_list (2.msg.user.SattleItemR
-sattleList*‹
+sattleList
+
+begin_time (	R	beginTime*‹
 Result
 success
 paramater_error

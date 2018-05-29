@@ -37,34 +37,57 @@ local MJ_CARDS_TYPE = {
 	[36] = "🀆"
 }
 
-local card_list = {
-		1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,35,
-		1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,35,
-		1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,35,
-		1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,35
-	}
+local card_list = {}
+
+for i=1,30 do
+	if i % 10 ~= 0 then
+		card_list[i] = 4
+	end
+end
+card_list[35] = 4
+			
+local handle1 = {4,5,6,7,8,9,23,24,25,26,27,29,29}
+local handle2 = {1,2,3,11,12,13,14,15,16,17,18,28,28}
+
+for i,v in ipairs(handle2) do
+	table.insert(handle1,v)
+end
+local pool = handle1
+
+table.insert(pool,28) -- 第一个人摸了个 28  
+-->第一个人出28
+--第二个人碰 并且出牌18
+table.insert(pool,27) -- 第一个人又摸了个27 --》 出牌27
+table.insert(pool,28) -- 第二个人摸了个28  这个时候第二个人可以碰杠
+--第二个人碰杠
+--这个时候第一个人可以抢杠胡
 
 
-local handle1 = {11,11,11,11,21,21,1,14,14,  
+for _,value in ipairs(pool) do
+	local num = card_list[value]
+	card_list[value] = num - 1
+end
 
-4,4,4,4,3,3,3,3,2,2,2,1,1,
+math.randomseed(tostring(os.time()):reverse():sub(1, 6))
+local temp_list = {}
 
-29,14,15,16,13,13,13,13,12,12,12,2,1,     
-}
-
-for _,v in ipairs(handle1) do
-	for i=#card_list,1,-1 do
-		local card = card_list[i]
-		if v == card then
-			table.remove(card_list,i)
-			break
+for k,v in pairs(card_list) do
+	if v ~= 0 then
+		for i=1,v do
+			table.insert(temp_list,k)
 		end
 	end
 end
 
-for _,v in ipairs(handle1) do
-	table.insert(card_list,v)
-end
+for i=1,#temp_list do
+	local idx = math.random(1,#temp_list)
+	local value = table.remove(temp_list,idx)
 
-return {card_list=card_list,zpos = 1}
---return card_list
+	table.insert(pool,value)
+end
+ 
+
+for i,v in ipairs(pool) do
+	print(i,v)
+end
+return {pool=pool,zpos = 1}

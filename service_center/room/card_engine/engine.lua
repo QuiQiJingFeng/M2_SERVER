@@ -33,6 +33,10 @@ function engine:buildPool()
 	end
 end
 
+function engine:setDebugPool(debugPool)
+	self.__cardPool = utils:clone(debugPool)
+end
+
 function engine:clear()
 	self.__mode = constant.BankerMode.YING
 	self.__curBankerPos = nil
@@ -45,30 +49,45 @@ function engine:clear()
 	self.__config = {}
 end
 
+function engine:setDefaultConfig()
+	-- 别人出牌的时候是否可以吃碰杠胡(明听也算出牌)
+	self.__config.isChi = false
+	self.__config.isPeng = true
+	self.__config.isGang = true
+	self.__config.isHu = true
+	-- 是否可以七对胡
+	self.__config.isQiDui = false
+	-- 癞子牌
+	self.__config.huiCard = nil
+	-- 抢杠胡
+	self.__config.qiangGangHu = true
+	-- 有癞子是否可以抢杠胡
+	self.__config.qiangGangHuHasHui = nil
+
+	-- 四癞子胡牌
+	self.__config.hiPoint = nil
+	-- 是否限制只能一个癞子胡牌
+	self.__config.onlyOneHuiCardHu = false
+
+	-- 明听还是暗听 默认是暗听
+	self.__config.anTing = true
+	-- 胡牌是否必须听牌
+	self.__config.huMustTing = true
+	-- 听牌时候是否可以杠
+	self.__config.gangAfterTing = true
+end
+
 --设置列表
-function engine:settingConfig(config)
-	if not config then
-		-- 别人出牌的时候是否可以吃碰杠胡
-		self.__config.isChi = false
-		self.__config.isPeng = true
-		self.__config.isGang = true
-		self.__config.isHu = true
-		-- 是否可以七对胡
-		self.__config.isQiDui = false
-		-- 癞子牌
-		self.__config.huiCard = nil
- 		-- 抢杠胡
-		self.__config.qiangGangHu = true
-		-- 四红中胡牌
-		self.__config.hiPoint = nil 
-		-- 明听还是暗听 默认是暗听
-		self.__config.anTing = true
-		-- 听牌时候是否可以杠
-		self.__config.gangAfterTing = true
-	else
-		for k,v in pairs(config) do
-			self.__config[k] = v
-		end
+function engine:setConfig(config)
+	self.__config = {}
+	for k,v in pairs(config) do
+		self.__config[k] = v
+	end
+end
+
+function engine:updateConfig(config)
+	for k,v in pairs(config) do
+		self.__config[k] = v
 	end
 end
 
@@ -86,6 +105,12 @@ end
 -- 获取牌库
 function engine:getCardPool()
 	return self.__cardPool
+end
+
+
+-- 获取牌库中牌的数量
+function engine:getPoolCardNum()
+	return #self.__cardPool
 end
 
 -- 洗牌
@@ -107,6 +132,10 @@ function engine:getCurRoundBanker()
 	return self.__curBankerPos
 end
 
+function engine:setCurRoundBanker(pos)
+	self.__curBankerPos = pos
+end
+
 -- 更新下一局庄家的位置
 function engine:updateBankerPos(winnerPos)
 	if self.__mode == constant.BankerMode.YING then
@@ -125,6 +154,18 @@ end
 -- 当前局开始
 function engine:curRoundStart()
 	self.__curRound = self.__curRound + 1
+
+	-- 需要记录下当前局所有人的总积分,用来在某些游戏荒庄的时候需要重置杠分
+	for _,place in ipairs(self.__places) do
+		place:recordOriginScore()
+	end
+end
+
+-- 重置积分到回合开始前
+function engine:resetOriginScore()
+	for _,place in ipairs(self.__places) do
+		place:resetOriginScore()
+	end
 end
 
 --发牌
@@ -159,8 +200,8 @@ function engine:flowBureau()
 	return false
 end
 
--- 摸牌 result FLOW/card
-function engine:drawCard(pos,specail)
+-- 摸牌 result FLOW/card last 是否从最后一个开始摸
+function engine:drawCard(pos,specail,last)
 	--检查是否流局
 	local is_flow = self:flowBureau()
 	if is_flow then
@@ -168,6 +209,10 @@ function engine:drawCard(pos,specail)
 		return "FLOW"
 	end
 	local place = self.__places[pos]
+	local idx = 1
+	if last then
+		idx = nil
+	end
 	local card = table.remove(self.__cardPool,1)
 	if specail then
 		card = specail
@@ -282,10 +327,16 @@ function engine:pengCard(pos)
 	if not card then
 		return false
 	end
-	return place:peng(from,card)
+	local obj =  place:peng(from,card)
+	if obj then
+		--如果碰牌成功,从牌堆中删除一张牌
+		local place2 = self.__places[from]
+		place2:removePutCard(from)
+	end
+	return obj
 end
-
-function engine:updateScoreFromConf(obj,conf,pos)
+-- multi 乘  add 加 expo 2的指数(不断的翻倍)
+function engine:updateScoreFromConf(data,conf,pos)
 	local place = self.__places[pos]
 	if conf.mode == "ALL" then
 		local total = 0
@@ -297,13 +348,27 @@ function engine:updateScoreFromConf(obj,conf,pos)
 					local add2 = place:getRecordData(conf.add) or 0
 					score = score + add1 + add2
 				end
+				if conf.oneAdd then
+					local add = place:getRecordData(conf.oneAdd) or 0
+					score = score + add
+				end
+				if conf.multi then
+					local multi1 = obj:getRecordData(conf.multi) or 0
+					local multi2 = place:getRecordData(conf.multi) or 0
+					score = score * (multi1 + multi2)
+				end
+				if conf.expo then
+					local expo1 = obj:getRecordData(conf.expo) or 0
+					local expo2 = place:getRecordData(conf.expo) or 0
+					score = score * 2^(expo1 + expo2)
+				end
 				obj:updateScore(score * -1)
 				total = total + score
 			end
 		end
 		place:updateScore(total)
 	elseif conf.mode == "ONE" then
-		local obj = self.__places[obj.from]
+		local obj = self.__places[data.from]
 		local score = conf.score
 		if conf.add then
 			local add1 = obj:getRecordData(conf.add) or 0
@@ -332,7 +397,7 @@ function engine:gangCard(pos,card)
 			local handleCards
 			--暗杠
 			if from == self.__lastPutPos then
-				if not place:removeCard(card,4) then
+				if not place:removeCard(card,4,nil,true) then
 					return false
 				end
 				handleCards = utils:clone(place:getHandleCardBuild())
@@ -340,7 +405,7 @@ function engine:gangCard(pos,card)
 					place:addCard(card)
 				end
 			else
-				if not place:removeCard(card,3) then
+				if not place:removeCard(card,3,nil,true) then
 					return false
 				end
 				handleCards = utils:clone(place:getHandleCardBuild())
@@ -357,24 +422,51 @@ function engine:gangCard(pos,card)
 		end
 	end
 
-	local obj = place:gang(from,card,self.__lastPutCard)
-	--如果杠成功了,那么检查其他人是否有抢杠胡
+	local gangType = place:checkGang(card)
+	if not gangType then
+		return false
+	end
+	--如果可以杠
+	--在杠之前要检查其他人是否有抢杠胡
 	local stackList = {}
-	if obj and self.__config.qiangGangHu then
+	if gangType and self.__config.qiangGangHu then
 		for idx= pos + 1,pos + self.__placeNum -1 do
 			if idx > self.__placeNum then
 				idx = idx - self.__placeNum
 			end
-	 		local stackItem = {pos = idx,card = card,operators = {}}
-			table.insert(stackList,stackItem)
-			local obj = self.__places[idx]
-			local stack = stackItem.operators
-			local handleCards = obj:getHandleCardBuild()
-			local hu = algorithm:checkHu(handleCards,card,self.__config)
-			local item = "HU"
-			if hu then
-				table.insert(stack,item)
+			local canThrough = true
+			if not self.__config.qiangGangHuHasHui and self.__config.huiCard then
+				--如果抢杠胡不能带癞子牌
+				local num = self:getCardNum(idx,self.__config.huiCard)
+				if num > 0 then
+					canThrough = false
+				end
 			end
+			if canThrough then
+		 		local stackItem = {pos = idx,card = card,operators = {}}
+				local obj = self.__places[idx]
+				local stack = stackItem.operators
+				local handleCards = obj:getHandleCardBuild()
+				local hu = algorithm:checkHu(handleCards,card,self.__config)
+				local item = "HU"
+				if hu then
+					table.insert(stackList,stackItem)
+					table.insert(stack,item)
+				end
+			end
+		end
+	end
+
+	local obj
+	if #stackList >= 1 then
+		--意味着杠被人抢了
+		local stackItem = {pos = pos,card = card,operators = {"GANG"}}
+		table.insert(stackList,stackItem)
+		obj = "QIANG_GANG"
+	else
+		obj = place:gang(from,card,self.__lastPutCard)
+		if obj then
+			place:removePutCard(from)
 		end
 	end
 
@@ -411,24 +503,12 @@ function engine:getPlaceCards( pos )
 	return place:getHandleCardList()
 end
 
--- 添加额外分
-function engine:addExtraScore(pos,extraScore)
-	local place = self.__places[pos]
-	place:addExtraScore(extraScore)
-end
-
--- 获取额外分
-function engine:getExtraScore(pos)
-	local place = self.__places[pos]
-	return place:getExtraScore()
-end
-
 function engine:caculateFan(refResult,card,place,handleCards)
 	-------------------------算番开始-----------------------------
 	local fans = {}
 	-- 如果可以胡牌,则开始计算番数
 
-	-- 暗卡
+	-- 暗卡 三个相同花色，相同的牌数组成的为一个暗卡（刻字）。还有自己摸到的才算暗卡。 碰杠都不算暗卡（暗杠也不算暗卡）
 	local anKaNum = 0
 	for _,obj in ipairs(refResult.handleStack) do
 		if obj.type == "PENG" then
@@ -492,14 +572,14 @@ function engine:caculateFan(refResult,card,place,handleCards)
 				if card == obj.value + 1 then
 					fans[constant.FANTYPE.QIA_ZHANG] = true
 				end
-				-- 边张
-				if (card == obj.value or card == obj.value + 2) and (obj.value % 10 == 1 or obj.value % 10 == 7) then
+				-- 边张 
+				if (card == obj.value + 2 and card % 10 == 3) or (card == obj.value and card % 10 == 7) then
 					fans[constant.FANTYPE.BIAN_ZHANG] = true
 				end
 			else
-				-- 单调一张也属于掐张
+				--单调一张 
 				if card == obj.value then
-					fans[constant.FANTYPE.QIA_ZHANG] = true
+					fans[constant.FANTYPE.DAN_DIAO] = true
 				end
 			end
 		end
@@ -564,12 +644,20 @@ end
 function engine:huCard(pos,card)
 	local place = self.__places[pos]
 
-	if self.__config.anTing or self.__config.anTing == false then
+	if self.__config.huMustTing then
 		-- 检查是否听牌
 		if not place:getTing() then
 			return false
 		end
 	end
+	--如果只能一个癞子胡牌
+	if self.__config.onlyOneHuiCardHu then
+		local num = place:getCardNum(self.__config.huiCard)
+		if num > 1 then
+			return false
+		end
+	end
+
 	local handleCards = place:getHandleCardBuild()
 	
 	local hu,refResult = algorithm:checkHu(handleCards,card,self.__config)
@@ -577,13 +665,14 @@ function engine:huCard(pos,card)
 		return false
 	end
 
+
 	local fans = engine:caculateFan(refResult,card,place,handleCards)
 	refResult.fans = fans
 
 	self:curRoundOver(constant.OVER_TYPE.NORMAL)
 	place:updateHuNum()
 
-	local from = nil 
+	local from = pos 
 	if not refResult.isZiMo then
 		from = self.__lastPutPos
 	end
@@ -695,6 +784,12 @@ function engine:getRecordData(pos,key)
 	place:getRecordData(key)
 end
 
+function engine:updateRecordData(pos,key,value)
+	local place = self.__places[pos]
+	local origin = place:getRecordData(key) or 0
+	place:setRecordData(key,origin+value)
+end
+
 -- 获取某一张牌的数量
 function engine:getCardNum(pos,card)
 	local place = self.__places[pos]
@@ -742,14 +837,14 @@ function engine:getAllCardType()
 		[36] = "🀅",
 		[37] = "🀆",
 		
-		[41] = "🀢",
-		[42] = "🀣",
-		[43] = "🀤",
-		[44] = "🀥",
-		[45] = "🀦",
-		[46] = "🀧",
-		[47] = "🀨",
-		[48] = "🀩",
+		[41] = "🀦",
+		[42] = "🀧",
+		[43] = "🀨",
+		[44] = "🀩",
+		[45] = "🀢",
+		[46] = "🀣",
+		[47] = "🀤",
+		[48] = "🀥",
 		[49] = "🀪"
 	}
 	return allCardType

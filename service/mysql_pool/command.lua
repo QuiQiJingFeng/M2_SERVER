@@ -49,10 +49,8 @@ local function convertInsertSql(tb_name,data,quote)
             temp_value = temp_value and 1 or 0
          end
 
-         if value ~= "now()" and value ~= "NOW()" then
-            table.insert(updates,string.format("`%s`=VALUES(`%s`)",field,field))
-         end
-         table.insert(values,temp_value)
+        table.insert(updates,string.format("`%s`=VALUES(`%s`)",field,field))
+        table.insert(values,temp_value)
     end
 
     local query = query .."("..table.concat(fileds,",")..") values("..table.concat(values,",")..") ON DUPLICATE KEY UPDATE "..table.concat(updates,",")..";"
@@ -132,7 +130,7 @@ function command:checkIsInGame(user_id)
     -- 因为删除房间是每个小时删除一次,所以这里应该 排除那些待删除的记录
 
     local time = math.ceil(skynet.time());
-    local sql = string.format("select * from room_list where expire_time > %d and player_list like '%%%d%%'",time,user_id)
+    local sql = string.format("select * from room_list where (expire_time > %d and player_list like '%%%d%%') and state <> 4",time,user_id)
     local data = do_query(sql)
     return data[1]
 end
@@ -147,7 +145,7 @@ end
 -- 查询指定服务器上的销毁超过12个小时的房间并删除(这就意味着 房间号必须通过mysql来生成)
 function command:distroyCord(server_id)
     local time = math.ceil(tonumber(skynet.time() - 12 * 60 * 60))
-    local sql = string.format("delete from room_list where server_id = %d and expire_time > %d",server_id,time)
+    local sql = string.format("delete from room_list where server_id = %d and expire_time < %d",server_id,time)
     return do_query(sql)
 end
 
