@@ -200,7 +200,7 @@ function CMD.disconnect(content)
     if not player then
         return
     end
-    if player.is_sit then
+    if player.is_sit or room.cur_round >= 1 then
         room:userDisconnect(player)
         return
     end

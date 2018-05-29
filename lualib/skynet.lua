@@ -260,12 +260,24 @@ function suspend(co, result, command, param, size)
 	dispatch_error_queue()
 end
 
+local function remove_timeout_cb(...)
+end
+
+function skynet.remove_timeout(session)
+	if not session or not session_id_coroutine[session] then
+		return
+	end
+    local co = co_create(remove_timeout_cb)
+    session_id_coroutine[session] = co
+end
+
 function skynet.timeout(ti, func)
 	local session = c.intcommand("TIMEOUT",ti)
 	assert(session)
 	local co = co_create(func)
 	assert(session_id_coroutine[session] == nil)
 	session_id_coroutine[session] = co
+	return session
 end
 
 function skynet.sleep(ti)
