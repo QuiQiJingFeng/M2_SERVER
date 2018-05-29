@@ -90,10 +90,9 @@ function CMD.back_room(content)
                 num = num + 1
             end
         end
-        print("num--->>>",num)
         if num >= room.seat_num then
             --开始游戏
-            room:startGame()
+            room:startGame(true)
             room:updatePlayersToDb()
             
             room:userReconnect(player)

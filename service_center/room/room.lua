@@ -199,7 +199,7 @@ function room:updatePlayersToDb()
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 end
 
-function room:startGame()
+function room:startGame(recover)
 	--current round + 1 after game begin
     self.cur_round = self.cur_round + 1
     --update room state after game begin
@@ -236,7 +236,7 @@ function room:startGame()
 
     local path = string.format("%d.game",game_type)
     self.game = require(path)
-    self.game:start(self)
+    self.game:start(self,recover)
     self.recover_state = nil
 end
 
