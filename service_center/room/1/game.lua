@@ -175,7 +175,7 @@ function game:drawCard(player)
 
 	--通知玩家出牌了
 	self:noticePushPlayCard(player,1)
-	self.waite_operators[draw_pos] = { operators = { "PLAY_CARD","GANG","HU"},card = card}
+	self.waite_operators[draw_pos] = { operators = { "PLAY_CARD"},card = card}
 end
 
 --通知玩家出牌 operator = 1 摸牌出牌  operator = 2 碰牌出牌
@@ -266,7 +266,7 @@ end
 --杠
 game["GANG"] = function(self,player,data,isGuo)
 	local card = data.card 
-	if not self:check_operator(player.user_pos,"GANG") then
+	if (not self:check_operator(player.user_pos,"GANG")) and (not self:check_operator(player.user_pos,"PLAY_CARD")) then
 		return "invaild_operator"
 	end
 	if isGuo then
@@ -367,7 +367,7 @@ end
 --胡牌
 game["HU"] = function(self,player,data)
 
-	if not self:check_operator(player.user_pos,"HU") then
+	if (not self:check_operator(player.user_pos,"HU")) and (not self:check_operator(player.user_pos,"PLAY_CARD")) then
 		return "invaild_operator"
 	end
 	local operate = self.waite_operators[player.user_pos]
