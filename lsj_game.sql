@@ -48,6 +48,12 @@ CREATE TABLE user_info
     user_ip         varchar(20),            -- 玩家最后登陆的IP
     user_pic        varchar(255),           -- 玩家头像的地址
     gold_num        double,                 -- 玩家的金币数量
+    level           int,                    -- 用户的星级
+    pre_user_id     int(10),                -- 上级的代理ID
+    invite_code     text,                   -- 自身所在的5级代理链 (user_id+user_id+user_id...)
+    total_pay       float,                  -- 总充值
+    all_pay         float,                  -- 成为下级代理之后的总充值
+    bind_time       datetime,               -- 成为下级代理的时间
     primary key(user_id)
 );
 
@@ -135,10 +141,8 @@ CREATE TABLE room_servers
     primary key(game_type,server_host,server_port)
 );
 
-
 INSERT INTO room_servers values(1,1,"47.52.99.120",8888);
 INSERT INTO room_servers values(2,2,"47.52.99.120",8889);
-
 
 -- REPLAY ID
 CREATE TABLE replay_ids
@@ -161,7 +165,16 @@ CREATE TABLE active_code_list
 );
 
 
-
+-- 支付列表
+CREATE TABLE pay_orders(
+    user_id        int(10),     -- 用户ID
+    platform       varchar(30), -- 支付平台 weixin alipay
+    order_id       varchar(30), -- 订单号
+    item_id        varchar(30), -- 支付项 ID
+    price          float,       -- 支付项价格
+    gold_num       float,       -- 支付项 的总金币数量(包含赠送的数量)
+    state          varchar(10)  -- 支付的状态 new/checking/faild/success
+);
 
 
 
