@@ -149,10 +149,11 @@ pbc_wmessage_integer(struct pbc_wmessage *m, const char *key, uint32_t low, uint
 			if (low == f->default_v->e.id)
 				return 0;
 		} else {
-			if (low == f->default_v->integer.low &&
-				hi == f->default_v->integer.hi) {
-				return 0;
-			}
+			//FYD  BUGFIX 解决optional int32无法传0的问题
+			// if (low == f->default_v->integer.low &&
+			// 	hi == f->default_v->integer.hi) {
+			// 	return 0;
+			// }
 		}
 	}
 	int id = f->id << 3;
