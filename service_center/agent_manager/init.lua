@@ -148,6 +148,7 @@ function SOCKET.data(fd, data)
             local next_heart = 100*5
             hearts[fd] = skynet.timeout(next_heart,function() 
                     --如果3秒之后还没有收到心跳包则 断开连接
+                    print("FYD---->>>断开连接")
                     skynet.call(GATE_SERVICE,"lua","kick",fd)
                 end)
             

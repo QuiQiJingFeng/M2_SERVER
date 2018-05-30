@@ -47,6 +47,7 @@ function engine:clear()
 		place:clear()
 	end
 	self.__config = {}
+	self.__qiangGangFrom = nil
 end
 
 function engine:setDefaultConfig()
@@ -450,6 +451,7 @@ function engine:gangCard(pos,card)
 				local hu = algorithm:checkHu(handleCards,card,self.__config)
 				local item = "HU"
 				if hu then
+					self.__qiangGangFrom = pos
 					table.insert(stackList,stackItem)
 					table.insert(stack,item)
 				end
@@ -641,7 +643,7 @@ function engine:getTing(pos)
 end
 
 -- 胡牌
-function engine:huCard(pos,card)
+function engine:huCard(pos,card,specail)
 	local place = self.__places[pos]
 
 	if self.__config.huMustTing then
@@ -673,8 +675,15 @@ function engine:huCard(pos,card)
 	place:updateHuNum()
 
 	local from = pos 
-	if not refResult.isZiMo then
+
+	if not refResult.isZiMo and card == self.__lastPutCard then
 		from = self.__lastPutPos
+	end
+	-- 如果不是自摸，并且牌不是牌桌上的牌 则是抢杠胡
+	if not refResult.isZiMo and card ~= self.__lastPutCard then
+		if self.__qiangGangFrom then
+			from = self.__qiangGangFrom
+		end
 	end
 
 	local obj = {type = constant.TYPE.HU,value = card,from = from}
