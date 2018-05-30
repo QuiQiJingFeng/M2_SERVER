@@ -212,7 +212,7 @@ function CMD.leave_room(content)
     local room_id = content.room_id
     local user_id = content.user_id
 
-    if room.state ~= ROOM_STATE.GAME_PREPARE then
+    if room.state ~= ROOM_STATE.GAME_PREPARE and room.state ~= ROOM_STATE.ROOM_DISTROY then
         return "current_in_game"
     end
 
