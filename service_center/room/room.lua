@@ -216,9 +216,8 @@ function room:startGame(recover)
 	    data.begin_time = 'NOW()'
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 	end
-
-	data = {room_id = self.room_id}
-	
+	local temp = self:getPlayerInfo("user_id","user_name","score")
+	local data = {room_id = self.room_id,players=cjson.encode(temp),game_type=self.game_type,time="NOW()"}
 	local info = skynet.call(".mysql_pool","lua","insertTable","replay_ids",data)
 	if not info or not info.insert_id then
 		log.error("not replay_id")

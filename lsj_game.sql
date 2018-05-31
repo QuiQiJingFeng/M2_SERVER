@@ -71,7 +71,7 @@ CREATE TABLE create_room
     is_friend_room  boolean,                -- 是否好友房
     is_open_voice   boolean,                -- 是否开启语音聊天
     is_open_gps     boolean,                -- 是否开启gps
-    time            datetime                -- 创建时间
+    time            datetime,               -- 创建时间
 );
 
 -- 房间的加入记录
@@ -144,11 +144,16 @@ CREATE TABLE room_servers
 INSERT INTO room_servers values(1,1,"47.52.99.120",8888);
 INSERT INTO room_servers values(2,2,"47.52.99.120",8889);
 
--- REPLAY ID
+
+-- 对局记录
 CREATE TABLE replay_ids
 (
     replay_id      int auto_increment,       -- 战局编号
     room_id        double,                   -- 房间编号
+    players        text,                     -- 房间中的玩家
+    game_type      int,                      -- 游戏的类型
+    time           datetime,                 -- 对战时间
+
     primary key(replay_id)               
 );
 -- 定义replay_id 的自增ID 从100开始
