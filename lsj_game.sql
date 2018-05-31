@@ -71,7 +71,7 @@ CREATE TABLE create_room
     is_friend_room  boolean,                -- 是否好友房
     is_open_voice   boolean,                -- 是否开启语音聊天
     is_open_gps     boolean,                -- 是否开启gps
-    time            datetime,               -- 创建时间
+    time            datetime                -- 创建时间
 );
 
 -- 房间的加入记录
