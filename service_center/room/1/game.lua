@@ -535,6 +535,10 @@ function game:gameOver(player,over_type,operate,refResult)
 		obj.hu_num = engine:getTotalHuNum(obj.user_pos)
 	end
 
+
+	room:roundOver()
+
+
  	if engine:isGameEnd() then
 		room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
 	end

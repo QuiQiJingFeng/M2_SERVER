@@ -199,6 +199,12 @@ function room:updatePlayersToDb()
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 end
 
+function room:roundOver()
+    local temp = self:getPlayerInfo("user_id","user_name","score")
+	local data = {players=cjson.encode(temp),replay_id=self.replay_id}
+	skynet.call(".mysql_pool","lua","insertTable","replay_ids",data)
+end
+
 function room:startGame(recover)
 	--current round + 1 after game begin
     self.cur_round = self.cur_round + 1
@@ -216,8 +222,7 @@ function room:startGame(recover)
 	    data.begin_time = 'NOW()'
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 	end
-	local temp = self:getPlayerInfo("user_id","user_name","score")
-	local data = {room_id = self.room_id,players=cjson.encode(temp),game_type=self.game_type,time="NOW()"}
+	local data = {room_id = self.room_id,game_type=self.game_type,time="NOW()"}
 	local info = skynet.call(".mysql_pool","lua","insertTable","replay_ids",data)
 	if not info or not info.insert_id then
 		log.error("not replay_id")
