@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-à2
+©2
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -320,7 +320,9 @@ reward_num (R	rewardNum
 sattle_list (2.msg.user.SattleItemR
 sattleList
 
-begin_time (	R	beginTime*ã
+begin_time (	R	beginTime"
+	SendAudio
+data (Rdata*ã
 Result
 success
 paramater_error
@@ -347,8 +349,8 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-⁄
-protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ù
+è
+protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"“
 C2S
 
 session_id (R	sessionId3
@@ -365,7 +367,9 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 game_cmdïN (2.msg.user.GameCmdReqRgameCmd<
 distroy_roomñN (2.msg.user.DistroyRoomReqRdistroyRoomR
 confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
-get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList"Â
+get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList3
+
+send_audioôN (2.msg.user.SendAudioR	sendAudio"Â
 S2C
 
 session_id (R	sessionId
