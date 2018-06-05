@@ -24,8 +24,9 @@ function CMD.saveRecord(game_type,replay_id)
     record_msg[replay_id] = nil
 
     print("------------saveRecord------------game_type=",game_type," replay_id = ",replay_id)
+    local prefix = "all"
     local content = table.concat(msg,"\n")
-    local success = utils:ossRequest("replaycord.oss-cn-hongkong-internal.aliyuncs.com","replaycord",game_type.."/"..replay_id..".txt",content)
+    local success = utils:ossRequest("replaycord.oss-cn-hongkong-internal.aliyuncs.com","replaycord",prefix.."/"..replay_id..".txt",content)
     if not success then
         --设置回调 等会继续尝试发送
         print("FYD===发送失败")
