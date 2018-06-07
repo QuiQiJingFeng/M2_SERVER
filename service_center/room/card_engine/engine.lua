@@ -499,12 +499,6 @@ function engine:curRoundOver(pos,overType)
 	self:updateBankerPos(winnerPos)
 end
 
--- 获取玩家手牌
-function engine:getPlaceCards( pos )
-	local place = self.__places[pos]
-	return place:getHandleCardList()
-end
-
 function engine:caculateFan(refResult,card,place,handleCards)
 	-------------------------算番开始-----------------------------
 	local fans = {}
@@ -640,6 +634,18 @@ end
 function engine:getTing(pos)
 	local place = self.__places[pos]
 	return place:getTing()
+end
+
+function engine:checkHuCard(pos)
+	local place = self.__places[pos]
+	local card = self.__lastPutCard
+
+	local handleCards = place:getHandleCardBuild()
+	local hu,refResult = algorithm:checkHu(handleCards,card,self.__config)
+	if not hu then
+		return false
+	end
+	return true
 end
 
 -- 胡牌

@@ -107,7 +107,7 @@ function game:start(room)
 	for index=1,engine:getPlaceNum() do
 		local player = self.room:getPlayerByPos(index)
 		local pos = player.user_pos
-		local card_list = engine:getPlaceCards(pos)
+		local card_list = engine:getHandleCardList(pos)
 		
 		local rsp_msg = {zpos = banker_pos}
 		rsp_msg.cards = deal_cards[pos]
@@ -229,7 +229,7 @@ function game:drawCard(player)
 
 	--通知玩家出牌了
 	self:noticePushPlayCard(player,1)
-	self.waite_operators[player.user_pos] = { operators = { "PLAY_CARD","GANG","HU"},card = card}
+	self.waite_operators[player.user_pos] = { operators = { "PLAY_CARD"},card = card}
 end
 
 --通知玩家出牌 operator = 1 摸牌出牌  operator = 2 碰牌出牌
@@ -524,6 +524,21 @@ game["GANG"] = function(self,player,data,isGuo)
 	return "success"
 end
 
+--硬扣 硬扣之后只能自摸
+game["YING_KOU"] = function(self,player,data)
+	
+	local obj = engine:checkHuCard(player.user_pos)
+	if not obj then
+		return "invailid_operator"
+	end
+	engine:setRecordData(player.user_pos,"yingkou",true)
+	--通知所有人,有人硬扣
+	local data = {user_pos=player.user_pos,card=obj.value}
+	self.room:broadcastAllPlayers("notice_ying_kou",data)
+
+	return "success"
+end
+
 --过
 game["GUO"] = function(self,player,data)
 
@@ -565,12 +580,22 @@ game["HU"] = function(self,player,data)
 	end
 	local operate = self.waite_operators[player.user_pos]
 	self.waite_operators[player.user_pos] = nil
- 	local card = operate.card
+	local card = operate.card
+
+	--如果是硬扣 则不能点炮胡和抢杠胡
+	local yingkou = engine:getRecordData(player.user_pos,"yingkou")
+	if yingkou then
+		local num = engine:getHandleCardList(pos)
+		if(num %3 ~= 2) then
+			return "invailid_operator"
+		end
+	end
+
 	local obj,refResult = engine:huCard(player.user_pos,card)
 	if not obj then
 		return "invaild_operator"
 	end
-
+	
 
 	--通知所有人,有人胡了
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}

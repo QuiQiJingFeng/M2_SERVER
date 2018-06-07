@@ -54,10 +54,10 @@ userDemand"L
 cCardNum (RcCardNum
 	cCardType (R	cCardType
 
-cCardValue (R
+cCardValue (R
 cCardValue"
-cLestCardNum (RcLestCardNum
-cCards (RcCards
+cLestCardNum (RcLestCardNum
+cCards (RcCards
 ‹
 msg/login.proto	msg.login"9
 LoginReq
@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-©2
+ã3
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -126,7 +126,7 @@ GameCmdReq
 nowType (RnowType
 nowValue (RnowValue
 cardList (RcardList
-cardNums	 (RcardNums
+cardNums	 (RcardNums
 pao_num
  (RpaoNum"6
 
@@ -182,14 +182,15 @@ randomNums
 PushDrawCard
 user_id (RuserId
 card (Rcard
-user_pos (RuserPos"¨
+user_pos (RuserPos"Œ
 PushPlayCard
 user_id (RuserId
 user_pos (RuserPos
 operator (Roperator
 	card_list (RcardList/
 
-card_stack (2.msg.user.GPItemR	cardStack"X
+card_stack (2.msg.user.GPItemR	cardStack 
+userCardNum (RuserCardNum"X
 NoticePlayCard
 user_id (RuserId
 card (Rcard
@@ -322,7 +323,10 @@ sattleList
 
 begin_time (	R	beginTime"
 	SendAudio
-data (Rdata*ã
+data (Rdata">
+NoticeYingKou
+user_pos (RuserPos
+card (Rcard*ã
 Result
 success
 paramater_error
@@ -349,7 +353,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-è
+—
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"“
 C2S
 
@@ -369,7 +373,7 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 confirm_distroy_roomóN (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
 get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList3
 
-send_audioôN (2.msg.user.SendAudioR	sendAudio"Â
+send_audioôN (2.msg.user.SendAudioR	sendAudio"ß
 S2C
 
 session_id (R	sessionId
@@ -408,7 +412,8 @@ leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 refresh_player_cur_score‚ (2.msg.user.RefreshPlayerCurScoreRrefreshPlayerCurScoreL
 notice_total_sattle„ (2.msg.user.NoticeTotalSattleRnoticeTotalSattleO
 notice_special_event‰ (2.msg.user.NoticeSpecailEventRnoticeSpecialEventC
-notice_ting_cardÂ (2.msg.user.NoticeTingCardRnoticeTingCardC
+notice_ting_cardÂ (2.msg.user.NoticeTingCardRnoticeTingCard@
+notice_ying_kouÊ (2.msg.user.NoticeYingKouRnoticeYingKouC
 update_resource±Í (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state≤Í (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_errorëø (2.msg.user.HandleErrorRhandleErrorA

@@ -78,7 +78,7 @@ function game:start(room,recover)
 	for index=1,engine:getPlaceNum() do
 		local player = self.room:getPlayerByPos(index)
 		local pos = player.user_pos
-		local card_list = engine:getPlaceCards(pos)
+		local card_list = engine:getHandleCardList(pos)
 		
 		local rsp_msg = {zpos = banker_pos}
 		rsp_msg.cards = deal_cards[pos]
