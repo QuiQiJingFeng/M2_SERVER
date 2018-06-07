@@ -137,8 +137,8 @@ function game:start(room)
 	self.waite_operators = {}
 	self.stack_list = {}
 
-	-- 是否第一次开杠、补花
-	self.first_gang_hua = false
+	-- 第n次开杠、补花
+	self.gang_hua = 0
 
 	--等待所有玩家发回发牌完毕的命令
 	for idx=1,engine:getPlaceNum() do
@@ -296,10 +296,12 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	--花牌  补花 
 	if data.card > 40 then
-		--当第一次开杠或者补花时候，且荒庄数再往前移两张
-		if not self.first_gang_hua then
-			self.first_gang_hua = true
-			engine:setflowBureauNum(16)
+		self.gang_hua = self.gang_hua + 1
+		--当第基数次开杠或者补花时候，且荒庄数再往前移两张
+		if self.gang_hua %2 == 1 then
+			engine:setflowBureauNum(15)
+		else
+			engine:setflowBureauNum(14)
 		end
 		engine:updateRecordData(user_pos,"hua",1)
 	end
@@ -513,10 +515,12 @@ game["GANG"] = function(self,player,data,isGuo)
 		self.stack_list = stack_list
 	else
 		--杠了之后再摸一张牌
+		self.gang_hua = self.gang_hua + 1
 		--当第一次开杠或者补花时候，且荒庄数再往前移两张
-		if not self.first_gang_hua then
-			self.first_gang_hua = true
-			engine:setflowBureauNum(16)
+		if self.gang_hua %2 == 1 then
+			engine:setflowBureauNum(15)
+		else
+			engine:setflowBureauNum(14)
 		end
 		self:drawCard(player)
 	end
