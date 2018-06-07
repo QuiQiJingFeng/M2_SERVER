@@ -606,6 +606,10 @@ game["HU"] = function(self,player,data)
 	self.room:broadcastAllPlayers("notice_special_event",data)
 
 	local hufen = self.base_score
+	--硬扣+1 分
+	if yingkou then
+		hufen = hufen + 1
+	end
 
 	local zui_score = 1  --报听的一分
 	if self.men_qing and refResult.fans["MEN_QING"] then
