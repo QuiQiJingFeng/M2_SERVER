@@ -360,6 +360,14 @@ function CMD.confirm_distroy_room(content)
     return "success"
 end
 
+function CMD.send_audio(content)
+    local user_id = content.user_id
+    local player = room:getPlayerByUserId(user_id)
+    content.user_pos = player.user_pos
+    room:broadcastAllPlayers("notice_send_audio",content)
+    return "success"
+end
+
 function CMD.request(req_name,req_content)
     local func = CMD[req_name]
     if not func then
