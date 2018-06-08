@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-Í3
+õ3
 msg/user.protomsg.user"F
 GPItem
 value (Rvalue
@@ -323,7 +323,9 @@ sattleList
 
 begin_time (	R	beginTime"
 	SendAudio
-data (Rdata"@
+data (Rdata"&
+SendAudioRet
+result (	Rresult"@
 NoticeSendAudio
 data (Rdata
 user_pos (RuserPos">
@@ -356,7 +358,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-™
+Ø
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"Ò
 C2S
 
@@ -376,7 +378,7 @@ leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 confirm_distroy_room—N (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
 get_my_room_list˜N (2.msg.user.GetMyRoomListReqRgetMyRoomList3
 
-send_audio™N (2.msg.user.SendAudioR	sendAudio"ï
+send_audio™N (2.msg.user.SendAudioR	sendAudio"®
 S2C
 
 session_id (R	sessionId
@@ -417,7 +419,8 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_special_eventä (2.msg.user.NoticeSpecailEventRnoticeSpecialEventC
 notice_ting_cardå (2.msg.user.NoticeTingCardRnoticeTingCard@
 notice_ying_kouæ (2.msg.user.NoticeYingKouRnoticeYingKouF
-notice_send_audioç (2.msg.user.NoticeSendAudioRnoticeSendAudioC
+notice_send_audioç (2.msg.user.NoticeSendAudioRnoticeSendAudio=
+send_audio_retè (2.msg.user.SendAudioRetRsendAudioRetC
 update_resource±ê (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state²ê (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_error‘¿ (2.msg.user.HandleErrorRhandleErrorA
