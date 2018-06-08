@@ -53,8 +53,9 @@ function Player:send(data_content)
     if self.disconnect then
         return
     end
-
-    print(cjson.encode(data_content))
+    if not data_content.notice_send_audio then
+        print(cjson.encode(data_content))
+    end
 
     -- 转换为protobuf编码
     local success, data, err = pcall(pbc.encode, "S2C", data_content)
