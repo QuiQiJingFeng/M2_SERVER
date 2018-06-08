@@ -45,7 +45,9 @@ end
 function Player:send(data_content)
     local room = require "room"
     if room.replay_id then
-        skynet.send(".replay_cord","lua","insertRecord",room.replay_id,data_content)
+        if not data_content.notice_send_audio then
+            skynet.send(".replay_cord","lua","insertRecord",room.replay_id,data_content)
+        end
     end
 
     if self.disconnect then

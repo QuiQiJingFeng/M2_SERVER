@@ -363,8 +363,7 @@ end
 function CMD.send_audio(content)
     local user_id = content.user_id
     local player = room:getPlayerByUserId(user_id)
-    content.user_pos = player.user_pos
-    room:broadcastAllPlayers("notice_send_audio",content)
+    room:broadcastAllPlayers("notice_send_audio",{data = content.data,user_pos=player.user_pos})
     return "success"
 end
 
