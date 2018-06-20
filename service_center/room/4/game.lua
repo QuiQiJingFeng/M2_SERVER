@@ -204,7 +204,7 @@ game["PLAY_CARD"] = function(self,player,data)
 		return "paramater_error" 
 	end
 
-	local stack_list = engine:playCard(user_pos,data.card)
+	local stack_list = engine:playCard(user_pos,data.card,nil,data.card == self.huiCard)
 	if not stack_list then
 		return "invaild_operator"
 	end
@@ -553,13 +553,13 @@ function game:back_room(user_id)
 		rsp_msg.card = self.waite_operators[player.user_pos].card
 	end
 
-	local piao_list = {}
-	for pos=1,#self.room.seat_num do
-		local num = engine:getRecordData(pos,"piao") or 0
-		local temp = {user_pos = pos,piao_num = num}
-		table.insert(piao_list,temp)
+	--markList
+	local mark_list = {}
+	for pos=1,engine:getPlaceNum() do
+		local cards = engine:getMarkList(pos)
+		local temp = {user_pos=pos,cards = cards}
+		table.insert(mark_list,temp)
 	end
-	rsp_msg.piao_list = piao_list
 	
 	rsp_msg.zpos = engine:getCurRoundBanker()
 	rsp_msg.put_pos = engine:getLastPutPos()
