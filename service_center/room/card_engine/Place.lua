@@ -31,6 +31,9 @@ function Place:clear()
 	self.__cardStack = {}
 	--已经出的牌列表
 	self.__putCardList = {}
+	--一些需要额外放置的牌(例如补花，飘)
+	self.__markCardList = {}
+
 	--当前的手牌列表
 	self.__handleCardList = {}
 	--结构化手牌
@@ -110,7 +113,7 @@ function Place:addCard(card)
 end
 -- skipRecord 是为了构造数据用的,并不是真正的移除牌,后面会补上的
 -- 时候用到
-function Place:removeCard(card,num,antingCard,skipRecord)
+function Place:removeCard(card,num,antingCard,skipRecord,mark)
 	num = num or 1
 	local indexs = {}
 	for i=#self.__handleCardList,1,-1 do
@@ -135,11 +138,15 @@ function Place:removeCard(card,num,antingCard,skipRecord)
 			break
 		end
 	end
-	if not skipRecord then
-		if antingCard then
-			table.insert(self.__putCardList,antingCard)
-		else
-			table.insert(self.__putCardList,card)
+	if mark then
+		table.insert(self.__markCardList,card)
+	else
+		if not skipRecord then
+			if antingCard then
+				table.insert(self.__putCardList,antingCard)
+			else
+				table.insert(self.__putCardList,card)
+			end
 		end
 	end
 	
@@ -348,6 +355,10 @@ end
 function Place:getCardNum(card)
 	local cardType,cardValue = self:caculateTypeAndValue(card)
 	return self.__handleCardBuild[cardType][cardValue]
+end
+
+function Place:getMarkList()
+	return self.__markCardList
 end
 
 return Place

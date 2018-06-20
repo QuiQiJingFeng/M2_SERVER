@@ -286,7 +286,7 @@ game["PLAY_CARD"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	local stack_list = engine:playCard(user_pos,data.card)
+	local stack_list = engine:playCard(user_pos,data.card,nil,data.card > 40)
 	if not stack_list then
 		return "invaild_operator"
 	end
@@ -824,6 +824,16 @@ function game:back_room(user_id)
 		local arg = {user_pos=pos,handle_num= handle_num}
 		table.insert(rsp_msg.handle_nums,arg)
 	end
+	--markList
+	local mark_list = {}
+	for pos=1,engine:getPlaceNum() do
+		local cards = engine:getMarkList(pos)
+		local temp = {user_pos=pos,cards = cards}
+		table.insert(mark_list,temp)
+	end
+
+	rsp_msg.mark_list = mark_list
+
 	rsp_msg.put_card = engine:getLastPutCard()
 	player:send({push_all_room_info = rsp_msg})
 

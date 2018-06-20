@@ -244,9 +244,9 @@ function engine:getLastPutCard()
 end
 
 -- 出牌
-function engine:playCard(pos,card,antingCard)
+function engine:playCard(pos,card,antingCard,mark)
 	local place = self.__places[pos]
-	local success = place:removeCard(card,1,antingCard)
+	local success = place:removeCard(card,1,antingCard,nil,mark)
 	if success then 
 		self.__lastPutCard = card
 		self.__lastPutPos = pos
@@ -814,6 +814,11 @@ end
 function engine:getCardNum(pos,card)
 	local place = self.__places[pos]
 	return place:getCardNum(card)
+end
+
+function engine:getMarkList(pos)
+	local place = self.__places[pos]
+	return place:getMarkList()
 end
 
 --获取所有牌型对应的值
