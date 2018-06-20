@@ -26,6 +26,6 @@ center_redis = "127.0.0.1:6379"
 
 center_mysql = "127.0.0.1:3306"
 
-server_id = 1
+server_id = 3
 port = 8890
 console_port = 9002
