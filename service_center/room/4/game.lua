@@ -212,7 +212,7 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	self.waite_operators[user_pos] = nil
 
-	--飘癞子
+	--飘癞子  
 	if data.card == self.huiCard then
 		engine:updateRecordData(user_pos,"piao",1)
 		self:drawCard(player,nil,true)
@@ -552,6 +552,14 @@ function game:back_room(user_id)
 		rsp_msg.operators = self.waite_operators[player.user_pos].operators
 		rsp_msg.card = self.waite_operators[player.user_pos].card
 	end
+
+	local piao_list = {}
+	for pos=1,#self.room.seat_num do
+		local num = engine:getRecordData(pos,"piao") or 0
+		local temp = {user_pos = pos,piao_num = num}
+		table.insert(piao_list,temp)
+	end
+	rsp_msg.piao_list = piao_list
 	
 	rsp_msg.zpos = engine:getCurRoundBanker()
 	rsp_msg.put_pos = engine:getLastPutPos()
