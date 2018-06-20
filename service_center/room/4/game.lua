@@ -24,6 +24,7 @@ function game:start(room,recover)
 	self.room = room
 	--底分
 	self.base_score = self.room.other_setting[1]
+	-- 是否只能自摸
 	self.zimo = self.room.other_setting[2] == 1
 
 	if room.cur_round == 1 or recover then
@@ -87,7 +88,7 @@ function game:start(room,recover)
 		player:send({deal_card = rsp_msg})
 	end
 
-	engine:setConfig({isPeng = true,isGang = true,huiCard=huiCard,isHu = zimo,onlyOneHuiCardHu=true})
+	engine:setConfig({isPeng = true,isGang = true,huiCard=huiCard,isHu = not self.zimo,onlyOneHuiCardHu=true})
 
 	self.huiCard = huiCard
 	--等待玩家操作的列表

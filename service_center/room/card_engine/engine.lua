@@ -76,6 +76,8 @@ function engine:setDefaultConfig()
 	self.__config.huMustTing = true
 	-- 听牌时候是否可以杠
 	self.__config.gangAfterTing = true
+	-- 十三幺为特殊牌型,需要特殊处理
+	self.__config.shiShanYao = nil
 end
 
 --设置列表
@@ -504,6 +506,7 @@ function engine:curRoundOver(pos,overType)
 	self:updateBankerPos(winnerPos)
 end
 
+
 function engine:caculateFan(refResult,card,place,handleCards)
 	-------------------------算番开始-----------------------------
 	local fans = {}
@@ -523,8 +526,76 @@ function engine:caculateFan(refResult,card,place,handleCards)
 		fans[constant.FANTYPE.MEN_QING] = true
 	end
 
-	-- 缺门
 	local cardStack = place:getCardStack()
+	-- 清一色
+	local qing_yi_se = true
+	local value = place:getHandleCardList()[1]
+	local cardType = place:caculateTypeAndValue(value)
+	for i,value in ipairs(place:getHandleCardList()) do
+		local cType = place:caculateTypeAndValue(value)
+		if cType ~= cardType then
+			qing_yi_se = false
+			break
+		end
+	end
+	if qing_yi_se then
+		for _,obj in ipairs(cardStack) do
+ 			local cType = place:caculateTypeAndValue(obj.value)
+ 			if cType ~= cardType then
+				qing_yi_se = false
+			break
+		end
+ 		end
+	end
+	fans[constant.FANTYPE.QING_YI_SE] = qing_yi_se
+
+	
+	if refResult.isQiDui then
+		--豪华七小对
+		if refResult.gangDui then
+			fans[constant.FANTYPE.HAO_HUA_QI_XIAO_DUI] = true
+		else
+			--七小对
+			fans[constant.FANTYPE.QI_XIAO_DUI] = true
+		end
+	end
+
+	--一条龙暂时特殊处理一下
+	local long_type
+	for type=1,3 do
+		local hasLong = true
+		for i=1,9 do
+			local num = handleCards[type][i]
+			if num <= 0 then
+				hasLong = false
+				break
+			end
+		end
+		if hasLong then
+			long_type = type
+			break
+		end
+	end
+
+	if long_type then
+		local tempHandleCards = utils:clone(handleCards)
+		--减去一条龙的牌
+		for i=1,9 do
+			tempHandleCards[long_type][i] = tempHandleCards[long_type][i] - 1
+		end
+		tempHandleCards[long_type][10] = tempHandleCards[long_type][10] - 9
+
+		local hu = algorithm:checkHu(tempHandleCards,card,self.__config)
+		if hu then
+			fans[constant.FANTYPE.YI_TIAO_LONG] = true
+		end
+	end
+
+	if refResult.shiShanYao then
+		fans[constant.FANTYPE.SHI_SHAN_YAO] = true
+	end
+
+	-- 缺门
 	local queNum = 0
 	for i=1,3 do
  		local has = false

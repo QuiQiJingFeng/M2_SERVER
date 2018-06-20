@@ -26,7 +26,7 @@ local function addCard(handleCards,card)
 end
 
 function algorithm:checkHu(handleCards,card,config)
-	local isQiDui,huiCard,hiPoint = config.isQiDui,config.huiCard,config.hiPoint
+	local isQiDui,huiCard,hiPoint,shiShanYao = config.isQiDui,config.huiCard,config.hiPoint,config.shiShanYao
 
 	handleCards = utils:clone(handleCards)
 	local refResult = {handleStack = {},jiangOK=false,isZiMo = true,isQiDui = false,huiNum = 0,huiCard=huiCard}
@@ -53,6 +53,27 @@ function algorithm:checkHu(handleCards,card,config)
 			refResult.isZiMo = false
 		end
 	end
+
+	if shiShanYao then
+		-- 检查十三幺
+		-- 检查19、19、19
+		local through = true
+		for type=1,3 do
+			through = through and handleCards[type][1] >= 1 and handleCards[type][9] >= 1
+		end
+		--31-37 东南西北中发白
+		if through then
+			for value=1,7 do
+				through = through and handleCards[4][value] >= 1
+			end
+		end
+		if through then
+			refResult.shiShanYao = true
+			return true,refResult
+		end
+	end
+
+
 	-- 检查七对
 	local duiNum = 0
 	for type = 1,4 do
@@ -61,6 +82,7 @@ function algorithm:checkHu(handleCards,card,config)
 				duiNum = duiNum + 1
 			elseif handleCards[type][value] == 4 then
 				duiNum = duiNum + 2
+				refResult.gangDui = true
 			end
 		end
 	end
