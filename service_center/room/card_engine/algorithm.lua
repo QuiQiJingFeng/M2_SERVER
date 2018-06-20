@@ -55,20 +55,48 @@ function algorithm:checkHu(handleCards,card,config)
 	end
 
 	if shiShanYao then
+		local temphandleCards = utils:clone(handleCards)
 		-- 检查十三幺
 		-- 检查19、19、19
 		local through = true
 		for type=1,3 do
-			through = through and handleCards[type][1] >= 1 and handleCards[type][9] >= 1
+			through = through and temphandleCards[type][1] >= 1 and temphandleCards[type][9] >= 1
+			if through then
+				temphandleCards[type][1] = temphandleCards[type][1] - 1
+				temphandleCards[type][9] = temphandleCards[type][9] - 1
+				temphandleCards[type][10] = temphandleCards[type][10] - 2
+			end
 		end
 		--31-37 东南西北中发白
 		if through then
 			for value=1,7 do
-				through = through and handleCards[4][value] >= 1
+				through = through and temphandleCards[4][value] >= 1
+				if through then
+					temphandleCards[4][value] = temphandleCards[4][value] - 1
+					temphandleCards[4][10] = temphandleCards[4][10] - 1
+				end
 			end
 		end
 		if through then
-			refResult.shiShanYao = true
+			--计算剩下的一张牌是否是 1、9 31-37中的一张
+			for type,obj in ipairs(temphandleCards) do
+				for i=1,9 do
+					if obj[i] > 0 then
+						local value = (type - 1) * 10 + i
+						if type <= 3 and ((i == 1) or (i == 9)) then
+
+						elseif type == 4 then
+
+						else
+							through = false
+						end
+						break;
+					end
+				end
+			end
+			if through then
+				refResult.shiShanYao = true
+			end
 			return true,refResult
 		end
 	end
