@@ -814,6 +814,7 @@ function game:back_room(user_id)
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}
 	rsp_msg.handle_nums = {}
+	rsp_msg.four_card_list = self.four_card_list
 
 	for pos=1,engine:getPlaceNum() do
 		local cards = engine:getPutCard(pos)
