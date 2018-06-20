@@ -24,6 +24,7 @@ function game:start(room,recover)
 	self.room = room
 	--底分
 	self.base_score = self.room.other_setting[1]
+	self.zimo = self.room.other_setting[2] == 1
 
 	if room.cur_round == 1 or recover then
 		engine:init(room.seat_num,room.round)
@@ -86,7 +87,7 @@ function game:start(room,recover)
 		player:send({deal_card = rsp_msg})
 	end
 
-	engine:setConfig({isPeng = true,isGang = true,huiCard=huiCard})
+	engine:setConfig({isPeng = true,isGang = true,huiCard=huiCard,isHu = zimo,onlyOneHuiCardHu=true})
 
 	self.huiCard = huiCard
 	--等待玩家操作的列表
@@ -383,14 +384,10 @@ game["HU"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	engine:getCardNum(player.user_pos,card)
-
-
 	local operate = self.waite_operators[player.user_pos]
 	self.waite_operators[player.user_pos] = nil
  	local card = operate.card
 	local obj,refResult = engine:huCard(player.user_pos,card)
-
 	if not obj then
 		return "invaild_operator"
 	end
@@ -399,11 +396,20 @@ game["HU"] = function(self,player,data)
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 	self.room:broadcastAllPlayers("notice_special_event",data)
 
-	-- 自摸赢每个玩家2*底分  飘+倍
-	local conf = {mode = "ALL" ,score = self.base_score * 2,expo="piao"}
-	engine:updateScoreFromConf(obj,conf,player.user_pos)
-
-	
+	if refResult.isZiMo then
+		--黑摸+倍
+		local export_score = 1
+		local card_num = engine:getCardNum(player.user_pos,self.huiCard) or 0
+		if card_num ~= 0 then
+			export_score = 2
+		end
+		-- 自摸赢每个玩家2*底分  飘+倍
+		local conf = {mode = "ALL" ,score = self.base_score * 2 * export_score,expo="piao"}
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	else
+		local conf = {mode = "ALL" ,score = self.base_score * 1,expo="piao"}
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	end
 
 	for _,obj in ipairs(self.room.player_list) do
 		obj.cur_score = engine:getCurScore(obj.user_pos)
@@ -415,7 +421,11 @@ game["HU"] = function(self,player,data)
 	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info}
 
 	data.winner_pos = player.user_pos
-	data.winner_type = constant["WINNER_TYPE"].ZIMO
+	if refResult.isZiMo then
+		data.winner_type = constant["WINNER_TYPE"].ZIMO
+	else
+		data.winner_type = constant["WINNER_TYPE"].DIAN_PAO
+	end
 
 	data.last_round = engine:isGameEnd()
 
