@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-î7
+Ü8
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -255,7 +255,10 @@ is_connect (R	isConnect":
 handle_num (R	handleNum"L
 	ItemStack$
 item (2.msg.user.GPItemRitem
-user_pos (RuserPos"ˆ
+user_pos (RuserPos";
+MarkItem
+user_pos (RuserPos
+cards (Rcards"¹
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -286,7 +289,8 @@ card_stack (2.msg.user.ItemStackR	cardStack&
 cBaseCards (R
 cBaseCards
 huicard (Rhuicard<
-four_card_list (2.msg.user.FourCardItemRfourCardList"Y
+four_card_list (2.msg.user.FourCardItemRfourCardList/
+	mark_list (2.msg.user.MarkItemRmarkList"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
