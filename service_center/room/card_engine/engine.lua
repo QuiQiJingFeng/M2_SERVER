@@ -201,6 +201,11 @@ function engine:flowBureau()
 	return false
 end
 
+--移除一张牌 (癞根)
+function engine:removeAcard()
+	return table.remove(self.__cardPool,1)
+end
+
 -- 摸牌 result FLOW/card last 是否从最后一个开始摸
 function engine:drawCard(pos,specail,last)
 	--检查是否流局
@@ -214,7 +219,7 @@ function engine:drawCard(pos,specail,last)
 	if last then
 		idx = nil
 	end
-	local card = table.remove(self.__cardPool,1)
+	local card = table.remove(self.__cardPool,idx)
 	if specail then
 		card = specail
 	end
