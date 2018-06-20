@@ -72,7 +72,7 @@ cCardValue"
 Result
 success
 	auth_fail
-‹8
+È8
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -354,7 +354,8 @@ begin_time (	R	beginTime"
 user_pos (RuserPos">
 NoticeYingKou
 user_pos (RuserPos
-card (Rcard*ã
+card (Rcard"
+	NoticePao*ã
 Result
 success
 paramater_error
@@ -381,7 +382,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-ÿ
+ç 
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"ë
 C2S
 
@@ -402,7 +403,7 @@ leave_roomìN (2.msg.user.LeaveRoomReqR	leaveRoom0
 get_my_room_listòN (2.msg.user.GetMyRoomListReqRgetMyRoomList3
 
 send_audioôN (2.msg.user.SendAudioR	sendAudio=
-fast_spake_reqöN (2.msg.user.FastSpakeReqRfastSpakeReq"Ô
+fast_spake_reqöN (2.msg.user.FastSpakeReqRfastSpakeReq"§
 S2C
 
 session_id (R	sessionId
@@ -446,7 +447,9 @@ leave_roomìN (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_send_audioÁ (2.msg.user.NoticeSendAudioRnoticeSendAudioF
 notice_fast_spakeË (2.msg.user.NoticeFastSpakeRnoticeFastSpake6
 
-send_audioÈ (2.msg.user.SendAudioRspR	sendAudioC
+send_audioÈ (2.msg.user.SendAudioRspR	sendAudio3
+
+notice_paoÍ (2.msg.user.NoticePaoR	noticePaoC
 update_resource±Í (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state≤Í (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_errorëø (2.msg.user.HandleErrorRhandleErrorA

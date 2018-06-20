@@ -98,6 +98,48 @@ function game:start(room)
 		engine:setCurRoundBanker(data.zpos)
 	end
 
+	--等待玩家操作的列表
+	self.waite_operators = {}
+	self.stack_list = {}
+
+	-- 第n次开杠、补花
+	self.gang_hua = 0
+
+	for idx=1,engine:getPlaceNum() do
+		self.waite_operators[idx] = { operators = { "PAO" }}
+	end
+
+	self.room:broadcastAllPlayers("notice_pao",{})
+end
+
+
+--下跑
+game["PAO"] = function(self,player,data)
+	local user_pos = player.user_pos
+	if not self:check_operator(user_pos,"PAO") then
+		return "invaild_operator"
+	end
+
+
+	self.waite_operators[user_pos] = {}
+	-- 下跑
+	local pao_num = data.pao_num == 1
+	if not pao_num then
+		return "invaild_operator"
+	end
+ 
+	engine:setRecordData(user_pos,"pao_num",1)
+	
+	if not self.all_pao then
+		self.all_pao = 1
+	else
+		self.all_pao = self.all_pao + 1
+	end
+
+	if self.all_pao < engine:getPlaceNum() then
+		return "success"
+	end
+
 	-- 获取本局的庄家
 	local banker_pos = engine:getCurRoundBanker()
 	-- 随机骰子
@@ -133,18 +175,12 @@ function game:start(room)
 		player:send({deal_card = rsp_msg})
 	end
 
-	--等待玩家操作的列表
-	self.waite_operators = {}
-	self.stack_list = {}
-
-	-- 第n次开杠、补花
-	self.gang_hua = 0
-
 	--等待所有玩家发回发牌完毕的命令
 	for idx=1,engine:getPlaceNum() do
 		self.waite_operators[idx] = { operators = { "DEAL_FINISH" }}
 	end
 end
+
 
 function game:check_operator(user_pos,...)
 	local temp = {...}
@@ -191,12 +227,6 @@ game["DEAL_FINISH"] = function(self, player,data)
 	end
 	
 	self.waite_operators[user_pos] = nil
-	
-	-- 下跑
-	local pao_num = data.pao_num
-	if pao_num then
-		engine:setRecordData(user_pos,"pao_num",pao_num)
-	end
 
 	--计算剩余的数量
 	local _,opt = next(self.waite_operators)
