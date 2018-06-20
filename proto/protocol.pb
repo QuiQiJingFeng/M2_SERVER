@@ -72,8 +72,16 @@ cCardValue"
 Result
 success
 	auth_fail
-õ3
-msg/user.protomsg.user"F
+î7
+msg/user.protomsg.user"H
+FastSpakeReq
+user_pos (RuserPos
+
+fast_index (	R	fastIndex"K
+NoticeFastSpake
+user_pos (RuserPos
+
+fast_index (	R	fastIndex"F
 GPItem
 value (Rvalue
 from (Rfrom
@@ -170,7 +178,7 @@ expireTime
 sit_list (2.msg.user.SitItemRsitList"?
 FourCardItem
 user_pos (RuserPos
-cards (Rcards"Ë
+cards (Rcards"å
 DealCard
 zpos (Rzpos
 user_pos (RuserPos
@@ -178,7 +186,8 @@ expireTime
 random_nums (R
 randomNums
 	cur_round (RcurRound<
-four_card_list (2.msg.user.FourCardItemRfourCardList"V
+four_card_list (2.msg.user.FourCardItemRfourCardList
+huicard (Rhuicard"V
 PushDrawCard
 user_id (RuserId
 card (Rcard
@@ -246,7 +255,7 @@ is_connect (R	isConnect":
 handle_num (R	handleNum"L
 	ItemStack$
 item (2.msg.user.GPItemRitem
-user_pos (RuserPos"À
+user_pos (RuserPos"ˆ
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -267,7 +276,17 @@ handleNums
 cur_play_operators (	RcurPlayOperators
 card (Rcard2
 
-card_stack (2.msg.user.ItemStackR	cardStack"Y
+card_stack (2.msg.user.ItemStackR	cardStack&
+cur_table_cards (RcurTableCards(
+cur_table_Demand (RcurTableDemand*
+cur_table_bDouble (RcurTableBDouble$
+cur_table_time (RcurTableTime*
+cur_last_CardNums (RcurLastCardNums
+
+cBaseCards (R
+cBaseCards
+huicard (Rhuicard<
+four_card_list (2.msg.user.FourCardItemRfourCardList"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
@@ -358,8 +377,8 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
-Ñ
-protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"Ò
+Ø
+protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"‘
 C2S
 
 session_id (R	sessionId3
@@ -378,7 +397,8 @@ leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 confirm_distroy_room—N (2.msg.user.ConfirmDistroyRoomReqRconfirmDistroyRoomD
 get_my_room_list˜N (2.msg.user.GetMyRoomListReqRgetMyRoomList3
 
-send_audio™N (2.msg.user.SendAudioR	sendAudio"§
+send_audio™N (2.msg.user.SendAudioR	sendAudio=
+fast_spake_reqšN (2.msg.user.FastSpakeReqRfastSpakeReq"ï
 S2C
 
 session_id (R	sessionId
@@ -419,9 +439,10 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 notice_special_eventä (2.msg.user.NoticeSpecailEventRnoticeSpecialEventC
 notice_ting_cardå (2.msg.user.NoticeTingCardRnoticeTingCard@
 notice_ying_kouæ (2.msg.user.NoticeYingKouRnoticeYingKouF
-notice_send_audioç (2.msg.user.NoticeSendAudioRnoticeSendAudio6
+notice_send_audioç (2.msg.user.NoticeSendAudioRnoticeSendAudioF
+notice_fast_spakeè (2.msg.user.NoticeFastSpakeRnoticeFastSpake6
 
-send_audioè (2.msg.user.SendAudioRspR	sendAudioC
+send_audioé (2.msg.user.SendAudioRspR	sendAudioC
 update_resource±ê (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state²ê (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_error‘¿ (2.msg.user.HandleErrorRhandleErrorA
