@@ -145,9 +145,9 @@ function SOCKET.data(fd, data)
         -- 心跳包直接返回
         if rawget(content,"heartbeat") then
             skynet.remove_timeout(hearts[fd])
-            local next_heart = 100*5
+            local next_heart = 100*7
             hearts[fd] = skynet.timeout(next_heart,function() 
-                    --如果4秒之后还没有收到心跳包则 断开连接
+                    --如果7秒之后还没有收到心跳包则 断开连接
                     print("FYD---->>>玩家:",info.user_id,"断开连接")
                     skynet.call(GATE_SERVICE,"lua","kick",fd)
                 end)
