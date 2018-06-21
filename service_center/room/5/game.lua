@@ -65,7 +65,7 @@ function game:start(room)
 	--洗牌
 	engine:sort()
 	engine:setConfig({isPeng = true,isGang = true,huiCard=huiCard,isHu = not self.zimo,
-		gangAfterTing = true,qiangGangHu=qiangGangHu,shiShanYao=true})
+		gangAfterTing = true,qiangGangHu=qiangGangHu,shiShanYao=true,anTing = true})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
