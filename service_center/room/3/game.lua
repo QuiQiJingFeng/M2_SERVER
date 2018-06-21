@@ -279,6 +279,7 @@ function game:noticePushPlayCard(splayer,operator)
 		if player.user_id == splayer.user_id then
 			rsp_msg.card_list = engine:getHandleCardList(player.user_pos)
 			rsp_msg.card_stack = engine:getHandleCardStack(player.user_pos)
+			rsp_msg.four_card_list = self.four_card_list
 		end
 		rsp_msg.operator = operator
 		player:send({push_play_card=rsp_msg})
