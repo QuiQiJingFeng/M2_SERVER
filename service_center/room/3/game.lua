@@ -105,41 +105,18 @@ function game:start(room)
 	-- 第n次开杠、补花
 	self.gang_hua = 0
 
-	for idx=1,engine:getPlaceNum() do
-		self.waite_operators[idx] = { operators = { "PAO" }}
-	end
+	if self.xia_pao then
+		for idx=1,engine:getPlaceNum() do
+			self.waite_operators[idx] = { operators = { "PAO" }}
+		end
 
-	self.room:broadcastAllPlayers("notice_pao",{})
+		self.room:broadcastAllPlayers("notice_pao",{})
+	else
+		self:dealCard()
+	end
 end
 
-
---下跑
-game["PAO"] = function(self,player,data)
-	local user_pos = player.user_pos
-	if not self:check_operator(user_pos,"PAO") then
-		return "invaild_operator"
-	end
-
-
-	self.waite_operators[user_pos] = {}
-	-- 下跑
-	local pao_num = data.pao_num == 1
-	if not pao_num then
-		return "invaild_operator"
-	end
- 
-	engine:setRecordData(user_pos,"pao_num",1)
-	
-	if not self.all_pao then
-		self.all_pao = 1
-	else
-		self.all_pao = self.all_pao + 1
-	end
-
-	if self.all_pao < engine:getPlaceNum() then
-		return "success"
-	end
-
+function game:dealCard()
 	-- 获取本局的庄家
 	local banker_pos = engine:getCurRoundBanker()
 	-- 随机骰子
@@ -179,6 +156,36 @@ game["PAO"] = function(self,player,data)
 	for idx=1,engine:getPlaceNum() do
 		self.waite_operators[idx] = { operators = { "DEAL_FINISH" }}
 	end
+end
+
+--下跑
+game["PAO"] = function(self,player,data)
+	local user_pos = player.user_pos
+	if not self:check_operator(user_pos,"PAO") then
+		return "invaild_operator"
+	end
+
+
+	self.waite_operators[user_pos] = {}
+	-- 下跑
+	local pao_num = data.pao_num == 1
+	if not pao_num then
+		return "invaild_operator"
+	end
+ 
+	engine:setRecordData(user_pos,"pao_num",1)
+	
+	if not self.all_pao then
+		self.all_pao = 1
+	else
+		self.all_pao = self.all_pao + 1
+	end
+
+	if self.all_pao < engine:getPlaceNum() then
+		return "success"
+	end
+
+	self:dealCard()
 end
 
 
