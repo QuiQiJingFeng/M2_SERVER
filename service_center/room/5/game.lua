@@ -18,7 +18,7 @@ local GAME_OVER_TYPE = {
 	DISTROY_ROOM = 3,   --房间解散推送结算积分
 }
 
-function game:start(room)
+function game:start(room,recover)
 	print("========game start=========")
 	self.room = room
 
@@ -31,7 +31,7 @@ function game:start(room)
 	-- 大胡
 	self.da_hu = self.room.other_setting[4] == 1
 	
-	if room.cur_round == 1 then
+	if room.cur_round == 1 or recover  then
 		engine:init(room.seat_num)
 	end
 	-- 清空上局的数据
