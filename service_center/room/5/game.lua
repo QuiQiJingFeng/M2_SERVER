@@ -405,7 +405,6 @@ game["GANG"] = function(self,player,data,isGuo)
 		self.stack_list = stack_list
 	else
 		--杠了之后再摸一张牌
-		self.gang_hua = self.gang_hua + 1
 		self:drawCard(player)
 	end
  
