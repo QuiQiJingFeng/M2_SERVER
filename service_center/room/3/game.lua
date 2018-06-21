@@ -247,9 +247,9 @@ game["DEAL_FINISH"] = function(self, player,data)
 end
 
 --向A发一张牌 摸牌
-function game:drawCard(player)
+function game:drawCard(player,special,last)
 	local draw_pos = player.user_pos
-	local result = engine:drawCard(draw_pos)
+	local result = engine:drawCard(draw_pos,special,last)
 	--检查是否流局
 	if "FLOW" == result then
 		self:gameOver(player,GAME_OVER_TYPE.FLOW)
@@ -321,9 +321,29 @@ game["PLAY_CARD"] = function(self,player,data)
 		return "paramater_error" 
 	end
 
+
+	
 	-- 亮四打一 不能出那四张牌
 	if self:checkLiangSiDaYi(user_pos,data.card) then
-		return "invaild_operator"
+		local can_play = false
+		for _,item in ipairs(self.four_card_list) do
+			if item.user_pos == user_pos then
+				if #item.cards >= 4 then
+					for i,card in ipairs(item.cards) do
+						if card == data.card then
+							table.remove(item.cards,i)
+							break;
+						end
+					end
+
+					can_play = true
+					break;
+				end 
+			end
+		end
+		if not can_play then
+			return "invaild_operator"
+		end
 	end
 
 	local stack_list = engine:playCard(user_pos,data.card,nil,data.card > 40)
@@ -333,6 +353,11 @@ game["PLAY_CARD"] = function(self,player,data)
 	
 
 	self.waite_operators[user_pos] = nil
+
+	local user_id = player.user_id
+	local data = {user_id = user_id,card = data.card,user_pos = user_pos}
+	--通知所有人 A 已经出牌
+	self.room:broadcastAllPlayers("notice_play_card",data)
 
 	--花牌  补花 
 	if data.card > 40 then
@@ -344,12 +369,9 @@ game["PLAY_CARD"] = function(self,player,data)
 			engine:setflowBureauNum(14)
 		end
 		engine:updateRecordData(user_pos,"hua",1)
+		self:drawCard(player,nil,true)
+		return "success"
 	end
-
-	local user_id = player.user_id
-	local data = {user_id = user_id,card = data.card,user_pos = user_pos}
-	--通知所有人 A 已经出牌
-	self.room:broadcastAllPlayers("notice_play_card",data)
 	
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
