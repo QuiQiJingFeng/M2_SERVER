@@ -140,7 +140,7 @@ function game:dealCard()
 				local obj = {user_pos = idx,cards = {}}
 				-- 亮4张牌
 				for i=1,4 do
-					local card = table.remove(deal_cards[idx],1)
+					local card = deal_cards[idx][i]
 					table.insert(obj.cards,card)
 				end
 				table.insert(four_card_list,obj)
