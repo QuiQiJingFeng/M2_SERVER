@@ -341,7 +341,7 @@ game["GUO"] = function(self,player,data)
 	self.waite_operators[player.user_pos] = nil
 	--检测是否该下一个人操作
 	local _,item = next(self.stack_list)
-	if item then
+	if item and #item.operators > 0 then
 		if item.operators[1] ~= "GANG" then
 			local check_player = self.room:getPlayerByPos(item.pos)
 			local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
