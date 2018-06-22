@@ -263,7 +263,7 @@ game["TING_CARD"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	local result,stack_list = engine:tingCard(user_pos,data.card)
+	local result,stack_list,obj = engine:tingCard(user_pos,data.card)
 	if not result then
 		return "invaild_operator"
 	end
@@ -272,8 +272,8 @@ game["TING_CARD"] = function(self,player,data)
 	if engine:isAnTing() then
 		card = 99
 	end
-	local rsp_msg = {user_pos = user_pos,card = card}
-	self.room:broadcastAllPlayers("notice_ting_card",rsp_msg)
+	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
+	self.room:broadcastAllPlayers("notice_special_event",data)
 	if not stack_list then
 		stack_list = {}
 	end
