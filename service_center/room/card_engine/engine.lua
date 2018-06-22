@@ -264,44 +264,44 @@ function engine:playCard(pos,card,antingCard,mark)
 			check = false
 		end
 	end
-	if check then
-		-- 检查出牌人后面的三个人有啥想法
-		for idx= pos + 1,pos + self.__placeNum -1 do
-			if idx > self.__placeNum then
-				idx = idx - self.__placeNum
-			end
-	 		local stackItem = {pos = idx,card = card,operators = {}}
-			table.insert(stackList,stackItem)
-	 
-			local obj = self.__places[idx]
-			-- 检查碰、杠
-			local peng = obj:checkPeng(card)
-			local gang = obj:checkGang(card)
-			local chi = obj:checkChi(card)
-			local stack = stackItem.operators
-			if peng and self.__config.isPeng then
-				local item1 = "PENG"
-				table.insert(stack,item1)
-			end
-			if gang and self.__config.isGang then
-				local item2 = "GANG"
-				table.insert(stack,item2)
-			end
-			
-			if chi and self.__config.isChi then
-				local item3 = "CHI"
-				table.insert(stack,item3)
-			end
-			if self.__config.isHu then
-				local handleCards = obj:getHandleCardBuild()
-				local hu = algorithm:checkHu(handleCards,card,self.__config)
-				local item4 = "HU"
-				if hu then
-					table.insert(stack,item4)
-				end
+	
+	-- 检查出牌人后面的三个人有啥想法
+	for idx= pos + 1,pos + self.__placeNum -1 do
+		if idx > self.__placeNum then
+			idx = idx - self.__placeNum
+		end
+ 		local stackItem = {pos = idx,card = card,operators = {}}
+		table.insert(stackList,stackItem)
+ 
+		local obj = self.__places[idx]
+		-- 检查碰、杠
+		local peng = obj:checkPeng(card)
+		local gang = obj:checkGang(card)
+		local chi = obj:checkChi(card)
+		local stack = stackItem.operators
+		if peng and self.__config.isPeng then
+			local item1 = "PENG"
+			table.insert(stack,item1)
+		end
+		if gang and self.__config.isGang then
+			local item2 = "GANG"
+			table.insert(stack,item2)
+		end
+		
+		if chi and self.__config.isChi then
+			local item3 = "CHI"
+			table.insert(stack,item3)
+		end
+		if self.__config.isHu and check then
+			local handleCards = obj:getHandleCardBuild()
+			local hu = algorithm:checkHu(handleCards,card,self.__config)
+			local item4 = "HU"
+			if hu then
+				table.insert(stack,item4)
 			end
 		end
 	end
+
 
 	local function find(item,opt)
 		for i,v in ipairs(item.operators) do
