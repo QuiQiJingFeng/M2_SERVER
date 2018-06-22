@@ -247,7 +247,7 @@ game["DEAL_FINISH"] = function(self, player,data)
 end
 
 --向A发一张牌 摸牌
-function game:drawCard(player,special,last)
+function game:drawCard(player,special,last,in_liangsidayi)
 	local draw_pos = player.user_pos
 	local result = engine:drawCard(draw_pos,special,last)
 	--检查是否流局
@@ -257,6 +257,21 @@ function game:drawCard(player,special,last)
 	end
 
  	local card = result
+
+	if in_liangsidayi then
+		for _,item in ipairs(self.four_card_list) do
+			if item.user_pos == draw_pos then
+				-- 检查亮的四张牌中有几张 这个牌
+				if #item.cards >= 4 then
+					print("ERROR=>参数错误")
+				else
+					table.insert(item.cards,card)
+				end
+				break
+			end
+		end
+	end
+
 	--通知有人摸牌
 	for _,obj in ipairs(self.room.player_list) do
 		local data = {user_id = player.user_id,user_pos = draw_pos}
@@ -322,9 +337,10 @@ game["PLAY_CARD"] = function(self,player,data)
 	end
 
 
-	
+	local card_in_liangsidayi = false
 	-- 亮四打一 不能出那四张牌
 	if self:checkLiangSiDaYi(user_pos,data.card) then
+		card_in_liangsidayi = true
 		local can_play = false
 		for _,item in ipairs(self.four_card_list) do
 			if item.user_pos == user_pos then
@@ -369,7 +385,7 @@ game["PLAY_CARD"] = function(self,player,data)
 			engine:setflowBureauNum(14)
 		end
 		engine:updateRecordData(user_pos,"hua",1)
-		self:drawCard(player,nil,true)
+		self:drawCard(player,nil,true,card_in_liangsidayi)
 		return "success"
 	end
 	
