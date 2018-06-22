@@ -18,7 +18,8 @@ constant.TYPE = {
 	PENG_GANG = 3,
 	MING_GANG = 4,
 	AN_GANG = 5,
-	HU = 6
+	HU = 6,
+	TING = 7
 }
 
 
