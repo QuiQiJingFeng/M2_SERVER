@@ -338,27 +338,29 @@ game["PLAY_CARD"] = function(self,player,data)
 
 
 	local card_in_liangsidayi = false
-	-- 亮四打一 不能出那四张牌
+	-- 亮四打一 不能出那四张牌 
 	if self:checkLiangSiDaYi(user_pos,data.card) then
 		card_in_liangsidayi = true
-		local can_play = false
-		for _,item in ipairs(self.four_card_list) do
-			if item.user_pos == user_pos then
-				if #item.cards >= 4 then
-					for i,card in ipairs(item.cards) do
-						if card == data.card then
-							table.remove(item.cards,i)
-							break;
+		if data.card <= 40 then
+			local can_play = false
+			for _,item in ipairs(self.four_card_list) do
+				if item.user_pos == user_pos then
+					if #item.cards >= 4 then
+						for i,card in ipairs(item.cards) do
+							if card == data.card then
+								table.remove(item.cards,i)
+								break;
+							end
 						end
-					end
 
-					can_play = true
-					break;
-				end 
+						can_play = true
+						break;
+					end 
+				end
 			end
-		end
-		if not can_play then
-			return "invaild_operator"
+			if not can_play then
+				return "invaild_operator"
+			end
 		end
 	end
 
