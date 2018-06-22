@@ -482,7 +482,7 @@ game["PENG"] = function(self,player,data)
 				for i=#item.cards,1,-1 do
 					local card = item.cards[i]
 					if card == obj.value and rm_num > 0 then
-						table.remove(item.cards,idx)
+						table.remove(item.cards,i)
 						rm_num = rm_num - 1
 					end
 				end
