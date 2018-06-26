@@ -293,12 +293,11 @@ function engine:playCard(pos,card,antingCard,mark)
 					for i=1,3 do
 						place:addCard(card)
 					end
-				end
-
-				local result = self:__tingCard(handleCards)
-				--如果杠了之后还能听牌，则可以杠,否则不能杠
-				if not result then
-					gang = nil
+					local result = self:__tingCard(handleCards)
+					--如果杠了之后还能听牌，则可以杠,否则不能杠
+					if not result then
+						gang = nil
+					end
 				end
 			end
 		end
