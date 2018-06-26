@@ -282,16 +282,16 @@ function engine:playCard(pos,card,antingCard,mark)
 
 		if self.__config.gangAfterTing then
 			local handleCards
-			if self:getTing(pos) then
+			if obj:getTing(pos) then
 				peng = nil
 				chi = nil
 				if gang then
-					if not place:removeCard(card,3,nil,true) then
-						return false
+					if not obj:removeCard(card,3,nil,true) then
+						gang = nil
 					end
 					handleCards = utils:clone(place:getHandleCardBuild())
 					for i=1,3 do
-						place:addCard(card)
+						obj:addCard(card)
 					end
 					local result = self:__tingCard(handleCards)
 					--如果杠了之后还能听牌，则可以杠,否则不能杠
