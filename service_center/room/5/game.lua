@@ -64,7 +64,7 @@ function game:start(room,recover)
 	local qiangGangHu = not self.zimo
 	--洗牌
 	engine:sort()
-	engine:setConfig({isPeng = true,isGang = true,huiCard=huiCard,isHu = not self.zimo,
+	engine:setConfig({isPeng = true,isGang = true,isHu = not self.zimo,
 		gangAfterTing = true,qiangGangHu=qiangGangHu,shiShanYao=true,anTing = true})
 
 	-- 设置庄家模式
@@ -203,7 +203,7 @@ function game:noticePushPlayCard(splayer,operator)
 		player:send({push_play_card=rsp_msg})
 	end
 end
- 
+
 --出牌
 game["PLAY_CARD"] = function(self,player,data)
 	local user_pos = player.user_pos
@@ -447,7 +447,7 @@ end
 --胡牌
 game["HU"] = function(self,player,data)
 
-	if not self:check_operator(player.user_pos,"HU") then
+	if (not self:check_operator(player.user_pos,"HU")) and (not self:check_operator(player.user_pos,"PLAY_CARD")) then
 		return "invaild_operator"
 	end
 	local operate = self.waite_operators[player.user_pos]

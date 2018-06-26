@@ -659,7 +659,7 @@ end
 --胡牌
 game["HU"] = function(self,player,data)
 
-	if not self:check_operator(player.user_pos,"HU") then
+	if (not self:check_operator(player.user_pos,"HU")) and (not self:check_operator(player.user_pos,"PLAY_CARD")) then
 		return "invaild_operator"
 	end
 	local operate = self.waite_operators[player.user_pos]
