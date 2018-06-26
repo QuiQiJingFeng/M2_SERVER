@@ -279,6 +279,30 @@ function engine:playCard(pos,card,antingCard,mark)
 		local gang = obj:checkGang(card)
 		local chi = obj:checkChi(card)
 		local stack = stackItem.operators
+
+		if self.__config.gangAfterTing then
+			local handleCards
+			if self:getTing(pos) then
+				peng = nil
+				chi = nil
+				if gang then
+					if not place:removeCard(card,3,nil,true) then
+						return false
+					end
+					handleCards = utils:clone(place:getHandleCardBuild())
+					for i=1,3 do
+						place:addCard(card)
+					end
+				end
+
+				local result = self:__tingCard(handleCards)
+				--如果杠了之后还能听牌，则可以杠,否则不能杠
+				if not result then
+					gang = nil
+				end
+			end
+		end
+
 		if peng and self.__config.isPeng then
 			local item1 = "PENG"
 			table.insert(stack,item1)
