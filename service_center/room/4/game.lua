@@ -488,9 +488,6 @@ function game:gameOver(player,over_type,operate,refResult)
 
 	local room = self.room
 	local players = self.room.player_list
-	for i,player in ipairs(players) do
-		player.is_sit = false
-	end
 
 	if over_type == GAME_OVER_TYPE.FLOW then
 		for _,obj in ipairs(self.room.player_list) do

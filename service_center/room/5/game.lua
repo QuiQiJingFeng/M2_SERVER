@@ -579,9 +579,7 @@ function game:gameOver(player,over_type,tempResult)
 
 	local room = self.room
 	local players = self.room.player_list
-	for i,player in ipairs(players) do
-		player.is_sit = false
-	end
+ 
 	if over_type == GAME_OVER_TYPE.FLOW then
 		--流局 商丘麻将需要重置积分
 		engine:resetOriginScore()
@@ -607,6 +605,9 @@ function game:gameOver(player,over_type,tempResult)
 		obj.hu_num = engine:getTotalHuNum(obj.user_pos)
 	end
 
+
+	room:roundOver()
+	
  	if engine:isGameEnd() then
 		room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
 	end
