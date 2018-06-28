@@ -13,7 +13,9 @@ local PUSH_EVENT = constant.PUSH_EVENT
 local GANG_TYPE = constant.GANG_TYPE
 local GAME_OVER_TYPE = constant.GAME_OVER_TYPE
 local cjson = require "cjson"
-local Judgecard = require("2.judgeCard")
+local JudgeCard = require("2.judgeCard")
+
+
 
 local conf = require("2.conf")
 local log = require "skynet.log"
@@ -139,7 +141,13 @@ function game:initGame( ... )
 	-- 出的牌, 到时候扔进去, 最后填0 
 	self.cSendCards = {{}, {}, {}}
 	-- 当前出的牌的类型（用于断线重新连接的时候）
-	self.cSendNum = {0, 0, 0}
+	self.cSendNum = {{}, {}, {}}
+
+	for i = 1, 3 do 
+		for j = 1, 20 do
+			self.cSendNum[i][j] = 0
+		end
+	end
 	-- first 
 	self.iFirstDemand = 0
 	-- 当前桌面上牌权的人 
@@ -249,19 +257,28 @@ game["DEMAND"] = function(self, player, data)
 		local data = {userExtra = self.iMainPlayer, baseCard = {}}
 		local baseCard = self:getBaseCard()
 		-- local player = self.room:getPlayerByPos(tempExtra)
-		for i, v in pairs(baseCard) do 
-			table.insert(player.handle_cards, v)
+		-- for i, v in pairs(baseCard) do 
+		-- 	table.insert(player.handle_cards, v)
+		-- end
+		for i = 1, 3 do 
+			for j = 1, 20 do 
+				if player.handle_cards[j] == 0 then
+					player.handle_cards[j] = baseCard[i]
+					break
+				end
+			end
 		end
+
 		data.baseCard = baseCard
 		self.room:broadcastAllPlayers("NoticeMainPlayer", data)
 
 		-- 是否允许加倍（欢乐斗地主允许, 留个空, 没有加倍规则, 就出牌）
-		if 0 then
+		-- if 0 then
 
-		else
-			-- 通知当前玩家出牌
-			self:serverPushPlayCard(self.iCurPlayExtraNum)
-		end
+		-- else
+		-- 通知当前玩家出牌
+		self:serverPushPlayCard(self.iCurPlayExtraNum)
+		-- end
 
 		return "success"
 	elseif iDemandNums < 3 and self.iMaxPoint ~= 3 then  -- 经典斗地主, 没有叫三分，并且还有人没有叫分
@@ -383,7 +400,7 @@ game["DEMAND"] = function(self, player, data)
 					local data = {userExtra = self.iMainPlayer, baseCard = {}}
 					local baseCard = self:getBaseCard()
 
-					local player = self.room:getPlayerByPos(tempExtra)
+					local player = self.room:getPlayerByPos(iTempPos)
 					for i, v in pairs(baseCard) do 
 						table.insert(player.handle_cards, v)
 					end
@@ -415,20 +432,42 @@ end
 function game:serverPushPlayCard(iTableExtraNum)
 	local players = self.room.player_list
 
-	local cardNums = {}
-	for i = 1, 3 do 
-		-- 统计一下牌数, 
-		cardNums[i] = #players[i].handle_cards
+	local cardNums = {0, 0, 0}
+	-- for i = 1, 3 do 
+	-- 	-- 统计一下牌数, 
+	-- 	cardNums[i] = #players[i].handle_cards
+	-- end
+	for i = 1, 3 do
+		for k, v in pairs(players[i].handle_cards) do 
+			if v ~= 0 then
+				cardNums[i] = cardNums[i] + 1		
+			end
+		end
 	end
 
+
+-- 	message PushPlayCard {
+-- 	required int32 user_id = 1;
+-- 	optional int32 user_pos = 2;
+-- 	optional int32 operator = 3;   		// 2代表碰牌之后的出牌 1代表摸牌之后的出牌
+-- 	repeated int32 card_list = 4;  		//玩家的手牌
+-- 	repeated GPItem card_stack = 5;		//碰、杠、吃列表
+
+-- 	// ddz
+-- 	repeated int32 userCardNum = 6;
+
+-- 	repeated FourCardItem four_card_list = 7;
+-- }
+
 	for i, player in ipairs(players) do
-		local rsp_msg = {userExtra = iTableExtraNum}
+		local rsp_msg = {user_pos = iTableExtraNum}
+		rsp_msg.user_id = player.user_id
+		rsp_msg.userCardNum = cardNums
 		if player.user_pos == iTableExtraNum then
-			rsp_msg.userExtra = self.iCurPlayExtraNum
-			rsp_msg.userCard = player.handle_cards
-			rsp_msg.userCardNum = cardNums
+			rsp_msg.card_list = player.handle_cards
 		end
 		player:send({push_play_card = rsp_msg})
+		print("serverPushPlayCard通知玩家出牌", cjson.encode(rsp_msg))	
 	end
 end
 
@@ -470,15 +509,15 @@ game["PLAY_CARD"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	if not data.card then
-		return "paramater_error"
-	end
+	-- if not data.cardList then
+	-- 	return "paramater_error"
+	-- end
 
 	-- 检测手牌
 	local nodePlayer = player
 	local iTableNumExtra = player.user_pos
 
-	local cCards = data.cardList
+	local cCards = data.cardList or {}
 	local iCardType = data.nowType
 	local iCardValue = data.nowValue
 	local iCardNum = data.cardNums
@@ -508,7 +547,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	local iNowType;
 	local iNowValue;
 
-	if bIsPass == false then
+	if isPass == false then
 		if iTableNumExtra == self.iMainPlayer then
 			self.iTurn = self.iTurn + 1
 		end
@@ -521,18 +560,18 @@ game["PLAY_CARD"] = function(self,player,data)
 
 			local bFind = false
 			for j = 1, 20 do 
-				if cCardTemp[j] == 0 or cCardTemp[j] == nil then
-					break
+				if cCardTemp[j] and cCardTemp[j] > 0 then
+					if cCardTemp[j] == cCards[i] then
+						bFind = true
+						cCardTemp[j] = 0
+					end
 				end	
-				if cCardTemp[j] == cCards[i] then
-					bFind = true
-					cCardTemp[j] = 0
-				end
 			end
 
 			if bFind == false then
 				local error_msg = string.format("没有找到这张牌[%d][%d]", i, cCards[i])
 				self:handlingError(error_msg)
+				print("cCardTemp", cjson.encode(cCardTemp))
 
 				return "error"
 			end
@@ -550,7 +589,7 @@ game["PLAY_CARD"] = function(self,player,data)
 
 		-- temp, iCardsCount, iNowValue)
 		-- 判断合法之后，在判断牌型
-		iNowType = JudgeCard:JudgeCardShape( temp, iCardsCount, iNowValue)		
+		iNowType, iNowValue = JudgeCard:JudgeCardShape( temp, iCardsCount, iNowValue)		
 		if iNowType ~= iCardType or iNowValue ~= iCardValue then
 			local error_msg = string.format("ddz牌型牌值错误iNowType[%d]iCardType[%d]iNowValue[%d]iCardValue[%d]", iNowType, iCardType, iNowValue, iCardValue)
 			self:handlingError(error_msg)
@@ -573,7 +612,7 @@ game["PLAY_CARD"] = function(self,player,data)
 			end
 		end
 
-		iOldType = JudgeCard:JudgeCardShape(temp, iCardsCount, iOldValue);
+		iOldType, iOldValue = JudgeCard:JudgeCardShape(temp, iCardsCount, iOldValue);
 
 		local iAllow = 0
 		if ((iNowValue == -1) or (iOldValue < 1 ) or (iOldType < 0)or (iOldType==iNowType and iNowValue>iOldValue) or (iNowType == JudgeCard.TYPE_ROCKET_CARD) or ( iNowType == TYPE_BOMB_CARD and iOldType  ~= JudgeCard.TYPE_BOMB_CARD and iOldType ~= JudgeCard.TYPE_ROCKET_CARD)) then
@@ -655,6 +694,9 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	self.room:broadcastAllPlayers("NoticeSendCard", msgNotice)
 
+
+	print("iTableNumExtra == ", iTableNumExtra)
+
 	-- 扔在自己出牌的数组里面
 	for j = 1, iCardNum do 
 		for i = 1, 20 do 
@@ -672,9 +714,9 @@ game["PLAY_CARD"] = function(self,player,data)
 				break;
 			end
 
-			if iCardType == Judgecard.TYPE_ROCKET_CARD then
+			if iCardType == JudgeCard.TYPE_ROCKET_CARD then
 				self.cSendNum[iTableNumExtra][i] = 100
-			elseif iCardType == Judgecard.TYPE_BOMB_CARD then
+			elseif iCardType == JudgeCard.TYPE_BOMB_CARD then
 				self.cSendNum[iTableNumExtra][i] = 99
 			else
 				self.cSendNum[iTableNumExtra][i] = iCardNum
@@ -727,20 +769,17 @@ game["PLAY_CARD"] = function(self,player,data)
 
 
 		for i = 1,  3 do 
-			if i ~= iTableExtraNum then	
+			if i ~= iTableNumExtra then	
 				local bTempTime = 1
 				if self.bDoubleTime[i] == true then
 					bTempTime = bTempTime * 2
 				end 
-				if self.bDoubleTime[iTableExtraNum] == true then
+				if self.bDoubleTime[iTableNumExtra] == true then
 					bTempTime = bTempTime * 2				
 				end
-
-				-- local player1 = self.room:getPlayerByPos(i)
-				-- local player2 = self.room:getPlayerByPos(iTableExtraNum)
 				-- 算分
 				self.iAmountResult[i] = self.iAmountResult[i] + (-1)*self.iRoomTime*bTempTime
-				self.iAmountResult[iTableExtraNum] = self.iAmountResult[iTableExtraNum] + self.iRoomTime*bTempTime
+				self.iAmountResult[iTableNumExtra] = self.iAmountResult[iTableNumExtra] + self.iRoomTime*bTempTime
 			end
 		end
 
@@ -758,15 +797,38 @@ game["PLAY_CARD"] = function(self,player,data)
 		-- required bool  	bIfSpring = 2;		// 是否春天
 		-- required int32 	iTime = 3;			// 房间倍数
 		-- required int32 	iBoomNums = 4;		// 炸弹的个数
+
+		-- required string user_id = 1;   //玩家ID
+		-- required int32 	user_pos = 2;   //玩家的位置
+		-- required float  cur_score = 3; //玩家当前局的积分
+		-- required float  score = 4;     //玩家的总积分
+		-- repeated int32  card_list = 5; //玩家手里的牌
+
 		-- iLastCard
-		resultMsg.over_type = self.room:get("cur_round") >= self.room:get("round")
-		resultMsg.players = self.room:get("players")
+		resultMsg.over_type = self.room.cur_round >= self.room.round
+		-- resultMsg.players = self.room.player_list
+		resultMsg.players = {}
+		for i = 1, 3 do 
+			local player = {}
+			player.user_id = self.room.player_list[i].user_id
+			player.user_pos = self.room.player_list[i].user_pos
+			player.cur_score = self.room.player_list[i].cur_score
+			player.score = self.room.player_list[i].score
+			player.card_list = self.room.player_list[i].handle_cards
+			resultMsg.players[i] = player
+		end
+
 		resultMsg.bIfSpring = bIfSpring
 		resultMsg.iTime = self.iRoomTime
 		resultMsg.iBoomNums = self.iNowBoom
 
+		print("resultMsg", cjson.encode(resultMsg))
+
 		-- 通知玩家游戏结束了
 		self.room:broadcastAllPlayers("NoticeDDZGameOver", resultMsg)
+
+		-- 刷新玩家信息
+		self.room:refreshRoomInfo()
 
 		return "success"
 	else   -- 通知下个人出牌

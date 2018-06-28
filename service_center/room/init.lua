@@ -367,6 +367,21 @@ function CMD.send_audio(content)
     return "success"
 end
 
+-- 快捷发言             
+function CMD.fast_spake_req(content)
+    local user_id = content.user_id
+    local player = room:getPlayerByUserId(user_id)
+
+    local msg = {fast_index = content.fast_index,user_pos=player.user_pos}
+    print("_________________FastSpakeReq", cjson.encode(msg))
+
+    room:broadcastAllPlayers("notice_fast_spake", msg)
+    return "success"
+end
+
+
+
+
 function CMD.request(req_name,req_content)
     local func = CMD[req_name]
     if not func then
