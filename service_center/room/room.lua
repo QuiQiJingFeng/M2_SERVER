@@ -200,6 +200,10 @@ function room:updatePlayersToDb()
 end
 
 function room:roundOver()
+	for i,player in ipairs(self.player_list) do
+		player.is_sit = false
+	end
+
     local temp = self:getPlayerInfo("user_id","user_name","score")
 	local data = {players=cjson.encode(temp),replay_id=self.replay_id}
 	skynet.call(".mysql_pool","lua","insertTable","replay_ids",data)
