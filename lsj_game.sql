@@ -48,11 +48,12 @@ CREATE TABLE user_info
     user_ip         varchar(20),            -- 玩家最后登陆的IP
     user_pic        varchar(255),           -- 玩家头像的地址
     gold_num        double,                 -- 玩家的金币数量
-    level           int,                    -- 用户的星级
+    start           int,                    -- 用户的星级
     pre_user_id     int(10),                -- 上级的代理ID
-    invite_code     text,                   -- 自身所在的5级代理链 (user_id+user_id+user_id...)
+    invite_code     text,                   -- 自身所在的5级代理链 (user_id-user_id-user_id...)
     total_pay       float,                  -- 总充值
-    all_pay         float,                  -- 成为下级代理之后的总充值
+    today_rebate    float,                  -- 成为下级代理之后的总充值
+    reduce_rebate   float,                  -- 剩余可提现的返利
     bind_time       datetime,               -- 成为下级代理的时间
     primary key(user_id)
 );
@@ -180,6 +181,17 @@ CREATE TABLE pay_orders(
     gold_num       float,       -- 支付项 的总金币数量(包含赠送的数量)
     state          varchar(10)  -- 支付的状态 new/checking/faild/success
 );
+
+
+
+
+
+
+
+
+
+
+
 
 
 
