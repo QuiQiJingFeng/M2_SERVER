@@ -269,9 +269,6 @@ game["TING_CARD"] = function(self,player,data)
 	end
 
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
-	if engine:isAnTing() then
-		data.card = 99
-	end
 	self.room:broadcastAllPlayers("notice_special_event",data)
 	if not stack_list then
 		stack_list = {}
