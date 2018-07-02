@@ -270,7 +270,7 @@ game["TING_CARD"] = function(self,player,data)
 
 	local card = data.card
 	if engine:isAnTing() then
-		card = 99
+		data.card = 99
 	end
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 	self.room:broadcastAllPlayers("notice_special_event",data)
