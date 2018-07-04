@@ -46,6 +46,8 @@ function game:start(room,recover)
 	self.jia_zui = self.room.other_setting[11] == 1
 	--对对胡
 	self.dui_dui_hu = self.room.other_setting[12] == 1
+	-- 是否是暗听
+	self.is_anting = self.room.other_setting[13] == 1
 
 	if room.cur_round == 1 or recover then
 		engine:init(room.seat_num)
@@ -85,7 +87,7 @@ function game:start(room,recover)
 	--洗牌
 	engine:sort()
 	engine:setDefaultConfig()
-
+	engine:updateConfig({anTing=self.is_anting})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")

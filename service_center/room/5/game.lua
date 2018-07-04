@@ -30,6 +30,9 @@ function game:start(room,recover)
 	self.zimo = self.room.other_setting[3] == 1
 	-- 大胡
 	self.da_hu = self.room.other_setting[4] == 1
+
+	-- 是否是暗听
+	self.is_anting = self.room.other_setting[5] == 1
 	
 	if room.cur_round == 1 or recover  then
 		engine:init(room.seat_num)
@@ -65,7 +68,7 @@ function game:start(room,recover)
 	--洗牌
 	engine:sort()
 	engine:setConfig({isPeng = true,isGang = true,isHu = not self.zimo,
-		gangAfterTing = true,qiangGangHu=qiangGangHu,shiShanYao=true,anTing = true})
+		gangAfterTing = true,qiangGangHu=qiangGangHu,shiShanYao=true,anTing = self.is_anting})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
