@@ -357,11 +357,11 @@ game["PLAY_CARD"] = function(self,player,data)
 						break;
 					end 
 				end
- 
+ 			end
 			if not can_play then
 				return "invaild_operator"
 			end
-		end
+		
 	end
 
 	local stack_list = engine:playCard(user_pos,data.card,nil,data.card > 40)
