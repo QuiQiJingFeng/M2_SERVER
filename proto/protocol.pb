@@ -73,7 +73,7 @@ cCardValue"
 Result
 success
 	auth_fail
-ï:
+§;
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -100,7 +100,7 @@ fast_index (	R	fastIndex"F
 
 disconnect
  (R
-disconnect"…
+disconnect" 
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -108,8 +108,9 @@ disconnect"…
 seat_num (RseatNum$
 is_friend_room (RisFriendRoom"
 is_open_voice (RisOpenVoice
-is_open_gps (R	isOpenGps#
-other_setting (RotherSetting"I
+is_open_gps (R	isOpenGps
+owner_id (RownerId#
+other_setting	 (RotherSetting"I
 CreateRoomReq8
 room_setting (2.msg.user.RoomSettingRroomSetting"9
 CreateRoomRsp(
@@ -265,7 +266,7 @@ handle_num (R	handleNum"L
 cards (Rcards"9
 TingItem
 user_pos (RuserPos
-ting (Rting"ê
+ting (Rting"‡
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -298,7 +299,8 @@ cBaseCards
 huicard (Rhuicard<
 four_card_list (2.msg.user.FourCardItemRfourCardList/
 	mark_list (2.msg.user.MarkItemRmarkList/
-	ting_list (2.msg.user.TingItemRtingList"Y
+	ting_list (2.msg.user.TingItemRtingList
+	ting_card (RtingCard"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos

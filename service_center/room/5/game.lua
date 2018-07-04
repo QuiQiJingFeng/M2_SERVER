@@ -30,9 +30,12 @@ function game:start(room,recover)
 	self.zimo = self.room.other_setting[3] == 1
 	-- 大胡
 	self.da_hu = self.room.other_setting[4] == 1
+
+	-- 是否是暗听
+	self.is_anting = self.room.other_setting[5] == 1
 	
 	if room.cur_round == 1 or recover  then
-		engine:init(room.seat_num)
+		engine:init(room.seat_num,room.round)
 	end
 	-- 清空上局的数据
 	engine:clear()
@@ -65,7 +68,7 @@ function game:start(room,recover)
 	--洗牌
 	engine:sort()
 	engine:setConfig({isPeng = true,isGang = true,isHu = not self.zimo,
-		gangAfterTing = true,qiangGangHu=qiangGangHu,shiShanYao=true,anTing = true})
+		gangAfterTing = true,qiangGangHu=qiangGangHu,shiShanYao=true,anTing = self.is_anting})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
@@ -336,7 +339,8 @@ end
 --杠
 game["GANG"] = function(self,player,data,isGuo)
 	local card = data.card 
-	if not self:check_operator(player.user_pos,"GANG") then
+
+	if not self:check_operator(player.user_pos,"GANG") and not self:check_operator(user_pos,"PLAY_CARD") then
 		return "invaild_operator"
 	end
 	if isGuo then
@@ -652,6 +656,16 @@ function game:back_room(user_id)
 			rsp_msg.cur_play_operators = obj.operators
 		end
 	end
+	rsp_msg.ting_card = engine:getTing(player.user_pos)
+
+	local ting_list = {}
+	for pos=1,engine:getPlaceNum() do
+		local ting = engine:getTing(pos) and true or false
+		local temp = {user_pos=pos,ting = ting}
+		table.insert(ting_list,temp)
+	end
+	
+	rsp_msg.ting_list = ting_list
 
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}

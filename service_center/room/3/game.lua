@@ -46,9 +46,11 @@ function game:start(room,recover)
 	self.jia_zui = self.room.other_setting[11] == 1
 	--对对胡
 	self.dui_dui_hu = self.room.other_setting[12] == 1
+	-- 是否是暗听
+	self.is_anting = self.room.other_setting[13] == 1
 
 	if room.cur_round == 1 or recover then
-		engine:init(room.seat_num)
+		engine:init(room.seat_num,room.round)
 	end
 	-- 清空上局的数据
 	engine:clear()
@@ -85,7 +87,7 @@ function game:start(room,recover)
 	--洗牌
 	engine:sort()
 	engine:setDefaultConfig()
-
+	engine:updateConfig({anTing=self.is_anting})
 
 	-- 设置庄家模式
 	engine:setBankerMode("YING")
@@ -373,7 +375,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	self.waite_operators[user_pos] = nil
 
 	local user_id = player.user_id
-	local data = {user_id = user_id,card = data.card,user_pos = user_pos}
+	local data = {user_id = user_id,card = data.card,user_pos = user_pos,four_card_list = self.four_card_list}
 	--通知所有人 A 已经出牌
 	self.room:broadcastAllPlayers("notice_play_card",data)
 
@@ -507,7 +509,7 @@ end
 --杠
 game["GANG"] = function(self,player,data,isGuo)
 	local card = data.card 
-	if not self:check_operator(player.user_pos,"GANG") then
+	if not self:check_operator(player.user_pos,"GANG") and not self:check_operator(user_pos,"PLAY_CARD") then
 		return "invaild_operator"
 	end
 	if isGuo then
@@ -884,6 +886,7 @@ function game:back_room(user_id)
 	rsp_msg.put_cards = {}
 	rsp_msg.handle_nums = {}
 	rsp_msg.four_card_list = self.four_card_list
+	rsp_msg.ting_card = engine:getTing(player.user_pos)
 
 	for pos=1,engine:getPlaceNum() do
 		local cards = engine:getPutCard(pos)
@@ -905,7 +908,7 @@ function game:back_room(user_id)
 
 	local ting_list = {}
 	for pos=1,engine:getPlaceNum() do
-		local ting = engine:getTing(pos)
+		local ting = engine:getTing(pos) and true or false
 		local temp = {user_pos=pos,ting = ting}
 		table.insert(ting_list,temp)
 	end

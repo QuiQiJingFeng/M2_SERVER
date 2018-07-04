@@ -721,7 +721,7 @@ function engine:tingCard(pos,card)
 	local result = self:__tingCard(handleCards)
 	-- 如果是明听,需要检测其他人的吃碰杠胡
 	if result then
-		place:setTing()
+		place:setTing(card)
 		if self.__config.anTing then
 			local antingCard = 99
 			if not self:playCard(pos,card,antingCard) then
@@ -828,7 +828,7 @@ end
 
 -- 是否游戏结束
 function engine:isGameEnd()
-	return self.__round == self.__overRound
+	return self.__round <= self.__overRound
 end
 
 function engine:getOverRound()

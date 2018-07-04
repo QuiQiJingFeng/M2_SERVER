@@ -57,15 +57,15 @@ function Place:clear()
 	self.__lastCard = nil
 	-- 记录一些不同麻将所用到的一些数据
 	self.__recordData = {}
-	self.__isTing = false
+	self.__tingCard = nil
 end
 
-function Place:setTing()
-	self.__isTing = true
+function Place:setTing(card)
+	self.__tingCard = card
 end
 
 function Place:getTing()
-	return self.__isTing
+	return self.__tingCard
 end
 
 function Place:addExtraScore(deltScore)
