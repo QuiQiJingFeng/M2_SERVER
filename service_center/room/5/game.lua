@@ -35,7 +35,7 @@ function game:start(room,recover)
 	self.is_anting = self.room.other_setting[5] == 1
 	
 	if room.cur_round == 1 or recover  then
-		engine:init(room.seat_num)
+		engine:init(room.seat_num,room.round)
 	end
 	-- 清空上局的数据
 	engine:clear()
