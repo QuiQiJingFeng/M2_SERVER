@@ -373,7 +373,7 @@ game["PLAY_CARD"] = function(self,player,data)
 	self.waite_operators[user_pos] = nil
 
 	local user_id = player.user_id
-	local data = {user_id = user_id,card = data.card,user_pos = user_pos}
+	local data = {user_id = user_id,card = data.card,user_pos = user_pos,self.four_card_list}
 	--通知所有人 A 已经出牌
 	self.room:broadcastAllPlayers("notice_play_card",data)
 

@@ -60,7 +60,7 @@ for i=41,48 do
 end
 
 			
-local handle1 = {41,42,43,44,1,2,3,5,5,5,11,12,13}
+local handle1 = {41,42,43,44,1,2,3,15,15,15,11,12,13}
 local handle2 = {45,46,1,1,2,2,3,5,5,5,11,47,48}
 
 for i,v in ipairs(handle2) do
