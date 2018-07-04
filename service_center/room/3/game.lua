@@ -509,7 +509,7 @@ end
 --杠
 game["GANG"] = function(self,player,data,isGuo)
 	local card = data.card 
-	if not self:check_operator(player.user_pos,"GANG") and not self:check_operator(user_pos,"PLAY_CARD") then
+	if not self:check_operator(player.user_pos,"GANG") and not self:check_operator(player.user_pos,"PLAY_CARD") then
 		return "invaild_operator"
 	end
 	if isGuo then
