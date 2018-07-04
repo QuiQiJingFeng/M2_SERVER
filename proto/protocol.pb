@@ -73,7 +73,7 @@ cCardValue"
 Result
 success
 	auth_fail
-Œ;
+§;
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -100,7 +100,7 @@ fast_index (	R	fastIndex"F
 
 disconnect
  (R
-disconnect"…
+disconnect" 
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -108,8 +108,9 @@ disconnect"…
 seat_num (RseatNum$
 is_friend_room (RisFriendRoom"
 is_open_voice (RisOpenVoice
-is_open_gps (R	isOpenGps#
-other_setting (RotherSetting"I
+is_open_gps (R	isOpenGps
+owner_id (RownerId#
+other_setting	 (RotherSetting"I
 CreateRoomReq8
 room_setting (2.msg.user.RoomSettingRroomSetting"9
 CreateRoomRsp(
