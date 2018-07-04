@@ -256,7 +256,7 @@ game["TING_CARD"] = function(self,player,data)
 
 	if not self:check_operator(user_pos,"PLAY_CARD") then 
 		return "invaild_operator" 
-	end
+	end 
 	if not data.card then 
 		return "paramater_error" 
 	end
@@ -266,13 +266,27 @@ game["TING_CARD"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	local result,stack_list,obj = engine:tingCard(user_pos,data.card)
+	local result,stack_list, obj = engine:tingCard(user_pos,data.card)
 	if not result then
 		return "invaild_operator"
 	end
+	-- 回放的时候需要删除牌, 把真实牌值传给前段使用
+	local dataMsg = {user_id = player.user_id, user_pos = player.user_pos}
 
-	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
-	self.room:broadcastAllPlayers("notice_special_event",data)
+	dataMsg.item = {}
+	for i, v in pairs(obj) do 
+		dataMsg.item[i] = v
+	end
+
+	dataMsg.item.value = data.card
+	self.room:broadcastAllPlayers("notice_special_event", dataMsg)
+
+	-- 给前段发送出牌消息
+	local data = {user_id = player.user_id, card = obj.value, user_pos = player.user_pos}
+	--通知所有人 A 已经出牌
+	self.room:broadcastAllPlayers("notice_play_card",data)
+
+
 	if not stack_list then
 		stack_list = {}
 	end
