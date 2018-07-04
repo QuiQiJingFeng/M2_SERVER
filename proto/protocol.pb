@@ -73,7 +73,7 @@ cCardValue"
 Result
 success
 	auth_fail
-ï:
+Œ;
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -265,7 +265,7 @@ handle_num (R	handleNum"L
 cards (Rcards"9
 TingItem
 user_pos (RuserPos
-ting (Rting"ê
+ting (Rting"‡
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -298,7 +298,8 @@ cBaseCards
 huicard (Rhuicard<
 four_card_list (2.msg.user.FourCardItemRfourCardList/
 	mark_list (2.msg.user.MarkItemRmarkList/
-	ting_list (2.msg.user.TingItemRtingList"Y
+	ting_list (2.msg.user.TingItemRtingList
+	ting_card (RtingCard"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
