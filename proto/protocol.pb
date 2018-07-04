@@ -10,7 +10,7 @@ msg.common"
 Result
 success
 fail
-Ñ
+ï
 msg/ddz.protomsg.ddz"0
 ReqPointDemand
 
@@ -32,10 +32,11 @@ userDemand"_
 	userExtra (R	userExtra
 
 userDemand (R
-userDemand"L
+userDemand"j
 NoticeMainPlayer
 	userExtra (R	userExtra
-baseCard (RbaseCard"Š
+baseCard (RbaseCard
+	iRoomTime (R	iRoomTime"Š
 Item
 user_id (	RuserId
 user_pos (RuserPos
@@ -72,7 +73,7 @@ cCardValue"
 Result
 success
 	auth_fail
-“:
+ï:
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -172,10 +173,11 @@ expireTime
 	cur_round (RcurRound"=
 SitItem
 user_id (RuserId
-user_pos (RuserPos"T
+user_pos (RuserPos"q
 PushSitDown
 room_id (RroomId,
-sit_list (2.msg.user.SitItemRsitList"?
+sit_list (2.msg.user.SitItemRsitList
+	cur_round (RcurRound"?
 FourCardItem
 user_pos (RuserPos
 cards (Rcards"å
@@ -200,11 +202,12 @@ randomNums
 
 card_stack (2.msg.user.GPItemR	cardStack 
 userCardNum (RuserCardNum<
-four_card_list (2.msg.user.FourCardItemRfourCardList"X
+four_card_list (2.msg.user.FourCardItemRfourCardList"–
 NoticePlayCard
 user_id (RuserId
 card (Rcard
-user_pos (RuserPos"j
+user_pos (RuserPos<
+four_card_list (2.msg.user.FourCardItemRfourCardList"j
 NoticePengCard
 user_id (RuserId
 user_pos (RuserPos$
