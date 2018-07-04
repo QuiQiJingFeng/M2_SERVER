@@ -727,7 +727,7 @@ function engine:tingCard(pos,card)
 			if not self:playCard(pos,card,antingCard) then
 				return false
 			end
-			return true,nil,{type = constant.TYPE.TING,value = card,from = pos}
+			return true,nil,{type = constant.TYPE.TING,value = antingCard,from = pos}
 		else
 			local stackList = self:playCard(pos,card)
 			if not stackList then

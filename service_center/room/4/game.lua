@@ -488,9 +488,6 @@ function game:gameOver(player,over_type,operate,refResult)
 
 	local room = self.room
 	local players = self.room.player_list
-	for i,player in ipairs(players) do
-		player.is_sit = false
-	end
 
 	if over_type == GAME_OVER_TYPE.FLOW then
 		for _,obj in ipairs(self.room.player_list) do
@@ -523,16 +520,6 @@ function game:gameOver(player,over_type,operate,refResult)
  	if engine:isGameEnd() then
 		room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
 	end
-
-    local data = {}
-    data.room_id = self.room.room_id
-    data.over_round = engine:getOverRound()
-	data.cur_round = engine:getCurRound()
-    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
-
-    -- 同步玩家的个人数据到数据库
-    self.room:updatePlayersToDb()
-	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
 
 --返回房间,推送当局的游戏信息

@@ -203,6 +203,15 @@ function room:roundOver()
 	for i,player in ipairs(self.player_list) do
 		player.is_sit = false
 	end
+    local data = {}
+    data.room_id = self.room_id
+    data.over_round = self.over_round
+	data.cur_round = self.cur_round
+    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
+
+    -- 同步玩家的个人数据到数据库
+    self:updatePlayersToDb()
+	skynet.send(".replay_cord","lua","saveRecord",self.game_type,self.replay_id)
 
     local temp = self:getPlayerInfo("user_id","user_name","score")
 	local data = {players=cjson.encode(temp),replay_id=self.replay_id}

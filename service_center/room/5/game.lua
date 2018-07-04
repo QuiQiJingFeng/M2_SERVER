@@ -268,10 +268,6 @@ game["TING_CARD"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
-	local card = data.card
-	if engine:isAnTing() then
-		card = 99
-	end
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 	self.room:broadcastAllPlayers("notice_special_event",data)
 	if not stack_list then
@@ -579,9 +575,7 @@ function game:gameOver(player,over_type,tempResult)
 
 	local room = self.room
 	local players = self.room.player_list
-	for i,player in ipairs(players) do
-		player.is_sit = false
-	end
+ 
 	if over_type == GAME_OVER_TYPE.FLOW then
 		--流局 商丘麻将需要重置积分
 		engine:resetOriginScore()
@@ -607,19 +601,12 @@ function game:gameOver(player,over_type,tempResult)
 		obj.hu_num = engine:getTotalHuNum(obj.user_pos)
 	end
 
+
+	room:roundOver()
+
  	if engine:isGameEnd() then
 		room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
 	end
-
-    local data = {}
-    data.room_id = self.room.room_id
-    data.over_round = engine:getOverRound()
-	data.cur_round = engine:getCurRound()
-    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
-
-    -- 同步玩家的个人数据到数据库
-    self.room:updatePlayersToDb()
-	skynet.send(".replay_cord","lua","saveRecord",room.game_type,room.replay_id)
 end
 
 
