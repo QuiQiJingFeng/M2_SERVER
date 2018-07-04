@@ -828,7 +828,7 @@ end
 
 -- 是否游戏结束
 function engine:isGameEnd()
-	return self.__round == self.__overRound
+	return self.__round <= self.__overRound
 end
 
 function engine:getOverRound()
