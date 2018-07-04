@@ -641,6 +641,7 @@ function game:back_room(user_id)
 			rsp_msg.cur_play_operators = obj.operators
 		end
 	end
+	rsp_msg.ting_card = engine:getTing(player.user_pos)
 
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}

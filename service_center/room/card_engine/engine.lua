@@ -721,7 +721,7 @@ function engine:tingCard(pos,card)
 	local result = self:__tingCard(handleCards)
 	-- 如果是明听,需要检测其他人的吃碰杠胡
 	if result then
-		place:setTing()
+		place:setTing(card)
 		if self.__config.anTing then
 			local antingCard = 99
 			if not self:playCard(pos,card,antingCard) then
