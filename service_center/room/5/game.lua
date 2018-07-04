@@ -643,6 +643,15 @@ function game:back_room(user_id)
 	end
 	rsp_msg.ting_card = engine:getTing(player.user_pos)
 
+	local ting_list = {}
+	for pos=1,engine:getPlaceNum() do
+		local ting = engine:getTing(pos) and true or false
+		local temp = {user_pos=pos,ting = ting}
+		table.insert(ting_list,temp)
+	end
+	
+	rsp_msg.ting_list = ting_list
+
 	--每个玩家出的牌
 	rsp_msg.put_cards = {}
 	rsp_msg.handle_nums = {}

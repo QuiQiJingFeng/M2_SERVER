@@ -908,7 +908,7 @@ function game:back_room(user_id)
 
 	local ting_list = {}
 	for pos=1,engine:getPlaceNum() do
-		local ting = engine:getTing(pos)
+		local ting = engine:getTing(pos) and true or false
 		local temp = {user_pos=pos,ting = ting}
 		table.insert(ting_list,temp)
 	end
