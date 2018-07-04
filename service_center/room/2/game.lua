@@ -16,7 +16,6 @@ local cjson = require "cjson"
 local JudgeCard = require("2.judgeCard")
 
 
-
 local conf = require("2.conf")
 local log = require "skynet.log"
 
@@ -45,9 +44,16 @@ function game:fisherYates()
 end
 
 -- 开始游戏
-function game:start(room)
+function game:start(room, bRepate)
 	print("ddz, start()")
 	self.room = room
+
+	-- 不是重开局的时候才会加1
+	-- if not bRepate then
+	-- 	self.room.cur_round = self.room.cur_round + 1
+	-- end
+
+	print("self.room.cur_round", self.room.cur_round)
 
 	self.other_setting = self.room.other_setting
 	--底分
@@ -78,6 +84,18 @@ function game:dealCardServer( ... )
 			iHandCards[i][j] = self.card_list[((i-1)*17 + j)]
 			-- print(string.format("发牌iHandCards[%d][%d] = [%d]", i, j, iHandCards[i][j]))
 		end	
+
+
+		print("conf", cjson.encode(conf)) 
+		-- 配牌
+		if conf and conf.isUserMake and conf.isUserMake == true and conf["isOpen"..i] == true then
+			for j = 1, 17 do 
+				if conf["card" .. i] and conf["card" .. i][j] then
+					iHandCards[i][j] = conf["card" .. i][j]
+				end
+			end
+		end
+
 		players[i].handle_cards = iHandCards[i]
 		self.waite_operators[players[i].user_pos] = "WAIT_DEAL_FINISH"
 	end
@@ -219,10 +237,9 @@ game["DEMAND"] = function(self, player, data)
 	if not self.iMaxPoint then
 		self.iMaxPoint = 0
 	end
-
-	print("self.iMaxPoint = ", self.iMaxPoint)
-
-	log.infof("self.iDemandPoint[%d]", cjson.encode(self.iDemandPoint))
+	log.info("--------------------------------------")
+	log.info("self.iMaxPoint = ", self.iMaxPoint)
+	log.info("self.iDemandPoint = ", cjson.encode(self.iDemandPoint))
 
 	for i = 1, 3 do 
 		if self.iDemandPoint[i] > self.iMaxPoint then
@@ -251,6 +268,7 @@ game["DEMAND"] = function(self, player, data)
 	-- 叫了三分， 直接就是地主了
 	if data.demandPoint == 3 then
 
+		self.iRoomTime = 3
 		self.iMainPlayer = pos  -- 这个人就是地主
 		self.iCurPlayExtraNum = self.iMainPlayer
 
@@ -363,8 +381,12 @@ game["DEMAND"] = function(self, player, data)
 				end
 			end
 			if iDemandPlayNums == 1 then
+
 				self.iMainPlayer = self.iFirstDemand  -- 这个人就是地主
 				self.iCurPlayExtraNum = self.iMainPlayer
+
+				self.iRoomTime = self.iMaxPoint
+
 				local data = {userExtra = self.iMainPlayer, baseCard = {}}
 				local baseCard = self:getBaseCard()
 
@@ -418,7 +440,7 @@ game["DEMAND"] = function(self, player, data)
 			else
 				-- 重新再来一次, 重新洗牌，重新发牌，再重新叫地主
 				self:initGame()
-				self:start()
+				self:start(self.room, tr)
 			end
 		end  
 	end
@@ -526,6 +548,10 @@ game["PLAY_CARD"] = function(self,player,data)
 	if #cCards ~= iCardNum then
 		print(string.format("ERROR::card = [%d],iCardNum = [%d] ", #cCards, iCardNum))
 	end
+	print("cCards = ", cjson.encode(cCards))
+	print("player.handle_cards = ", cjson.encode(player.handle_cards))
+
+
 
 	-- 这手牌是否为Pass
 	local isPass = false
@@ -540,7 +566,10 @@ game["PLAY_CARD"] = function(self,player,data)
 		print(string.format("ERROR::cCards = [%d],iCardNum = [%d] ", #cCards, iCardNum))
 	end
 
-	local cCardTemp = player.handle_cards
+	local cCardTemp = {}
+	for i, v in pairs(player.handle_cards) do 
+		table.insert(cCardTemp, v)
+	end
 
 	local iOldType;
 	local iOldValue;
@@ -564,6 +593,7 @@ game["PLAY_CARD"] = function(self,player,data)
 					if cCardTemp[j] == cCards[i] then
 						bFind = true
 						cCardTemp[j] = 0
+						break
 					end
 				end	
 			end
@@ -573,7 +603,7 @@ game["PLAY_CARD"] = function(self,player,data)
 				self:handlingError(error_msg)
 				print("cCardTemp", cjson.encode(cCardTemp))
 
-				return "error"
+				return "ERROR"
 			end
 		end
 
@@ -643,20 +673,24 @@ game["PLAY_CARD"] = function(self,player,data)
 		end
 
 		-- 删除手中的牌(手牌20张， 值可能为0 但是不会为空)
-		for i = 1, 20 do
-			if not cCards[i] then
+		for k = 1, 20 do
+			if not cCards[k] then
 				break
 			end 
-			for j = 1, 20 do 
-				if player.handle_cards[j] == cCards[i] then
-					player.handle_cards[j] = 0
-					for z = j, 20 do 
-						player.handle_cards[z] = player.handle_cards[z+1]
-						player.handle_cards[z+1] = 0
-					end
+			for z = 1, 20 do 
+				local bFind = false
+				if player.handle_cards[z] == cCards[k] then
+					bFind = true
+					player.handle_cards[z] = 0
+					print("找到了一张牌，k, z ", k, z)
+					break
+				end
+				if bFind then
+					break
 				end
 			end			
 		end
+		print("player.handle_cards after delete = ", cjson.encode(player.handle_cards))
 
 		-- 标记现在桌面上出牌的人是谁（牌权）
 		self.iCurPlayExtraNum = iTableNumExtra;
@@ -679,7 +713,6 @@ game["PLAY_CARD"] = function(self,player,data)
 	end
 
 	-- 通知出牌
-
 	local msgNotice = {}
 
 	-- cardList
@@ -707,7 +740,6 @@ game["PLAY_CARD"] = function(self,player,data)
 		end
 	end
 
-	-- for (i=0; i<20; i++)
 	for i = 1, 20 do 
 		while true do 
 			if self.cSendNum[iTableNumExtra][i] ~= 0 then
@@ -742,7 +774,6 @@ game["PLAY_CARD"] = function(self,player,data)
 							iTempCardNum[iPlayer] = iTempCardNum[iPlayer] + 1
 						end
 					end
-
 					iPlayer = iPlayer + 1
 				end
 			end
@@ -760,14 +791,13 @@ game["PLAY_CARD"] = function(self,player,data)
 			end
 		end
 
+		print("bIfSpring", bIfSpring)
 		-- 先算出来底分和叫分的基础番数， 最后再算出来每个玩家需要的番数
 		-- 取得炸弹番数， 炸弹翻倍， 是指数
 		-- local iBoomNum = self.iNowBoom >= self.iMaxBoom and self.iMaxBoom or self.iNowBoom
 		-- local iBoutResult = iBoomNum + 1
 		
 		local iBoutResult = self.iRoomTime -- 乘以底分之后的
-
-
 		for i = 1,  3 do 
 			if i ~= iTableNumExtra then	
 				local bTempTime = 1
@@ -789,21 +819,11 @@ game["PLAY_CARD"] = function(self,player,data)
 			player.cur_score = self.iAmountResult[i]
 			player.score = player.score + self.iAmountResult[i]
 		end
+
+		print("self.iAmountResult = ", cjson.encode(self.iAmountResult))
+
 		-- 通知结算信息
 		local resultMsg = {}
-
-		-- required int32 	over_type = 1;     	// 1 正常结束 2 流局 3 房间解散会发送一个结算
-		-- repeated Item 	players = 2;       	// 玩家的信息 * 3
-		-- required bool  	bIfSpring = 2;		// 是否春天
-		-- required int32 	iTime = 3;			// 房间倍数
-		-- required int32 	iBoomNums = 4;		// 炸弹的个数
-
-		-- required string user_id = 1;   //玩家ID
-		-- required int32 	user_pos = 2;   //玩家的位置
-		-- required float  cur_score = 3; //玩家当前局的积分
-		-- required float  score = 4;     //玩家的总积分
-		-- repeated int32  card_list = 5; //玩家手里的牌
-
 		-- iLastCard
 		resultMsg.over_type = self.room.cur_round >= self.room.round
 		-- resultMsg.players = self.room.player_list
@@ -826,7 +846,8 @@ game["PLAY_CARD"] = function(self,player,data)
 
 		-- 通知玩家游戏结束了
 		self.room:broadcastAllPlayers("NoticeDDZGameOver", resultMsg)
-
+		-- 刷新玩家状态并且记录复盘文件
+		self.room:roundOver()
 		-- 刷新玩家信息
 		self.room:refreshRoomInfo()
 

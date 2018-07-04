@@ -150,7 +150,7 @@ function CMD.sit_down(content)
     if pos > room.seat_num then
         return "paramater_error"
     end
-
+    print("over_round, round", room.over_round, room.round)
     if room.over_round == room.round then
         return "round_not_enough"
     end
@@ -178,7 +178,7 @@ function CMD.sit_down(content)
         end
         obj.is_sit = nil
     end
-    local rsp_msg = {room_id = room_id,sit_list = sit_list}
+    local rsp_msg = {room_id = room_id,sit_list = sit_list, cur_round = room.cur_round}
     room:broadcastAllPlayers("push_sit_down",rsp_msg)
 
     local sit_num = room:getSitNums()
@@ -376,7 +376,7 @@ function CMD.fast_spake_req(content)
     print("_________________FastSpakeReq", cjson.encode(msg))
 
     room:broadcastAllPlayers("notice_fast_spake", msg)
-    return "success"
+    -- return "success"
 end
 
 
