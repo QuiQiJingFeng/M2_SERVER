@@ -565,6 +565,8 @@ game["GANG"] = function(self,player,data,isGuo)
 			obj.cur_score = engine:getCurScore(obj.user_pos)
 			obj.score = engine:getTotalScore(obj.user_pos)
 			obj.card_list = engine:getHandleCardList(obj.user_pos)
+			self.room:updatePlayerProperty(obj.user_id,"score",obj.score)
+			self.room:updatePlayerProperty(obj.user_id,"cur_score",obj.cur_score)
 		end
 
 		local list = engine:getRecentDeltScore()
@@ -747,6 +749,8 @@ game["HU"] = function(self,player,data)
 		obj.cur_score = engine:getCurScore(obj.user_pos)
 		obj.score = engine:getTotalScore(obj.user_pos)
 		obj.card_list = engine:getHandleCardList(obj.user_pos)
+		self.room:updatePlayerProperty(obj.user_id,"score",obj.score)
+		self.room:updatePlayerProperty(obj.user_id,"cur_score",obj.cur_score)
 	end
 
 	local data = {over_type = GAME_OVER_TYPE.NORMAL,players = info}
@@ -827,6 +831,8 @@ function game:gameOver(player,over_type,tempResult)
 			obj.cur_score = engine:getCurScore(obj.user_pos)
 			obj.score = engine:getTotalScore(obj.user_pos)
 			obj.card_list = engine:getHandleCardList(obj.user_pos)
+			self.room:updatePlayerProperty(obj.user_id,"score",obj.score)
+			self.room:updatePlayerProperty(obj.user_id,"cur_score",obj.cur_score)
 		end
 		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
