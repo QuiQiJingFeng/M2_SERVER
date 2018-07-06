@@ -67,6 +67,7 @@ function game:start(room,recover)
 	-- 翻一张癞根  癞子牌 + 1
 	local laiGen = engine:removeAcard()
 	self.laiGen = laiGen
+	local huiCard = laiGen
 	if huiCard % 10 == 9 then
 		huiCard = laiGen - 8
 	else
