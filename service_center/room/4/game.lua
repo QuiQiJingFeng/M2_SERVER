@@ -554,6 +554,9 @@ function game:back_room(user_id)
 		local temp = {user_pos=pos,cards = cards}
 		table.insert(mark_list,temp)
 	end
+
+	rsp_msg.mark_list = mark_list
+
 	
 	rsp_msg.zpos = engine:getCurRoundBanker()
 	rsp_msg.put_pos = engine:getLastPutPos()
