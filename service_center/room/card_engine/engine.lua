@@ -282,17 +282,18 @@ function engine:playCard(pos,card,antingCard,mark)
 
 		if self.__config.gangAfterTing then
 			local handleCards
-			if obj:getTing(pos) then
+			if obj:getTing() then
 				peng = nil
 				chi = nil
 				if gang then
 					if not obj:removeCard(card,3,nil,true) then
 						gang = nil
 					end
-					handleCards = utils:clone(place:getHandleCardBuild())
+					handleCards = utils:clone(obj:getHandleCardBuild())
 					for i=1,3 do
 						obj:addCard(card)
 					end
+
 					local result = self:__tingCard(handleCards)
 					--如果杠了之后还能听牌，则可以杠,否则不能杠
 					if not result then
@@ -715,6 +716,11 @@ function engine:__tingCard(handleCards)
 	return result
 end
 
+function engine:setTing(pos,card)
+	local place = self.__places[pos]
+	place:setTing(card)
+end
+
 function engine:tingCard(pos,card)
 	-- 检测是否听牌
 	local place = self.__places[pos]
@@ -810,6 +816,11 @@ function engine:huCard(pos,card,specail)
 	local obj = {type = constant.TYPE.HU,value = card,from = from}
 
 	return obj,refResult
+end
+
+function engine:getHandleCardBuild(pos)
+	local place = self.__places[pos]
+	return place:getHandleCardBuild()	
 end
 
 function engine:getHandleCardList(pos)
