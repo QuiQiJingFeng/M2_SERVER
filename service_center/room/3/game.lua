@@ -312,7 +312,7 @@ function game:checkLiangSiDaYi(pos,card)
 
 				if card_num > 0 then
 					local num = engine:getCardNum(item.user_pos,card)
-					if num <= card_num then
+					if num >= card_num then
 						return true
 					end
 				end
