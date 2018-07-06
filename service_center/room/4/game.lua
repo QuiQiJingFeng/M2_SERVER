@@ -65,11 +65,12 @@ function game:start(room,recover)
 	local random_nums = engine:getRandomNums(2)
 	
 	-- 翻一张癞根  癞子牌 + 1
-	local huiCard = engine:removeAcard()
+	local laiGen = engine:removeAcard()
+	self.laiGen = laiGen
 	if huiCard % 10 == 9 then
-		huiCard = huiCard - 8
+		huiCard = laiGen - 8
 	else
-		huiCard = huiCard + 1
+		huiCard = laiGen + 1
 	end
 
 	-- 发牌
@@ -265,6 +266,11 @@ game["PENG"] = function(self,player,data)
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 
 	self.room:broadcastAllPlayers("notice_special_event",data)
+	--如果碰的牌是赖根
+	if self.laiGen == data.card then
+		local conf = {mode = "ALL" ,score = self.base_score}
+		engine:updateScoreFromConf(obj,conf,player.user_pos)
+	end
 
 	--通知玩家出牌
 	local operator = 2
