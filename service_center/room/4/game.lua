@@ -412,9 +412,10 @@ game["HU"] = function(self,player,data)
 		--黑摸+倍
 		local export_score = 1
 		local card_num = engine:getCardNum(player.user_pos,self.huiCard) or 0
-		if card_num ~= 0 then
+		if card_num == 0 then
 			export_score = 2
 		end
+
 		-- 自摸赢每个玩家2*底分  飘+倍
 		local conf = {mode = "ALL" ,score = self.base_score * 2 * export_score,expo="piao"}
 		engine:updateScoreFromConf(obj,conf,player.user_pos)
