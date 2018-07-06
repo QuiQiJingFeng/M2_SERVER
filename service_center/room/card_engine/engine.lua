@@ -433,40 +433,46 @@ function engine:gangCard(pos,card)
 	end
 	local place = self.__places[pos]
 
-	if self.__config.gangAfterTing then
-		if self:getTing(pos) then
-			local handleCards
-			--暗杠
-			if from == self.__lastPutPos then
-				if not place:removeCard(card,4,nil,true) then
-					return false
-				end
-				handleCards = utils:clone(place:getHandleCardBuild())
-				for i=1,4 do
-					place:addCard(card)
-				end
-			else
-				if not place:removeCard(card,3,nil,true) then
-					return false
-				end
-				handleCards = utils:clone(place:getHandleCardBuild())
-				for i=1,3 do
-					place:addCard(card)
-				end
-			end
-
-			local result = self:__tingCard(handleCards)
-			--如果杠了之后还能听牌，则可以杠,否则不能杠
-			if not result then
-				return false
-			end
-		end
-	end
-
 	local gangType = place:checkGang(card)
 	if not gangType then
 		return false
 	end
+
+	if self.__config.gangAfterTing then
+		if self:getTing(pos) then
+			for i=1,1 do
+				local handleCards
+				--暗杠
+				if gangType == constant.TYPE.AN_GANG then
+					if not place:removeCard(card,4,nil,true) then
+						return false
+					end
+					handleCards = utils:clone(place:getHandleCardBuild())
+					for i=1,4 do
+						place:addCard(card)
+					end
+				elseif gangType == constant.TYPE.MING_GANG then
+					if not place:removeCard(card,3,nil,true) then
+						return false
+					end
+					handleCards = utils:clone(place:getHandleCardBuild())
+					for i=1,3 do
+						place:addCard(card)
+					end
+				elseif gangType == constant.TYPE.PENG_GANG then
+					break
+				end
+
+				local result = self:__tingCard(handleCards)
+				--如果杠了之后还能听牌，则可以杠,否则不能杠
+				if not result then
+					return false
+				end
+			end
+		end
+	end
+
+	
 	--如果可以杠
 	--在杠之前要检查其他人是否有抢杠胡
 	local stackList = {}
