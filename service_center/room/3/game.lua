@@ -841,10 +841,6 @@ function game:gameOver(player,over_type,tempResult)
 	end
 
 	room:roundOver()
-
- 	if engine:isGameEnd() then
-		room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
-	end
 end
 
 

@@ -525,11 +525,6 @@ function game:gameOver(player,over_type,operate,refResult)
 
 
 	room:roundOver()
-
-
- 	if engine:isGameEnd() then
-		room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
-	end
 end
 
 --返回房间,推送当局的游戏信息

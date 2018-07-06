@@ -216,6 +216,10 @@ function room:roundOver()
     local temp = self:getPlayerInfo("user_id","user_name","score")
 	local data = {players=cjson.encode(temp),replay_id=self.replay_id}
 	skynet.call(".mysql_pool","lua","insertTable","replay_ids",data)
+
+	if self.over_round >= self.round then
+		self:distroy(constant.DISTORY_TYPE.FINISH_GAME)
+	end
 end
 
 function room:startGame(recover)
