@@ -22,7 +22,6 @@ function room:init(data)
 	self.expire_time = data.expire_time
 	self.cur_round = data.cur_round
 
-
 	self.player_list = {}
 end
 
@@ -203,6 +202,7 @@ function room:roundOver()
 	for i,player in ipairs(self.player_list) do
 		player.is_sit = false
 	end
+	self.over_round = self.over_round + 1
     local data = {}
     data.room_id = self.room_id
     data.over_round = self.over_round

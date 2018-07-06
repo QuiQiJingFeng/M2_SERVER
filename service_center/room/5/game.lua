@@ -40,9 +40,6 @@ function game:start(room,recover)
 	-- 清空上局的数据
 	engine:clear()
 
-	-- 同步room的 over_round/cur_round=>到engine
-	engine:setOverRound(room.over_round)
-	engine:setCurRound(room.cur_round-1)
 
 	-- 同步玩家的总积分score=>engine
 	local list = self.room:getPlayerInfo("user_pos","score")
@@ -96,7 +93,7 @@ function game:start(room,recover)
 		rsp_msg.cards = deal_cards[pos]
 		rsp_msg.user_pos = pos
 		rsp_msg.random_nums = random_nums
-		rsp_msg.cur_round = engine:getCurRound()
+		rsp_msg.cur_round = self.room.cur_round
 
 		player:send({deal_card = rsp_msg})
 	end
@@ -616,8 +613,6 @@ function game:gameOver(player,over_type,tempResult)
 	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)
 
-	--更新当前已经完成的局数
-	self.room.over_round = engine:getOverRound()
 	-- 更新下明杠暗杠以及胡牌的计数
 	for _,obj in ipairs(players) do
 		obj.an_gang_num = engine:getTotalAnGangNum(obj.user_pos)
