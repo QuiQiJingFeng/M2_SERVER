@@ -289,11 +289,12 @@ function room:distroy(type)
 
     	self:broadcastAllPlayers("notice_total_sattle",rsp_msg)
     end
-    --通知房间被销毁
-    skynet.call(".agent_manager","lua","distroyRoom")
-    
+
     self:broadcastAllPlayers("notice_player_distroy_room",{room_id=self.room_id,type=type})
     room.player_list = {}
+
+    --通知房间被销毁
+    skynet.send(".agent_manager","lua","distroyRoom")
 end
 
 function room:getSitNums()
