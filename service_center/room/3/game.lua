@@ -305,7 +305,7 @@ function game:checkLiangSiDaYi(pos,card)
 						card_num = card_num + 1
 					end
 				end
-				return card_num > 0
+				return card_num > 0 and card_num or false
 			end
 		end
 	end
@@ -322,12 +322,11 @@ game["PLAY_CARD"] = function(self,player,data)
 		return "paramater_error" 
 	end
 
-
+	local all_num = engine:getCardNum(user_pos,data.card)
 	local card_in_liangsidayi = false
-	-- 亮四打一 不能出那四张牌 
-	if self:checkLiangSiDaYi(user_pos,data.card) then
-		card_in_liangsidayi = true
- 
+	-- 亮四打一 不能出那四张牌
+	local in_num = self:checkLiangSiDaYi(user_pos,data.card)
+	if in_num then
 			local can_play = false
 			for _,item in ipairs(self.four_card_list) do
 				if item.user_pos == user_pos then
@@ -344,10 +343,13 @@ game["PLAY_CARD"] = function(self,player,data)
 					end 
 				end
  			end
+ 			card_in_liangsidayi = can_play
 			if not can_play then
-				return "invaild_operator"
+				--如果该亮四打一的牌不能出,那么检查手牌是否能出,如果能,则出手牌
+				if not(all_num > in_num) then
+					return "invaild_operator"
+				end
 			end
-		
 	end
 
 	local stack_list = engine:playCard(user_pos,data.card,nil,data.card > 40)
