@@ -263,6 +263,8 @@ game["TING_CARD"] = function(self,player,data)
 		return "invaild_operator"
 	end
 
+	self.waite_operators[user_pos] = nil
+
 	local result,stack_list, obj = engine:tingCard(user_pos,data.card)
 	if not result then
 		return "invaild_operator"

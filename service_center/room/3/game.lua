@@ -415,7 +415,7 @@ game["TING_CARD"] = function(self,player,data)
 		end
 	end
 
-
+	self.waite_operators[user_pos] = nil
 
 	-- 如果当前已经是听牌状态了
 	if engine:getTing(user_pos) then
