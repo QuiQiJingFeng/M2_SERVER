@@ -406,7 +406,7 @@ game["TING_CARD"] = function(self,player,data)
 	if not data.card then 
 		return "paramater_error" 
 	end
-
+	local all_num = engine:getCardNum(user_pos,data.card)
 	local in_num = self:checkLiangSiDaYi(user_pos,data.card)
 	if in_num then
 		--如果该亮四打一的牌不能出,那么检查手牌是否能出,如果能,则听手牌
