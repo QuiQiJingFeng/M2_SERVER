@@ -399,13 +399,6 @@ game["GANG"] = function(self,player,data,isGuo)
 		self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 	end
 	
-	local list = engine:getRecentDeltScore()
-	local data = self.room:getPlayerInfo("user_id","user_pos")
-	for idx,info in ipairs(data) do
-		data[idx].delt_score = list[info.user_pos]
-	end
-
-	self.room:broadcastAllPlayers("refresh_player_cur_score",{cur_score_list=data})
 	if not stack_list then
 		stack_list = {}
 	end
