@@ -531,8 +531,17 @@ game["HU"] = function(self,player,data)
 	else
 		data.winner_type = constant["WINNER_TYPE"].DIAN_PAO
 	end
+	-- 更新下明杠暗杠以及胡牌的计数
+	for _,obj in ipairs(players) do
+		obj.an_gang_num = engine:getTotalAnGangNum(obj.user_pos)
+		obj.ming_gang_num = engine:getTotalMingGangNum(obj.user_pos)
+		obj.hu_num = engine:getTotalHuNum(obj.user_pos)
+	end
+	
+	--回合结束
+	room:roundOver()
 
-	data.last_round = engine:isGameEnd()
+	data.last_round = self.room.over_round >= self.room.round
 
 	self.room:broadcastAllPlayers("notice_game_over",data)
 
@@ -607,21 +616,15 @@ function game:gameOver(player,over_type,tempResult)
 		end
 		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
-		data.last_round = engine:isGameEnd()
+		data.last_round = self.room.over_round >= self.room.round
 		self.room:broadcastAllPlayers("notice_game_over",data)
 	end
 	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)
 
-	-- 更新下明杠暗杠以及胡牌的计数
-	for _,obj in ipairs(players) do
-		obj.an_gang_num = engine:getTotalAnGangNum(obj.user_pos)
-		obj.ming_gang_num = engine:getTotalMingGangNum(obj.user_pos)
-		obj.hu_num = engine:getTotalHuNum(obj.user_pos)
+	if self.room.over_round >= self.room.round then
+		self.room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
 	end
-
-
-	room:roundOver()
 end
 
 
