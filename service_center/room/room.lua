@@ -236,6 +236,8 @@ function room:startGame(recover)
         data.room_id = self.room_id
 	    data.expire_time = self.expire_time
 	    data.state = self.state
+	    data.over_round = self.over_round
+		data.cur_round = self.cur_round
 	    data.begin_time = 'NOW()'
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 	end

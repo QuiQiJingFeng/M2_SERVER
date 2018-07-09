@@ -91,10 +91,10 @@ function CMD.back_room(content)
             end
         end
         if num >= room.seat_num then
+            room.cur_round = room.over_round
             --开始游戏
             room:startGame(true)
             room:updatePlayersToDb()
-            
             room:userReconnect(player)
             room.game:back_room(user_id)
         else
