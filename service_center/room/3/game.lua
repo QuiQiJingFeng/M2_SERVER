@@ -99,7 +99,7 @@ function game:start(room,recover)
 	--等待玩家操作的列表
 	self.waite_operators = {}
 	self.stack_list = {}
-
+	self.all_pao = nil
 	-- 第n次开杠、补花
 	self.gang_hua = 0
 
