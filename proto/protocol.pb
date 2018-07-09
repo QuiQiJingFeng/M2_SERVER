@@ -73,7 +73,7 @@ cCardValue"
 Result
 success
 	auth_fail
-§;
+¡<
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -365,7 +365,7 @@ begin_time (	R	beginTime"
 NoticeYingKou
 user_pos (RuserPos
 card (Rcard"
-	NoticePao*‹
+	NoticePao*…
 Result
 success
 paramater_error
@@ -387,7 +387,13 @@ auth_faild
 no_support_command
 no_permission_distroy
 current_in_room
-no_position*5
+no_position
+operator_error
+in_four_cardlist
+already_ting_card
+	must_zimo
+can_not_hui_card
+not_allow_ting*5
 GangType
 AN_GANG
 	MING_GANG

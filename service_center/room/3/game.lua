@@ -347,14 +347,14 @@ game["PLAY_CARD"] = function(self,player,data)
 			if not can_play then
 				--如果该亮四打一的牌不能出,那么检查手牌是否能出,如果能,则出手牌
 				if not(all_num > in_num) then
-					return "invaild_operator"
+					return "in_four_cardlist"
 				end
 			end
 	end
 
 	local stack_list = engine:playCard(user_pos,data.card,nil,data.card > 40)
 	if not stack_list then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	
 
@@ -411,7 +411,7 @@ game["TING_CARD"] = function(self,player,data)
 	if in_num then
 		--如果该亮四打一的牌不能出,那么检查手牌是否能出,如果能,则听手牌
 		if not(all_num > in_num) then
-			return "invaild_operator"
+			return "in_four_cardlist"
 		end
 	end
 
@@ -419,18 +419,14 @@ game["TING_CARD"] = function(self,player,data)
 
 	-- 如果当前已经是听牌状态了
 	if engine:getTing(user_pos) then
-		return "invaild_operator"
+		return "already_ting_card"
 	end
 
 	local result,stack_list,obj = engine:tingCard(user_pos,data.card)
 	if not result then
-		return "invaild_operator"
+		return "operator_error"
 	end
 
-	local card = data.card
-	if engine:isAnTing() then
-		card = 99
-	end
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 	self.room:broadcastAllPlayers("notice_special_event",data)
 	if not stack_list then
@@ -465,7 +461,7 @@ game["PENG"] = function(self,player,data)
 
 	local obj = engine:pengCard(player.user_pos)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	-- 检测该牌是否属于亮四打一
 	local liangsi = self:checkLiangSiDaYi(player.user_pos,obj.value)
@@ -510,7 +506,7 @@ game["GANG"] = function(self,player,data,isGuo)
 	end
 	local obj,stack_list = engine:gangCard(player.user_pos,card)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	if isGuo then
 		engine:updateConfig({qiangGangHu=true})
@@ -610,7 +606,7 @@ game["YING_KOU"] = function(self,player,data)
 	
 	local obj = engine:checkHuCard(player.user_pos)
 	if not obj then
-		return "invailid_operator"
+		return "operator_error"
 	end
 	engine:setRecordData(player.user_pos,"yingkou",true)
 	--通知所有人,有人硬扣
@@ -668,13 +664,13 @@ game["HU"] = function(self,player,data)
 	if yingkou then
 		local num = engine:getHandleCardList(pos)
 		if(num %3 ~= 2) then
-			return "invailid_operator"
+			return "must_zimo"
 		end
 	end
 
 	local obj,refResult = engine:huCard(player.user_pos,card)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	
 

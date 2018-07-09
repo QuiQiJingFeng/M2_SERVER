@@ -216,7 +216,7 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	local stack_list = engine:playCard(user_pos,data.card)
 	if not stack_list then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	
 	self.waite_operators[user_pos] = nil
@@ -248,7 +248,7 @@ end
 game["TING_CARD"] = function(self,player,data)
 	local user_pos = player.user_pos
 	if not self.ting_card then
-		return "invaild_operator" 
+		return "not_allow_ting" 
 	end
 
 	if not self:check_operator(user_pos,"PLAY_CARD") then 
@@ -260,14 +260,14 @@ game["TING_CARD"] = function(self,player,data)
  
 	-- 如果当前已经是听牌状态了
 	if engine:getTing(user_pos) then
-		return "invaild_operator"
+		return "already_ting_card"
 	end
 
 	self.waite_operators[user_pos] = nil
 
 	local result,stack_list, obj = engine:tingCard(user_pos,data.card)
 	if not result then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	-- 回放的时候需要删除牌, 把真实牌值传给前段使用
 	local dataMsg = {user_id = player.user_id, user_pos = player.user_pos}
@@ -318,7 +318,7 @@ game["PENG"] = function(self,player,data)
 
 	local obj = engine:pengCard(player.user_pos)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
  
 	--通知所有人,有人碰了
@@ -347,7 +347,7 @@ game["GANG"] = function(self,player,data,isGuo)
 	end
 	local obj,stack_list = engine:gangCard(player.user_pos,card)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	if isGuo then
 		engine:updateConfig({qiangGangHu=true})
@@ -471,7 +471,7 @@ game["HU"] = function(self,player,data)
 
 	local obj,refResult = engine:huCard(player.user_pos,card)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	
 

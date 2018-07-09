@@ -201,7 +201,7 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	local stack_list = engine:playCard(user_pos,data.card)
 	if not stack_list then
-		return "invaild_operator"
+		return "operator_error"
 	end
 
 	self.waite_operators[user_pos] = nil
@@ -242,7 +242,7 @@ game["PENG"] = function(self,player,data)
 	
 	local obj = engine:pengCard(player.user_pos)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 
 	--通知所有人,有人碰了
@@ -270,7 +270,7 @@ game["GANG"] = function(self,player,data,isGuo)
 	end
 	local obj,stack_list = engine:gangCard(player.user_pos,card)
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 	if isGuo then
 		engine:updateConfig({qiangGangHu=true})
@@ -374,7 +374,7 @@ game["HU"] = function(self,player,data)
 	local obj,refResult = engine:huCard(player.user_pos,card)
 
 	if not obj then
-		return "invaild_operator"
+		return "operator_error"
 	end
 
 	--通知所有人,有人胡了
