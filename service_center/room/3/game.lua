@@ -167,7 +167,7 @@ game["PAO"] = function(self,player,data)
 	self.waite_operators[user_pos] = {}
 	-- 下跑
 	local pao_num = data.pao_num == 1
-	engine:setRecordData(user_pos,"pao_num",pao_num)
+	engine:setRecordData(user_pos,"pao_num",pao_num and 1 or 0)
 	if not self.all_pao then
 		self.all_pao = 1
 	else
