@@ -837,6 +837,8 @@ function game:gameOver(player,over_type,tempResult)
 		end
 		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
+		--回合结束
+		room:roundOver()
 		data.last_round = self.room.over_round >= self.room.round
 		self.room:broadcastAllPlayers("notice_game_over",data)
 	end
