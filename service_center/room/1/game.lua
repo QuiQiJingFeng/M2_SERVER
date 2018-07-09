@@ -446,7 +446,7 @@ game["HU"] = function(self,player,data)
 	else
 		data.winner_type = constant["WINNER_TYPE"].QIANG_GANG
 	end
-
+	local players = room.player_list
 	-- 更新下明杠暗杠以及胡牌的计数
 	for _,obj in ipairs(players) do
 		obj.an_gang_num = engine:getTotalAnGangNum(obj.user_pos)
