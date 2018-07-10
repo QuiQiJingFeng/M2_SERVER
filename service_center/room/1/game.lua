@@ -34,6 +34,7 @@ function game:start(room,recover)
 
 	if room.cur_round == 1 or recover then
 		engine:init(room.seat_num,room.round)
+		engine:initCtrl(room)
 	end
 	-- 清空上局的数据
 	engine:clear()
@@ -588,41 +589,41 @@ function game:back_room(user_id)
 	return "success"
 end
 
---结算大赢家
-function game:distroy()
-	local players = self.room.player_list
-	local over_round = self.room.over_round
-	local round = self.room.round
-	-- 大赢家金币结算
-	if over_round >= 1 then
-		local pay_type = self.pay_type
-		--赢家出资 积分高的掏钱
-		if pay_type == PAY_TYPE.WINNER_COST then
-			-- 积分从高到低排序
-			table.sort(players,function(a,b) 
-					return a.score > b.score
-				end)
+-- --结算大赢家
+-- function game:distroy()
+-- 	local players = self.room.player_list
+-- 	local over_round = self.room.over_round
+-- 	local round = self.room.round
+-- 	-- 大赢家金币结算
+-- 	if over_round >= 1 then
+-- 		local pay_type = self.pay_type
+-- 		--赢家出资 积分高的掏钱
+-- 		if pay_type == PAY_TYPE.WINNER_COST then
+-- 			-- 积分从高到低排序
+-- 			table.sort(players,function(a,b) 
+-- 					return a.score > b.score
+-- 				end)
 
-			local max_score = players[1].score
-			--大赢家列表
-			local winners = {}
-			for i,obj in ipairs(players) do
-				if obj.score >= max_score then
-					table.insert(winners,obj)
-				end
-			end
-			local gold_list = { }
-			local per_cost = math.floor(cost/#winners)
-			for _,obj in ipairs(winners) do
+-- 			local max_score = players[1].score
+-- 			--大赢家列表
+-- 			local winners = {}
+-- 			for i,obj in ipairs(players) do
+-- 				if obj.score >= max_score then
+-- 					table.insert(winners,obj)
+-- 				end
+-- 			end
+-- 			local gold_list = { }
+-- 			local per_cost = math.floor(cost/#winners)
+-- 			for _,obj in ipairs(winners) do
 
-			    skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
-				obj.gold_num = obj.gold_num -1*per_cost
-				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=obj.gold_num}
-				table.insert(gold_list,info)
-			end
-			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
-		end
-	end
-end
+-- 			    skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
+-- 				obj.gold_num = obj.gold_num -1*per_cost
+-- 				local info = {user_id=obj.user_id,user_pos=obj.user_pos,gold_num=obj.gold_num}
+-- 				table.insert(gold_list,info)
+-- 			end
+-- 			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+-- 		end
+-- 	end
+-- end
 
 return game

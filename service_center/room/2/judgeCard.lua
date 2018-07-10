@@ -116,15 +116,15 @@ function JudgeCard:JudgeCardShape( arg_card,  arg_num, arg_value)
 	    if i == 17 then 
 	        while i < 21 and card[i] and card[i] ~= -1 and card[i] ~= 0 do 
 	            if card[i] == card[i-1]  then 
-	                statu = statu | (3 << (i+1 - 17)*2)
+	                more_statu = more_statu | (3 << (i+1 - 17)*2)
 	                -- more_statu = bit:_or(statu, bit:_lshift(3, (i+1 - 17)*2))
 	                temp_count = temp_count + 1
 	            elseif card[i] + 1 == card[i-1] then 
-	                statu = statu | (2 << (i+1 - 17)*2)
+	                more_statu = more_statu | (2 << (i+1 - 17)*2)
 	                -- more_statu = bit:_or(statu, bit:_lshift(2, (i+1 - 17)*2))
 	                temp_count = 1
 	            else 
-	            	statu = statu | (1 << (i+1 - 17)*2)
+	            	more_statu = more_statu | (1 << (i+1 - 17)*2)
 	                -- more_statu = bit:_or(statu, bit:_lshift(1, (i+1 - 17)*2))
 	                temp_count = 1
 	            end 
@@ -142,7 +142,7 @@ function JudgeCard:JudgeCardShape( arg_card,  arg_num, arg_value)
 	if more_statu ~= 0 then
 		-- more 先不管
 		local ret = self:MoreCard(statu, more_statu, arg_value)
-        if ret == -1 then 
+        if ret ~= -1 then 
             arg_value = 0
             return ret ,arg_value
         end 
@@ -235,7 +235,7 @@ end
 
 
 function JudgeCard:MoreCard(arg_low, arg_high, arg_value)
-
+	print("arg_low, arg_high, arg_value= ", arg_low, arg_high, arg_value)
     if  arg_high == 1004  then 
         if arg_low == 4022202093 then 
             return JudgeCard.TYPE_PLANE_FOUR_WING_TWO, arg_value 
@@ -475,6 +475,10 @@ function JudgeCard:MoreCard(arg_low, arg_high, arg_value)
         if arg_low == 3204181949 then 
             return JudgeCard.TYPE_TRIAD_SEQUENCE_SIX,arg_value
         end 
+    elseif arg_high == 340 then 
+    	if arg_low == -1090785347 then
+    		return JudgeCard.TYPE_TRIAD_SEQUENCE_FIVE,arg_value
+    	end 
     end 
 end
 
