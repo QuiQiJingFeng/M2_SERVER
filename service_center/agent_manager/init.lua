@@ -98,7 +98,7 @@ function SOCKET.open(fd, addr)
     info.state = SECRET_STATE.WAIT_CLIENT_KEY
     info.challenge = crypt.randomkey()
     info.serverkey = crypt.randomkey()
-    info.ip = string.match(addr, "([%d.]+):")
+    info.ip = string.match(addr, "(.-):")
 
     local req_msg = {}
     req_msg["v1"] = crypt.base64encode(info.challenge)
