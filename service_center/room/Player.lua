@@ -30,10 +30,10 @@ function Player:init(info)
 	self.gold_num = info.gold_num	           --玩家的金币数量
 	self.user_pos = info.user_pos
 	self.is_sit = info.is_sit
-    self.hu_num = 0
-    self.ming_gang_num = 0
-    self.an_gang_num = 0
-    self.reward_num = 0
+    self.hu_num = info.hu_num or 0
+    self.ming_gang_num = info.ming_gang_num or 0
+    self.an_gang_num = info.an_gang_num or 0
+    self.reward_num = info.reward_num or 0
     self.disconnect = false
     self.put_cards = {}
 end

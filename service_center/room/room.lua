@@ -23,7 +23,6 @@ function room:init(data)
 	self.expire_time = data.expire_time
 	self.cur_round = data.cur_round
 
-
 	self.player_list = {}
 end
 
@@ -204,6 +203,7 @@ function room:roundOver()
 	for i,player in ipairs(self.player_list) do
 		player.is_sit = false
 	end
+	self.over_round = self.over_round + 1
     local data = {}
     data.room_id = self.room_id
     data.over_round = self.over_round
@@ -233,6 +233,8 @@ function room:startGame(recover)
         data.room_id = self.room_id
 	    data.expire_time = self.expire_time
 	    data.state = self.state
+	    data.over_round = self.over_round
+		data.cur_round = self.cur_round
 	    data.begin_time = 'NOW()'
 	    skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 	end
@@ -290,11 +292,12 @@ function room:distroy(type)
 
     	self:broadcastAllPlayers("notice_total_sattle",rsp_msg)
     end
-    --通知房间被销毁
-    skynet.call(".agent_manager","lua","distroyRoom")
-    
+
     self:broadcastAllPlayers("notice_player_distroy_room",{room_id=self.room_id,type=type})
     room.player_list = {}
+
+    --通知房间被销毁
+    skynet.send(".agent_manager","lua","distroyRoom")
 end
 
 function room:getSitNums()

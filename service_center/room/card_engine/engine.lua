@@ -282,17 +282,18 @@ function engine:playCard(pos,card,antingCard,mark)
 
 		if self.__config.gangAfterTing then
 			local handleCards
-			if obj:getTing(pos) then
+			if obj:getTing() then
 				peng = nil
 				chi = nil
 				if gang then
 					if not obj:removeCard(card,3,nil,true) then
 						gang = nil
 					end
-					handleCards = utils:clone(place:getHandleCardBuild())
+					handleCards = utils:clone(obj:getHandleCardBuild())
 					for i=1,3 do
 						obj:addCard(card)
 					end
+
 					local result = self:__tingCard(handleCards)
 					--如果杠了之后还能听牌，则可以杠,否则不能杠
 					if not result then
@@ -433,40 +434,46 @@ function engine:gangCard(pos,card)
 	end
 	local place = self.__places[pos]
 
-	if self.__config.gangAfterTing then
-		if self:getTing(pos) then
-			local handleCards
-			--暗杠
-			if from == self.__lastPutPos then
-				if not place:removeCard(card,4,nil,true) then
-					return false
-				end
-				handleCards = utils:clone(place:getHandleCardBuild())
-				for i=1,4 do
-					place:addCard(card)
-				end
-			else
-				if not place:removeCard(card,3,nil,true) then
-					return false
-				end
-				handleCards = utils:clone(place:getHandleCardBuild())
-				for i=1,3 do
-					place:addCard(card)
-				end
-			end
-
-			local result = self:__tingCard(handleCards)
-			--如果杠了之后还能听牌，则可以杠,否则不能杠
-			if not result then
-				return false
-			end
-		end
-	end
-
 	local gangType = place:checkGang(card)
 	if not gangType then
 		return false
 	end
+
+	if self.__config.gangAfterTing then
+		if self:getTing(pos) then
+			for i=1,1 do
+				local handleCards
+				--暗杠
+				if gangType == constant.TYPE.AN_GANG then
+					if not place:removeCard(card,4,nil,true) then
+						return false
+					end
+					handleCards = utils:clone(place:getHandleCardBuild())
+					for i=1,4 do
+						place:addCard(card)
+					end
+				elseif gangType == constant.TYPE.MING_GANG then
+					if not place:removeCard(card,3,nil,true) then
+						return false
+					end
+					handleCards = utils:clone(place:getHandleCardBuild())
+					for i=1,3 do
+						place:addCard(card)
+					end
+				elseif gangType == constant.TYPE.PENG_GANG then
+					break
+				end
+
+				local result = self:__tingCard(handleCards)
+				--如果杠了之后还能听牌，则可以杠,否则不能杠
+				if not result then
+					return false
+				end
+			end
+		end
+	end
+
+	
 	--如果可以杠
 	--在杠之前要检查其他人是否有抢杠胡
 	local stackList = {}
@@ -709,6 +716,11 @@ function engine:__tingCard(handleCards)
 	return result
 end
 
+function engine:setTing(pos,card)
+	local place = self.__places[pos]
+	place:setTing(card)
+end
+
 function engine:tingCard(pos,card)
 	-- 检测是否听牌
 	local place = self.__places[pos]
@@ -804,6 +816,11 @@ function engine:huCard(pos,card,specail)
 	local obj = {type = constant.TYPE.HU,value = card,from = from}
 
 	return obj,refResult
+end
+
+function engine:getHandleCardBuild(pos)
+	local place = self.__places[pos]
+	return place:getHandleCardBuild()	
 end
 
 function engine:getHandleCardList(pos)
@@ -974,6 +991,8 @@ function engine:getAllCardType()
 		[46] = "🀣",   --兰
 		[47] = "🀤",   --竹
 		[48] = "🀥",   --菊
+
+
 		[49] = "🀪"    --百搭
 	}
 	return allCardType
