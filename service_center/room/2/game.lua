@@ -185,7 +185,7 @@ end
 function game:demandPointServer( )
 	-- local iRoundIndex = self.room.cur_round
 	self.iCurDemandPlayer = math.floor(math.random(100) % 3 ) + 1
-	local data = { userExtra = self.iCurDemandPlayer, userNowDemand = self.iMaxPoint};
+	local data = { userExtra = self.iCurDemandPlayer, userNowDemand = self.iMaxPoint, userPoint = self.iDemandPoint,};
 
 	-- dump(data, "SERVER_POINT_DEMAND:data")
 	for k,v in pairs(data) do
@@ -259,6 +259,7 @@ game["DEMAND"] = function(self, player, data)
 	local NPDmsg = {
 		userExtra = player.user_pos,
 		userDemand = data.demandPoint,
+		nowTableTime = self.iRoomTime,
 	}
 
 	-- 通知玩家叫或者不叫
@@ -272,7 +273,7 @@ game["DEMAND"] = function(self, player, data)
 		self.iMainPlayer = pos  -- 这个人就是地主
 		self.iCurPlayExtraNum = self.iMainPlayer
 
-		local data = {userExtra = self.iMainPlayer, baseCard = {}}
+		local data = {userExtra = self.iMainPlayer, baseCard = {}, nowTableTime = self.iRoomTime,}
 		local baseCard = self:getBaseCard()
 		-- local player = self.room:getPlayerByPos(tempExtra)
 		-- for i, v in pairs(baseCard) do 
@@ -327,7 +328,7 @@ game["DEMAND"] = function(self, player, data)
 					self.iMainPlayer = self.iFirstDemand  -- 这个人就是地主
 					self.iCurPlayExtraNum = self.iMainPlayer
 										
-					local data = {userExtra = self.iMainPlayer, baseCard = {}}
+					local data = {userExtra = self.iMainPlayer, baseCard = {}, nowTableTime = self.iRoomTime,}
 					local baseCard = self:getBaseCard()
 					local player = self.room:getPlayerByPos(tempExtra)
 					for i, v in pairs(baseCard) do 
@@ -367,7 +368,7 @@ game["DEMAND"] = function(self, player, data)
 					self.iMainPlayer = tempExtra  -- 这个人就是地主
 					self.iCurPlayExtraNum = self.iMainPlayer
 
-					local data = {userExtra = self.iMainPlayer, baseCard = {}}
+					local data = {userExtra = self.iMainPlayer, baseCard = {}, nowTableTime = self.iRoomTime,}
 					local baseCard = self:getBaseCard()
 					local player = self.room:getPlayerByPos(tempExtra)
 					for i, v in pairs(baseCard) do 
@@ -387,7 +388,7 @@ game["DEMAND"] = function(self, player, data)
 
 				self.iRoomTime = self.iMaxPoint
 
-				local data = {userExtra = self.iMainPlayer, baseCard = {}}
+				local data = {userExtra = self.iMainPlayer, baseCard = {}, nowTableTime = self.iRoomTime,}
 				local baseCard = self:getBaseCard()
 
 				local player = self.room:getPlayerByPos(tempExtra)
@@ -405,7 +406,7 @@ game["DEMAND"] = function(self, player, data)
 
 				-- 欢乐斗地主，继续叫分
 				if self.bHuanLe == true then
-					local data = { userExtra = self.iFirstDemand, userNowDemand = self.iMaxPoint};
+					local data = { userExtra = self.iFirstDemand, userNowDemand = self.iMaxPoint, userPoint = self.iDemandPoint,};
 					self.room:broadcastAllPlayers("ServerPointDemand", data)
 				else
 					-- 谁的分数最大， 谁就是地主
@@ -419,7 +420,7 @@ game["DEMAND"] = function(self, player, data)
 
 					self.iMainPlayer = iTempPos -- 这个人就是地主
 					self.iCurPlayExtraNum = self.iMainPlayer
-					local data = {userExtra = self.iMainPlayer, baseCard = {}}
+					local data = {userExtra = self.iMainPlayer, baseCard = {}, nowTableTime = self.iRoomTime,}
 					local baseCard = self:getBaseCard()
 
 					local player = self.room:getPlayerByPos(iTempPos)
@@ -724,10 +725,8 @@ game["PLAY_CARD"] = function(self,player,data)
 
 	-- 剩余牌数， 给前端显示用
 	msgNotice.cLestCardNum = iCardLeft
-
+	msgNotice.nowTableTime = self.iRoomTime
 	self.room:broadcastAllPlayers("NoticeSendCard", msgNotice)
-
-
 	print("iTableNumExtra == ", iTableNumExtra)
 
 	-- 扔在自己出牌的数组里面
@@ -770,7 +769,7 @@ game["PLAY_CARD"] = function(self,player,data)
 				if i ~= iTableNumExtra then
 					local player = self.room:getPlayerByPos(i)
 					for j = 1, 20 do 
-						if player.handle_cards[j] ~= 0 then
+						if player.handle_cards[j] and player.handle_cards[j] ~= 0 then
 							iTempCardNum[iPlayer] = iTempCardNum[iPlayer] + 1
 						end
 					end
@@ -841,16 +840,23 @@ game["PLAY_CARD"] = function(self,player,data)
 		resultMsg.bIfSpring = bIfSpring
 		resultMsg.iTime = self.iRoomTime
 		resultMsg.iBoomNums = self.iNowBoom
+		resultMsg.nowTableTime = self.iRoomTime
 
 		print("resultMsg", cjson.encode(resultMsg))
 
 		-- 通知玩家游戏结束了
 		self.room:broadcastAllPlayers("NoticeDDZGameOver", resultMsg)
 		-- 刷新玩家状态并且记录复盘文件
+		self.room.over_round = self.room.over_round + 1
 		self.room:roundOver()
+		-- self.room.over_round = self.room
+		if self.room.cur_round >= self.room.round then
+			-- 给前段发送结算消息
+			self.room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
+			return "success"
+		end
 		-- 刷新玩家信息
 		self.room:refreshRoomInfo()
-
 		return "success"
 	else   -- 通知下个人出牌
 		local iJudgeCard = iTableNumExtra + 1
@@ -870,13 +876,35 @@ end
 --返回房间,推送当局的游戏信息
 function game:back_room(user_id)
 	local player = self.room:getPlayerByUserId(user_id)
-	local room_setting = self.room:getPropertys("game_type","round","pay_type","seat_num","is_friend_room","is_open_voice","is_open_gps","other_setting","cur_round")
-	local players_info = self.room:getPlayerInfo("user_id","user_name","user_pic","user_ip","user_pos","is_sit","score","card_stack","gold_num","disconnect")
+	local refresh_room_info = self.room:getRoomInfo()
 	local rsp_msg = {}
-	rsp_msg.room_setting = room_setting
-	rsp_msg.card_list = player.card_list
-	rsp_msg.players = players_info
-	rsp_msg.operator = self.waite_operators[player.user_pos]
+	rsp_msg.refresh_room_info = refresh_room_info
+	rsp_msg.card_list = player.handle_cards
+	-- 当前要操作的人
+	rsp_msg.operator = self.iCurPlayExtraNum
+	-- 最后一首出牌的人，如果中间有间隔人的话就是过
+	rsp_msg.cur_play_pos = self.iTablePlayer
+	rsp_msg.zpos = self.iMainPlayer
+
+
+	print("refresh_room_info", cjson.encode(refresh_room_info))
+
+	local cardNums = {0, 0, 0}
+	for i, v in pairs(refresh_room_info.players) do
+		for j = 1, 20 do 
+			if v.handle_cards[j] and v.handle_cards[j] ~= 0 then
+				cardNums[v.user_pos] = cardNums[v.user_pos] + 1
+			end
+		end
+	end
+
+	rsp_msg.cur_table_cards = self.cSendCards
+	rsp_msg.cur_table_Demand = self.iDemandPoint
+	rsp_msg.cur_table_bDouble = self.bDoubleTime
+	rsp_msg.cur_table_time = self.iRoomTime
+	rsp_msg.cur_last_CardNums = cardNums
+	rsp_msg.cBaseCards = self.baseCard
+
 	player:send({push_all_room_info = rsp_msg})
 
 	return "success"
