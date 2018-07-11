@@ -319,9 +319,7 @@ function CMD.confirm_distroy_room(content)
         --当前玩家的数量
         local player_num = 0
         for i,player in ipairs(players) do
-            if not player.disconnect then
-                player_num = player_num + 1
-            end
+            player_num = player_num + 1
         end
         local num = 0
         for k,v in pairs(confirm_map) do
