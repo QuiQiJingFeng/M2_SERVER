@@ -34,7 +34,6 @@ function game:start(room,recover)
 
 	if room.cur_round == 1 or recover then
 		engine:init(room.seat_num,room.round)
-		engine:initCtrl(room)
 	end
 	-- 清空上局的数据
 	engine:clear()
