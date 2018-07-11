@@ -259,7 +259,7 @@ function CMD.distroy_room(content)
         room.confirm_map = room.confirm_map or {}
         local confirm_map = room.confirm_map
         for i,obj in ipairs(players) do
-            confirm_map[obj.user_id] = nil
+            confirm_map[obj.user_id] = false
         end
         confirm_map[user_id] = true
         
