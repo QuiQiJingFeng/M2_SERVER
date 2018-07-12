@@ -91,7 +91,7 @@ fast_index (	R	fastIndex"F
 GPItem
 value (Rvalue
 from (Rfrom
-type (Rtype"”
+type (Rtype"¦
 UserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -105,7 +105,8 @@ fast_index (	R	fastIndex"F
 
 disconnect
  (R
-disconnect" 
+disconnect
+sex (Rsex" 
 RoomSetting
 	game_type (RgameType
 round (Rround
@@ -159,7 +160,7 @@ expireTime
 GetMyRoomListRsp(
 result (2.msg.user.ResultRresult/
 	room_list (2.msg.user.RoomItemRroomList
-room_id (RroomId"ï
+room_id (RroomId"Ý
 PushUserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -167,8 +168,7 @@ expireTime
 user_ip (	RuserIp
 gold_num (RgoldNum/
 	room_list (2.msg.user.RoomItemRroomList
-room_id (RroomId
-sex (Rsex"@
+room_id (RroomId"@
 UpdateRoomState
 room_id (RroomId
 state (Rstate"Å
