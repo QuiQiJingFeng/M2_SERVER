@@ -55,6 +55,8 @@ CREATE TABLE user_info
     today_rebate    float,                  -- 成为下级代理之后的总充值
     reduce_rebate   float,                  -- 剩余可提现的返利
     bind_time       datetime,               -- 成为下级代理的时间
+    sex             int(1),                 -- 性别 男为1
+    adress          varchar(255),           -- 地址
     primary key(user_id)
 );
 

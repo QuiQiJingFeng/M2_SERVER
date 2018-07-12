@@ -34,6 +34,7 @@ function Player:init(info)
     self.ming_gang_num = info.ming_gang_num or 0
     self.an_gang_num = info.an_gang_num or 0
     self.reward_num = info.reward_num or 0
+    self.sex = info.sex or 0
     self.disconnect = false
     self.put_cards = {}
 end

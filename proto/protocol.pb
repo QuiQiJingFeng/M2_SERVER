@@ -10,16 +10,17 @@ msg.common"
 Result
 success
 fail
-ï
+€
+
 msg/ddz.protomsg.ddz"0
 ReqPointDemand
 
 userDemand (R
 userDemand"_
 ReqSendCard
-nowType (RnowType
-nowValue (RnowValue
-cardList (RcardList"u
+nowType (RnowType
+nowValue (RnowValue
+cardList (RcardList"u
 ServerPointDemand
 	userExtra (R	userExtra$
 userNowDemand (RuserNowDemand
@@ -27,38 +28,42 @@ userDemand"_
 ServerSendCard
 	userExtra (R	userExtra
 userCard (RuserCard 
-userCardNum (RuserCardNum"Q
+userCardNum (RuserCardNum"u
 NoticePointDemand
 	userExtra (R	userExtra
 
 userDemand (R
-userDemand"j
+userDemand"
+nowTableTime (RnowTableTime"Ž
 NoticeMainPlayer
 	userExtra (R	userExtra
 baseCard (RbaseCard
-	iRoomTime (R	iRoomTime"Š
+	iRoomTime (R	iRoomTime"
+nowTableTime (RnowTableTime"Š
 Item
 user_id (	RuserId
 user_pos (RuserPos
 	cur_score (RcurScore
 score (Rscore
-	card_list (RcardList"É
-NoticeDDZGameOver
-	over_type (RoverType'
-players (2.msg.ddz.ItemRplayers
-	bIfSpring (R	bIfSpring
-iTime (RiTime
-	iBoomNums (R	iBoomNums
-	iLastCard (R	iLastCard"Ä
-NoticeSendCard
-	userExtra (R	userExtra
-cCardNum (RcCardNum
-	cCardType (R	cCardType
+	card_list (RcardList"í
+NoticeDDZGameOver"
+nowTableTime (RnowTableTime
+	over_type (RoverType'
+players (2.msg.ddz.ItemRplayers
+	bIfSpring (R	bIfSpring
+iTime (RiTime
+	iBoomNums (R	iBoomNums
+	iLastCard (R	iLastCard"è
+NoticeSendCard"
+nowTableTime (RnowTableTime
+	userExtra (R	userExtra
+cCardNum (RcCardNum
+	cCardType (R	cCardType
 
-cCardValue (R
+cCardValue (R
 cCardValue"
-cLestCardNum (RcLestCardNum
-cCards (RcCards
+cLestCardNum (RcLestCardNum
+cCards (RcCards
 Ü
 msg/login.proto	msg.login"9
 LoginReq
@@ -73,7 +78,7 @@ cCardValue"
 Result
 success
 	auth_fail
-¡<
+³<
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -154,7 +159,7 @@ expireTime
 GetMyRoomListRsp(
 result (2.msg.user.ResultRresult/
 	room_list (2.msg.user.RoomItemRroomList
-room_id (RroomId"Ý
+room_id (RroomId"ï
 PushUserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -162,7 +167,8 @@ expireTime
 user_ip (	RuserIp
 gold_num (RgoldNum/
 	room_list (2.msg.user.RoomItemRroomList
-room_id (RroomId"@
+room_id (RroomId
+sex (Rsex"@
 UpdateRoomState
 room_id (RroomId
 state (Rstate"Å

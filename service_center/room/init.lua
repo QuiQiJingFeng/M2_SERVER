@@ -280,7 +280,7 @@ function CMD.distroy_room(content)
         --2分钟 如果玩家仍然没有同意,则自动同意
         skynet.timeout(constant["AUTO_CONFIRM"]*100,function() 
                 if room.state == ROOM_STATE.ROOM_DISTROY then
-                    print("这个房间已经被解散了")
+                    print("这个房间已经被解散了 ",room.room_id)
                     --如果这个房间已经被解散了
                     return 
                 end
