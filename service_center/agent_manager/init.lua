@@ -282,6 +282,15 @@ local recoverRoomList = function()
     end
 end
 
+function CMD.distroyRoomById(room_id)
+    local service_id = roomid_to_agent[room_id]
+    if service_id then
+        skynet.send(service_id,"lua","force_distroy")
+        table.insert(room_services,room_info.service_id)
+        roomid_to_agent[room_id] = nil
+    end
+end
+
 function CMD.distroyRoom(room_id)
     local service_id = roomid_to_agent[room_id]
     if service_id then

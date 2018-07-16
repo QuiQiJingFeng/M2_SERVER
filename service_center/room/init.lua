@@ -226,6 +226,10 @@ function CMD.leave_room(content)
     return "success"
 end
 
+function CMD.force_distroy(room_id)
+    room:distroy(constant.DISTORY_TYPE.FORCE_DISTORY)
+end
+
 function CMD.distroy_room(content)
     local user_id = content.user_id
     local room_id = content.room_id

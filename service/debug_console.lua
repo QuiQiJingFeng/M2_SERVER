@@ -158,8 +158,15 @@ function COMMAND.help()
 		shrtbl = "Show shared short string table info",
 		ping = "ping address",
 		call = "call address ...",
-		debugProto = "debugProto user_id proto_name proto_msg"
+		debugProto = "debugProto user_id proto_name proto_msg",
+		--销毁指定的房间
+		distroyRoomById = "distroyRoomById room_id",
 	}
+end
+
+function COMMAND.distroyRoomById(room_id)
+	local room_id = tonumber(room_id)
+	return skynet.call(".agent_manager","lua","distroyRoomById",room_id)
 end
 
 function COMMAND.debugProto(user_id,proto_name,proto_msg)

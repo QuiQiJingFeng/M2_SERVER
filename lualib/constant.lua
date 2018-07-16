@@ -198,6 +198,7 @@ constant["DISTORY_TYPE"] = {
 	OWNER_DISTROY = 2, -- 房主解散
 	FINISH_GAME = 3,   -- 游戏结束解散
 	EXPIRE_TIME = 4,   -- 房间的时间过期
+	FORCE_DISTORY = 5, -- 后台强制解散
 }
 
 constant["ACCOUNT_DB"] = 0
