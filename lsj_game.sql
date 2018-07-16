@@ -15,7 +15,10 @@ CREATE TABLE register
     device_type     varchar(100),            -- 设备的型号 MI141
     time            datetime,                -- 注册的时间
     bind_id         int(10),                 -- web账号绑定的游戏ID
-    primary key(user_id,account)
+    register_code   int(10),                 -- 验证码
+    is_check        int(1),                  -- 是否校验通过
+    phone_number    varchar(11),             -- 手机号
+    primary key(user_id)
 );
 -- 定义user_id 的自增ID 从10001开始
 ALTER TABLE register AUTO_INCREMENT = 10001;
