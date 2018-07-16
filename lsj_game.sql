@@ -19,6 +19,7 @@ CREATE TABLE register
     is_check        int(1),                  -- 是否校验通过
     phone_number    varchar(11),             -- 手机号
     id_number       varchar(100),            -- 身份证号
+    user_name       varchar(200),
     primary key(user_id)
 );
 -- 定义user_id 的自增ID 从10001开始
