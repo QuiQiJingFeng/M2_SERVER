@@ -521,7 +521,7 @@ game["GANG"] = function(self,player,data,isGuo)
 				for i=#item.cards,1,-1 do
 					local card = item.cards[i]
 					if card == obj.value then
-						table.remove(item.cards,idx)
+						table.remove(item.cards,i)
 					end
 				end
 			end
