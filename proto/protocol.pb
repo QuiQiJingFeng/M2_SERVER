@@ -78,7 +78,7 @@ cCardValue"
 Result
 success
 	auth_fail
-³<
+í<
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -160,7 +160,7 @@ expireTime
 GetMyRoomListRsp(
 result (2.msg.user.ResultRresult/
 	room_list (2.msg.user.RoomItemRroomList
-room_id (RroomId"Ý
+room_id (RroomId"—
 PushUserInfo
 user_id (RuserId
 	user_name (	RuserName
@@ -168,7 +168,9 @@ expireTime
 user_ip (	RuserIp
 gold_num (RgoldNum/
 	room_list (2.msg.user.RoomItemRroomList
-room_id (RroomId"@
+room_id (RroomId
+latitude (Rlatitude
+	lontitude	 (R	lontitude"@
 UpdateRoomState
 room_id (RroomId
 state (Rstate"Å

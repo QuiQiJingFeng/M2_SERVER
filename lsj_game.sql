@@ -62,6 +62,8 @@ CREATE TABLE user_info
     bind_time       datetime,               -- 成为下级代理的时间
     sex             int(1),                 -- 性别 男为1
     adress          varchar(255),           -- 地址
+    latitude        double,                 -- 维度
+    lontitude       double,                 -- 经度
     primary key(user_id)
 );
 
@@ -189,7 +191,11 @@ CREATE TABLE pay_orders(
     state          varchar(10)  -- 支付的状态 new/checking/faild/success
 );
 
-
+-- 白名单列表
+CREATE TABLE white_list(
+    user_id        int(10),               -- 用户ID
+    level          int default 0          -- 白名单等级
+);
 
 
 

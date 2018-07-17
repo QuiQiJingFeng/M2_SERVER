@@ -37,6 +37,8 @@ function Player:init(info)
     self.sex = info.sex or 0
     self.disconnect = false
     self.put_cards = {}
+    self.latitude = info.latitude
+    self.lontitude = info.lontitude
 end
 
 function Player:update(info)
