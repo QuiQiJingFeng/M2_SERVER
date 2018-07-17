@@ -78,7 +78,7 @@ cCardValue"
 Result
 success
 	auth_fail
-í<
+®<
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -211,12 +211,11 @@ randomNums
 
 card_stack (2.msg.user.GPItemR	cardStack 
 userCardNum (RuserCardNum<
-four_card_list (2.msg.user.FourCardItemRfourCardList"–
+four_card_list (2.msg.user.FourCardItemRfourCardList"X
 NoticePlayCard
 user_id (RuserId
 card (Rcard
-user_pos (RuserPos<
-four_card_list (2.msg.user.FourCardItemRfourCardList"j
+user_pos (RuserPos"j
 NoticePengCard
 user_id (RuserId
 user_pos (RuserPos$

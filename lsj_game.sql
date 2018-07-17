@@ -132,9 +132,8 @@ CREATE TABLE resource
 (
      user_id        int(10),                 -- 玩家ID
      resource_type  int,                     -- 资源类型 1 = 金币
-     source         int,                     -- 资源变化来源 1 = 开房  2 = 充值 3 = 抽奖
-     old_num        double,                  -- 旧的数量
-     new_num        double,                  -- 新的数量
+     source         int,                     -- 资源变化来源 1 = 开房  2 = 充值 3 = 抽奖  4 = 玩家赠送  5 系统赠送
+     num        double,                      -- 变化的数量
      arg1           varchar(100),            -- 额外记录参数1
      arg2           varchar(100),            -- 额外记录参数2
      arg3           varchar(100)             -- 额外记录参数3
@@ -196,6 +195,8 @@ CREATE TABLE white_list(
     user_id        int(10),               -- 用户ID
     level          int default 0          -- 白名单等级
 );
+
+
 
 
 
