@@ -455,7 +455,7 @@ game["HU"] = function(self,player,data)
 	end
 	
 	--回合结束
-	self.room:roundOver()
+	self.room:roundOver(data)
 
 	data.last_round = self.room.over_round >= self.room.round
  
