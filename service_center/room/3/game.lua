@@ -391,7 +391,7 @@ game["PLAY_CARD"] = function(self,player,data)
 				end
 			end
 			--将碰的牌全部去掉之后检查是否和亮四打一的数量相等,如果相等则不可以碰
-			local list = utils:clone(engine:getHandleCardList())
+			local list = utils:clone(engine:getHandleCardList(item.pos))
 			local inum = 2
 			for i=#list,1,-1 do
 				local card = list[i]
