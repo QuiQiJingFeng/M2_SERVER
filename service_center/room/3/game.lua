@@ -406,16 +406,38 @@ game["TING_CARD"] = function(self,player,data)
 	if not data.card then 
 		return "paramater_error" 
 	end
+ 
 	local all_num = engine:getCardNum(user_pos,data.card)
+	local card_in_liangsidayi = false
+	-- 亮四打一 不能出那四张牌
 	local in_num = self:checkLiangSiDaYi(user_pos,data.card)
 	if in_num then
-		--如果该亮四打一的牌不能出,那么检查手牌是否能出,如果能,则听手牌
-		if not(all_num > in_num) then
-			return "in_four_cardlist"
-		end
-	end
+			local can_play = false
+			for _,item in ipairs(self.four_card_list) do
+				if item.user_pos == user_pos then
+					if #item.cards >= 4 or data.card > 40 then
+						for i,card in ipairs(item.cards) do
+							if card == data.card then
+								table.remove(item.cards,i)
+								break;
+							end
+						end
 
-	self.waite_operators[user_pos] = nil
+						can_play = true
+						break;
+					end 
+				end
+ 			end
+ 			card_in_liangsidayi = can_play
+			if not can_play then
+				--如果该亮四打一的牌不能出,那么检查手牌是否能出,如果能,则出手牌
+				if not(all_num > in_num) then
+					return "in_four_cardlist"
+				end
+			end
+	end
+	
+
 
 	-- 如果当前已经是听牌状态了
 	if engine:getTing(user_pos) then
@@ -426,6 +448,7 @@ game["TING_CARD"] = function(self,player,data)
 	if not result then
 		return "operator_error"
 	end
+	self.waite_operators[user_pos] = nil
 
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 	self.room:broadcastAllPlayers("notice_special_event",data)
