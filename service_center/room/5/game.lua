@@ -263,12 +263,12 @@ game["TING_CARD"] = function(self,player,data)
 		return "already_ting_card"
 	end
 
-	self.waite_operators[user_pos] = nil
-
 	local result,stack_list, obj = engine:tingCard(user_pos,data.card)
 	if not result then
 		return "operator_error"
 	end
+	self.waite_operators[user_pos] = nil
+
 	-- 回放的时候需要删除牌, 把真实牌值传给前段使用
 	local dataMsg = {user_id = player.user_id, user_pos = player.user_pos}
 

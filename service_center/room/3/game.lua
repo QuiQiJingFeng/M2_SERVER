@@ -449,9 +449,17 @@ game["TING_CARD"] = function(self,player,data)
 		return "operator_error"
 	end
 	self.waite_operators[user_pos] = nil
-
+	local origin_value = obj.value
+	obj.value = data.card
 	local data = {user_id=player.user_id,user_pos=player.user_pos,item=obj}
 	self.room:broadcastAllPlayers("notice_special_event",data)
+
+	-- 给前段发送出牌消息
+	local data = {user_id = player.user_id, card = origin_value, user_pos = player.user_pos}
+	--通知所有人 A 已经出牌
+	self.room:broadcastAllPlayers("notice_play_card",data)
+
+
 	if not stack_list then
 		stack_list = {}
 	end
