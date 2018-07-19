@@ -535,11 +535,7 @@ game["HU"] = function(self,player,data)
 	end
 	
 	--回合结束
-	self.room:roundOver()
-
-	data.last_round = self.room.over_round >= self.room.round
-
-	self.room:broadcastAllPlayers("notice_game_over",data)
+	self.room:roundOver(data)
 
 	self:gameOver(player,GAME_OVER_TYPE.NORMAL,refResult)
 
@@ -613,9 +609,7 @@ function game:gameOver(player,over_type,tempResult)
 		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
 		--回合结束
-		room:roundOver()
-		data.last_round = self.room.over_round >= self.room.round
-		self.room:broadcastAllPlayers("notice_game_over",data)
+		room:roundOver(data)
 	end
 	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)

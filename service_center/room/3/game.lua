@@ -382,6 +382,19 @@ game["PLAY_CARD"] = function(self,player,data)
 	local _,item = next(stack_list)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)
+		if self.liang_si_da_yi and string.find(table.concat(item.operators),"PENG") then
+			local num = 0
+			for _,item in ipairs(self.four_card_list) do
+				if item.user_pos == item.pos then
+					num = #item.cards
+				end
+			end
+			local list = utils:clone(engine:getHandleCardList())
+			for i,v in ipairs(list) do
+				print(i,v)
+			end
+		end
+
 		local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
 		check_player:send(rsp_msg)
 		table.insert(item.operators,"GUO")
@@ -783,10 +796,7 @@ game["HU"] = function(self,player,data)
 	end
 
 	--回合结束
-	self.room:roundOver()
-
-	data.last_round = self.room.over_round >= self.room.round
-	self.room:broadcastAllPlayers("notice_game_over",data)
+	self.room:roundOver(data)
 	self:gameOver(player,GAME_OVER_TYPE.NORMAL,refResult)
 
 	return "success"
@@ -858,9 +868,7 @@ function game:gameOver(player,over_type,tempResult)
 		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
 		--回合结束
-		room:roundOver()
-		data.last_round = self.room.over_round >= self.room.round
-		self.room:broadcastAllPlayers("notice_game_over",data)
+		room:roundOver(data)
 	end
 	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)

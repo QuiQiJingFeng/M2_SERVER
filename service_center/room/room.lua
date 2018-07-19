@@ -199,7 +199,7 @@ function room:updatePlayersToDb()
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 end
 
-function room:roundOver()
+function room:roundOver(msg)
 	for i,player in ipairs(self.player_list) do
 		player.is_sit = false
 	end
@@ -209,6 +209,11 @@ function room:roundOver()
     data.over_round = self.over_round
 	data.cur_round = self.cur_round
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
+
+    if msg then
+    	msg.last_round = self.over_round >= self.round
+		self:broadcastAllPlayers("notice_game_over",msg)
+    end
 
     -- 同步玩家的个人数据到数据库
     self:updatePlayersToDb()
