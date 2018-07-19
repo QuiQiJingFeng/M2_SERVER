@@ -811,59 +811,11 @@ game["HU"] = function(self,player,data)
 	end
 
 	--回合结束
-	self.room:roundOver(data)
-	self:gameOver(player,GAME_OVER_TYPE.NORMAL,refResult)
+	self.room:roundOver(data,GAME_OVER_TYPE.NORMAL)
 
 	return "success"
 end
  
-
---更新玩家的金币
-function game:updatePlayerGold(over_type)
-	if over_type == GAME_OVER_TYPE.DISTROY_ROOM then
-		return 
-	end
-	local room = self.room
-	local players = room.player_list
-	local cur_round = room.cur_round
-	local round = room.round
-	local seat_num = room.seat_num
-
-	--花费
-	local cost = round * ROUND_COST
-	--出资类型
-	local pay_type = room.pay_type
-	--第一局结束 结算(房主出资/平摊出资)的金币
-	if cur_round == 1 then
-		--房主出资
-		if pay_type == PAY_TYPE.ROOM_OWNER_COST then
-			local owner_id = room.owner_id
-			local owner = room:getPlayerByUserId(owner_id)
-			--更新玩家的金币数量
-			skynet.send(".mysql_pool","lua","updateGoldNum",-1*cost,owner_id)
-			--如果owner不存在 有可能不在游戏中(比如:有人开房给别人玩,自己不玩)
-			if owner then
-				owner.gold_num = owner.gold_num -1*cost
-				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=owner.gold_num}}
-				--通知房间中的所有人,有人的金币发生了变化
-				room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
-			end
-		--平摊
-		elseif pay_type == PAY_TYPE.AMORTIZED_COST then
-			--每个人的花费
-			local per_cost = math.floor(cost / seat_num)
-			local gold_list = {}
-			for i,obj in ipairs(players) do
-				skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
-				obj.gold_num = obj.gold_num -1*per_cost
-				local info = {user_id = obj.user_id,user_pos = obj.user_pos,gold_num = obj.gold_num}
-				table.insert(gold_list,info)
-			end
-			room:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
-		end   
-	end
-end
-
 --游戏结束
 function game:gameOver(player,over_type,tempResult)
 	print("FYD=======>>>游戏结束")
@@ -883,13 +835,9 @@ function game:gameOver(player,over_type,tempResult)
 		local info = self.room:getPlayerInfo("user_id","user_pos","cur_score","score","card_list")
 		local data = {over_type = GAME_OVER_TYPE.FLOW,players = info}
 		--回合结束
-		room:roundOver(data)
+		room:roundOver(data,over_type)
 	end
-	--计算金币并通知玩家更新
-	self:updatePlayerGold(over_type)
-	if self.room.over_round >= self.room.round then
-		self.room:distroy(constant.DISTORY_TYPE.FINISH_GAME)
-	end
+
 end
 
 

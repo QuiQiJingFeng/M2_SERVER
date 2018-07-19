@@ -5,7 +5,12 @@ local constant = require "constant"
 local ROOM_STATE = constant.ROOM_STATE
 local Player = require "Player"
 local PAY_TYPE = constant.PAY_TYPE
-
+local ROUND_COST = constant.ROUND_COST
+local GAME_OVER_TYPE = {
+	NORMAL = 1, --正常胡牌
+	FLOW = 2,	--流局
+	DISTROY_ROOM = 3,   --房间解散推送结算积分
+}
 local room = {}
 function room:init(data)
 	self.room_id = data.room_id
@@ -199,7 +204,7 @@ function room:updatePlayersToDb()
     skynet.send(".mysql_pool","lua","insertTable","room_list",data)
 end
 
-function room:roundOver(msg)
+function room:roundOver(msg,over_type)
 	for i,player in ipairs(self.player_list) do
 		player.is_sit = false
 	end
@@ -219,9 +224,63 @@ function room:roundOver(msg)
     self:updatePlayersToDb()
 	skynet.send(".replay_cord","lua","saveRecord",self.game_type,self.replay_id)
 
-    local temp = self:getPlayerInfo("user_id","user_name","score")
+    
+	--计算金币并通知玩家更新
+	self:updatePlayerGold(over_type)
+	if self.over_round >= self.round then
+		self:distroy(constant.DISTORY_TYPE.FINISH_GAME)
+	end
+
+
+	local temp = self:getPlayerInfo("user_id","user_name","score")
 	local data = {players=cjson.encode(temp),replay_id=self.replay_id}
 	skynet.call(".mysql_pool","lua","insertTable","replay_ids",data)
+end
+
+--更新玩家的金币
+function room:updatePlayerGold(over_type)
+	if over_type == GAME_OVER_TYPE.DISTROY_ROOM then
+		return 
+	end
+ 
+	local players = self.player_list
+	local cur_round = self.cur_round
+	local round = self.round
+	local seat_num = self.seat_num
+
+	--花费
+	local cost = round * ROUND_COST
+	--出资类型
+	local pay_type = self.pay_type
+	--第一局结束 结算(房主出资/平摊出资)的金币
+	if cur_round == 1 then
+		--房主出资
+		if pay_type == PAY_TYPE.ROOM_OWNER_COST then
+			local owner_id = self.owner_id
+			local owner = self:getPlayerByUserId(owner_id)
+			--更新玩家的金币数量
+			skynet.send(".mysql_pool","lua","updateGoldNum",-1*cost,owner_id)
+			--如果owner不存在 有可能不在游戏中(比如:有人开房给别人玩,自己不玩)
+			if owner then
+				owner.gold_num = owner.gold_num -1*cost
+				local gold_list = {{user_id = owner_id,user_pos = owner.user_pos,gold_num=owner.gold_num}}
+				--通知房间中的所有人,有人的金币发生了变化
+				self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+			end
+		--平摊
+		elseif pay_type == PAY_TYPE.AMORTIZED_COST then
+			--每个人的花费
+			local per_cost = math.floor(cost / seat_num)
+			local gold_list = {}
+			for i,obj in ipairs(players) do
+				skynet.send(".mysql_pool","lua","updateGoldNum",-1*per_cost,obj.user_id)
+				obj.gold_num = obj.gold_num -1*per_cost
+				local info = {user_id = obj.user_id,user_pos = obj.user_pos,gold_num = obj.gold_num}
+				table.insert(gold_list,info)
+			end
+			self:broadcastAllPlayers("update_cost_gold",{gold_list=gold_list})
+		end   
+	end
 end
 
 function room:startGame(recover)
