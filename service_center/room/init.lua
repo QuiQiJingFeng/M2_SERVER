@@ -327,7 +327,9 @@ function CMD.confirm_distroy_room(content)
         end
         local num = 0
         for k,v in pairs(confirm_map) do
-            num = num + 1
+            if v then
+                num = num + 1
+            end
         end
 
         --如果所有人都点了确定
