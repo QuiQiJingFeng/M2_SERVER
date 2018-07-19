@@ -383,15 +383,30 @@ game["PLAY_CARD"] = function(self,player,data)
 	if item and #item.operators >= 1 then
 		local check_player = self.room:getPlayerByPos(item.pos)
 		if self.liang_si_da_yi and string.find(table.concat(item.operators),"PENG") then
+			local skip_peng = false
 			local num = 0
 			for _,item in ipairs(self.four_card_list) do
 				if item.user_pos == item.pos then
 					num = #item.cards
 				end
 			end
+			--将碰的牌全部去掉之后检查是否和亮四打一的数量相等,如果相等则不可以碰
 			local list = utils:clone(engine:getHandleCardList())
-			for i,v in ipairs(list) do
-				print(i,v)
+			local inum = 2
+			for i=#list,1,-1 do
+				local card = list[i]
+				if card == item.card then
+					table.remove(list,i)
+				end
+			end
+			if num == #list then
+				skip_peng = true
+			end
+			if skip_peng then
+				local next_pos = engine:getNextPutPos()
+				local next_player = self.room:getPlayerByPos(next_pos)
+				self:drawCard(next_player)
+				return "success"
 			end
 		end
 
