@@ -78,7 +78,7 @@ cCardValue"
 Result
 success
 	auth_fail
-®<
+Õ<
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -198,11 +198,12 @@ expireTime
 randomNums
 	cur_round (RcurRound<
 four_card_list (2.msg.user.FourCardItemRfourCardList
-huicard (Rhuicard"V
+huicard (Rhuicard"}
 PushDrawCard
 user_id (RuserId
 card (Rcard
-user_pos (RuserPos"Œ
+user_pos (RuserPos%
+in_liangsidayi (RinLiangsidayi"Œ
 PushPlayCard
 user_id (RuserId
 user_pos (RuserPos

@@ -267,7 +267,7 @@ function game:drawCard(player,special,last,in_liangsidayi)
 
 	--通知有人摸牌
 	for _,obj in ipairs(self.room.player_list) do
-		local data = {user_id = player.user_id,user_pos = draw_pos}
+		local data = {user_id = player.user_id,user_pos = draw_pos,in_liangsidayi = in_liangsidayi}
 		if obj.user_id == player.user_id then
 			data.card = card
 		end
