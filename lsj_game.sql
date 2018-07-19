@@ -192,7 +192,7 @@ CREATE TABLE pay_orders(
 
 -- 白名单列表
 CREATE TABLE white_list(
-    phone        int(15),               -- 用户ID
+    phone          varchar(30),               -- 用户ID
     level          int default 0          -- 白名单等级
 );
 
