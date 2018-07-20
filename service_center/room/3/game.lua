@@ -174,6 +174,9 @@ game["PAO"] = function(self,player,data)
 		self.all_pao = self.all_pao + 1
 	end
 
+	local data = {user_pos = user_pos,pao = pao_num}
+	-- 通知有人跑
+	self.room:broadcastAllPlayers("push_player_pao",data)
 	if self.all_pao < engine:getPlaceNum() then
 		return "success"
 	end
@@ -408,7 +411,7 @@ game["PLAY_CARD"] = function(self,player,data)
 					end
 				end
 			end
-			
+
 			if skip_peng then
 				local next_pos = engine:getNextPutPos()
 				local next_player = self.room:getPlayerByPos(next_pos)
@@ -907,8 +910,27 @@ function game:back_room(user_id)
 		local temp = {user_pos=pos,ting = ting}
 		table.insert(ting_list,temp)
 	end
-	
+
 	rsp_msg.ting_list = ting_list
+
+	-----
+	local pao_list = {}
+	for pos=1,engine:getPlaceNum() do
+		local pao = engine:getRecordData(pos,"pao_num")
+		local temp = {user_pos=pos,pao = pao}
+		table.insert(pao_list,temp)
+	end
+	rsp_msg.pao_list = pao_list
+
+	local kou_list = {}
+	for pos=1,engine:getPlaceNum() do
+		local kou = engine:getRecordData(pos,"yingkou")
+		local temp = {user_pos=pos,kou = kou}
+		table.insert(kou_list,temp)
+	end
+	rsp_msg.kou_list = kou_list
+
+	-----
 
 	rsp_msg.put_card = engine:getLastPutCard()
 	player:send({push_all_room_info = rsp_msg})

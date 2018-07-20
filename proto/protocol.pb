@@ -78,7 +78,7 @@ cCardValue"
 Result
 success
 	auth_fail
-Õ<
+ß>
 msg/user.protomsg.user"H
 FastSpakeReq
 user_pos (RuserPos
@@ -274,7 +274,13 @@ handle_num (R	handleNum"L
 cards (Rcards"9
 TingItem
 user_pos (RuserPos
-ting (Rting"‡
+ting (Rting"6
+PaoItem
+user_pos (RuserPos
+pao (Rpao"6
+KouItem
+user_pos (RuserPos
+kou (Rkou"ã
 PushAllRoomInfoE
 refresh_room_info (2.msg.user.RefreshRoomInfoRrefreshRoomInfo
 	card_list (RcardList
@@ -308,7 +314,9 @@ cBaseCards
 four_card_list (2.msg.user.FourCardItemRfourCardList/
 	mark_list (2.msg.user.MarkItemRmarkList/
 	ting_list (2.msg.user.TingItemRtingList
-	ting_card (RtingCard"Y
+	ting_card (RtingCard,
+pao_list (2.msg.user.PaoItemRpaoList,
+kou_list (2.msg.user.KouItemRkouList"Y
 GoldItem
 user_id (RuserId
 user_pos (RuserPos
@@ -373,7 +381,10 @@ begin_time (	R	beginTime"
 NoticeYingKou
 user_pos (RuserPos
 card (Rcard"
-	NoticePao*…
+	NoticePao"<
+PushPlayerPao
+user_pos (RuserPos
+pao (Rpao*…
 Result
 success
 paramater_error
@@ -406,7 +417,7 @@ auth_faild
 AN_GANG
 	MING_GANG
 	PENG_GANG
- 
+Ï 
 protocol.protomsg/common.protomsg/login.protomsg/user.protomsg/ddz.proto"‘
 C2S
 
@@ -427,7 +438,7 @@ leave_room“N (2.msg.user.LeaveRoomReqR	leaveRoom0
 get_my_room_list˜N (2.msg.user.GetMyRoomListReqRgetMyRoomList3
 
 send_audio™N (2.msg.user.SendAudioR	sendAudio=
-fast_spake_reqšN (2.msg.user.FastSpakeReqRfastSpakeReq"¤
+fast_spake_reqšN (2.msg.user.FastSpakeReqRfastSpakeReq"æ
 S2C
 
 session_id (R	sessionId
@@ -473,7 +484,8 @@ leave_room“N (2.msg.user.LeaveRoomRspR	leaveRoom0
 
 send_audioé (2.msg.user.SendAudioRspR	sendAudio3
 
-notice_paoê (2.msg.user.NoticePaoR	noticePaoC
+notice_paoê (2.msg.user.NoticePaoR	noticePao@
+push_player_paoë (2.msg.user.PushPlayerPaoRpushPlayerPaoC
 update_resource±ê (2.msg.user.UpdateResourceRupdateResourceG
 update_room_state²ê (2.msg.user.UpdateRoomStateRupdateRoomState:
 handle_error‘¿ (2.msg.user.HandleErrorRhandleErrorA
