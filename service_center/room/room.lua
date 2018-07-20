@@ -220,13 +220,16 @@ function room:roundOver(msg,over_type)
 		self:broadcastAllPlayers("notice_game_over",msg)
     end
 
-    -- 同步玩家的个人数据到数据库
-    self:updatePlayersToDb()
-	skynet.send(".replay_cord","lua","saveRecord",self.game_type,self.replay_id)
+
 
     
 	--计算金币并通知玩家更新
 	self:updatePlayerGold(over_type)
+
+    -- 同步玩家的个人数据到数据库
+    self:updatePlayersToDb()
+	skynet.send(".replay_cord","lua","saveRecord",self.game_type,self.replay_id)
+	
 	if self.over_round >= self.round then
 		self:distroy(constant.DISTORY_TYPE.FINISH_GAME)
 	end
