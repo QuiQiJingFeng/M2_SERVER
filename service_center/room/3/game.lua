@@ -675,6 +675,29 @@ game["YING_KOU"] = function(self,player,data)
 	local data = {user_pos=player.user_pos,card=obj.value}
 	self.room:broadcastAllPlayers("notice_ying_kou",data)
 
+	self.waite_operators[player.user_pos] = nil
+	--检测是否该下一个人操作
+	local _,item = next(self.stack_list)
+	if item and #item.operators > 0 then
+		if item.operators[1] ~= "GANG" then
+			local check_player = self.room:getPlayerByPos(item.pos)
+			local rsp_msg = {push_player_operator_state = {operator_list=item.operators,user_pos=item.pos,card=item.card}}
+			check_player:send(rsp_msg)
+			table.insert(item.operators,"GUO")
+			self.waite_operators[item.pos] = { operators = item.operators }
+		else
+			local obj = self.room:getPlayerByPos(item.pos)
+			self.waite_operators[item.pos] = { operators = item.operators }
+			game["GANG"](game,obj,{card = item.card},true)
+		end
+		table.remove(self.stack_list,1)
+		return "success"
+	end
+	-- 下一个人出牌
+	local next_pos = engine:getNextPutPos()
+	local next_player = self.room:getPlayerByPos(next_pos)
+	self:drawCard(next_player)
+
 	return "success"
 end
 
