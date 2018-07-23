@@ -447,7 +447,7 @@ game["HU"] = function(self,player,data)
 	end
 	
 	--回合结束
-	self.room:roundOver(data)
+	self.room:roundOver(data,GAME_OVER_TYPE.NORMAL)
 		
 	return "success"
 end
