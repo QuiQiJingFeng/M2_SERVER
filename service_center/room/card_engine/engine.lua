@@ -257,23 +257,26 @@ function engine:playCard(pos,card,antingCard,mark)
 	end
 	local stackList = {}
 
-	local check = true
-	if self.__config.huMustTing then
-		-- 检查是否听牌
-		if not place:getTing() then
-			check = false
-		end
-	end
-	
 	-- 检查出牌人后面的三个人有啥想法
 	for idx= pos + 1,pos + self.__placeNum -1 do
 		if idx > self.__placeNum then
 			idx = idx - self.__placeNum
 		end
+
  		local stackItem = {pos = idx,card = card,operators = {}}
 		table.insert(stackList,stackItem)
  
 		local obj = self.__places[idx]
+
+		local check = true
+		if self.__config.huMustTing then
+			-- 检查是否听牌
+			if not obj:getTing() then
+				check = false
+			end
+		end
+
+		
 		-- 检查碰、杠
 		local peng = obj:checkPeng(card)
 		local gang = obj:checkGang(card)
@@ -316,6 +319,7 @@ function engine:playCard(pos,card,antingCard,mark)
 			local item3 = "CHI"
 			table.insert(stack,item3)
 		end
+		print("check ==>",check)
 		if self.__config.isHu and check then
 			local handleCards = obj:getHandleCardBuild()
 			local hu = algorithm:checkHu(handleCards,card,self.__config)
