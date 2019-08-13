@@ -1,56 +1,9 @@
-local crypt = require "skynet.crypt"
-local hmac = crypt.hmac_sha1
-local base64encode = crypt.base64encode
-local md5 = require "md5"
-local httpc = require("http.httpc")
+-- local crypt = require "skynet.crypt"
+-- local hmac = crypt.hmac_sha1
+-- local base64encode = crypt.base64encode
+-- local md5 = require "md5"
+-- local httpc = require("http.httpc")
 local utils = {}
-
-local CONVERT = { [10] = "A", [11] = "B", [12] = "C", [13] = "D", [14] = "E", [15] = "F", [16] = "G",
-[17] = "H", [18] = "I", [19] = "J", [20] = "K", [21] = "L", [22] = "M", [23] = "N", [24] = "O", [25] = "P",
-[26] = "Q", [27] = "R", [28] = "S", [29] = "T",[30] = "U", [31] = "V",[32] = "W",[33] = "X", [34] = "Y", [35] = "Z" }
-
-function utils:createUserid(max_id)
-    local user_id = tonumber(string.format("%d%07d", 11, max_id))
-    local unin_id = ""
-    local multiple = 0
-    while user_id > 0 do
-        local dec = user_id%36
-        user_id = math.floor(user_id/36)
-        dec = CONVERT[dec] or dec
-        unin_id = dec .. unin_id
-        multiple = multiple + 1
-    end
-    return unin_id
-end
-
-function utils:handler(obj, method)
-    return function(...)
-        return method(obj, ...)
-    end
-end
-
-function utils:mergeNewTable(tb1,tb2)
-    tb1 = tb1 or {}
-    tb2 = tb2 or {}
-    local tb = {}
-    for k,v in pairs(tb1) do
-        tb[k] = v
-    end
-    for k,v in pairs(tb2) do
-        tb[k] = v
-    end
-    return tb
-end
-
-function utils:mergeToTable(tb1,tb2)
-    if not tb1 then
-        return
-    end
-    tb2 = tb2 or {}
-    for k,v in pairs(tb2) do
-        tb1[k] = v
-    end
-end
 
 function utils:getFileName(path)
     return string.match(path, ".+/([^/]*%.%w+)$")
@@ -125,22 +78,117 @@ function utils:fisherYates(card_list)
     return card_list
 end
 
-function utils:clone(object)
-    local lookup_table = {}
-    local function _copy(object)
-        if type(object) ~= "table" then
-            return object
-        elseif lookup_table[object] then
-            return lookup_table[object]
+--A~Z 65-90 所以最高支持format为36进制
+--10进制转换目标进制
+function utils:binaryConversion(format,value)
+    assert(format <= 36,"unsupport format too biger")
+    local list = {}
+    repeat
+        local var = value%format
+        if var > 9 then
+            var = string.char(55+var)
         end
-        local newObject = {}
-        lookup_table[object] = newObject
-        for key, value in pairs(object) do
-            newObject[_copy(key)] = _copy(value)
-        end
-        return newObject
+        table.insert(list,1,var)
+        value = math.floor(value/format)
+    until (value == 0)
+    return table.concat(list,"")
+end
+
+--生成36进制的玩家ID
+function utils:generalUserId(serverId,instanceId)
+    local id = tonumber(serverId .. string.format("%07d",intId))
+    return self:binaryConversion(36,id)
+end
+
+local function dump_value_(v)
+    if type(v) == "string" then
+        v = "\"" .. v .. "\""
     end
-    return _copy(object)
+    return tostring(v)
+end
+
+function utils:dump(value, description, nesting)
+    if type(nesting) ~= "number" then nesting = 3 end
+
+    local lookupTable = {}
+    local result = {}
+
+    local traceback = string.split(debug.traceback("", 2), "\n")
+    print("dump from: " .. string.trim(traceback[3]))
+
+    local function dump_(value, description, indent, nest, keylen)
+        description = description or "<var>"
+        local spc = ""
+        if type(keylen) == "number" then
+            spc = string.rep(" ", keylen - string.len(dump_value_(description)))
+        end
+        if type(value) ~= "table" then
+            result[#result +1 ] = string.format("%s%s%s = %s", indent, dump_value_(description), spc, dump_value_(value))
+        elseif lookupTable[tostring(value)] then
+            result[#result +1 ] = string.format("%s%s%s = *REF*", indent, dump_value_(description), spc)
+        else
+            lookupTable[tostring(value)] = true
+            if nest > nesting then
+                result[#result +1 ] = string.format("%s%s = *MAX NESTING*", indent, dump_value_(description))
+            else
+                result[#result +1 ] = string.format("%s%s = {", indent, dump_value_(description))
+                local indent2 = indent.."    "
+                local keys = {}
+                local keylen = 0
+                local values = {}
+                for k, v in pairs(value) do
+                    keys[#keys + 1] = k
+                    local vk = dump_value_(k)
+                    local vkl = string.len(vk)
+                    if vkl > keylen then keylen = vkl end
+                    values[k] = v
+                end
+                table.sort(keys, function(a, b)
+                    if type(a) == "number" and type(b) == "number" then
+                        return a < b
+                    else
+                        return tostring(a) < tostring(b)
+                    end
+                end)
+                for i, k in ipairs(keys) do
+                    dump_(values[k], k, indent2, nest + 1, keylen)
+                end
+                result[#result +1] = string.format("%s}", indent)
+            end
+        end
+    end
+    dump_(value, description, "- ", 1)
+
+    for i, line in ipairs(result) do
+        print(line)
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------
+--string 扩展方法
+-------------
+
+function string.split(input, delimiter)
+    local arr = {}
+    string.gsub(input, '[^'..delimiter..']+', function(w) table.insert(arr, w) end)
+    return arr
+end
+
+function string.trim(input)
+    input = string.gsub(input, "^[ \t\n\r]+", "")
+    return string.gsub(input, "[ \t\n\r]+$", "")
 end
 
 return utils
