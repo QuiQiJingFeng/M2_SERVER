@@ -1,0 +1,17 @@
+pacakge proto.battle;
+enum room_type //房间类型
+{
+    hall = 0;  //大厅房间
+    club = 1;  //俱乐部房间
+}
+
+message create_room_req
+{
+	require room_type type = 1;     //房间类型
+	require int32 settings = 2;      //房间规则
+}
+
+message create_room_res
+{
+	
+}

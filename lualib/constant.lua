@@ -8,6 +8,13 @@ constant.PLAY_TYPE = {
 constant.CLIENT_PLAY_TYPE = {
     -- /** 手牌(开局发牌/重新加入房间复牌/胡牌后公开手牌) */
     OPERATE_DEAL_FIRST        = 1,
+    -- /** 抓牌 */
+    OPERATE_DEAL              = 2,
+
+    -- /** 可以出牌 */
+    OPERATE_CAN_PLAY_A_CARD = 100,
+    -- /** 出牌 */
+    OPERATE_PLAY_A_CARD     = 101,
      
 }
 
