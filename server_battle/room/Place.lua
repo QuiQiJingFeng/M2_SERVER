@@ -64,8 +64,10 @@ function Place:addHandCard(card)
 	self._handCards[card:getId()] = card
 end
 
-function Place:removeHandCardBy(id)
+function Place:removeHandCardById(id)
+	local card = self._handCards[id]
 	self._handCards[id] = nil
+	return card
 end
 
 function Place:removeHandCardByValue(value,num)

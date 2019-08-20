@@ -38,6 +38,7 @@ function Room:init(settings,roomId)
 	self._cardPool = {}            --牌库
 	self._curRound = 0             --当前的回合
 	self._zpos = 0               --庄家的位置
+	self._waiteList = {}         --等待操作的玩家列表
 
 
 
@@ -88,7 +89,21 @@ function Room:getRoomId()
 end
 
 function Room:getPlace(pos)
-	return self._places[pos]
+	for _,place in ipairs(self._places) do
+		if pos == place:getPosition() then
+			return place
+		end
+	end
+	assert(false)
+end
+
+function Room:getPlaceByRoleId(roleId)
+	for _,place in ipairs(self._places) do
+		if roleId == place:getRoleId() then
+			return place
+		end
+	end
+	assert(false)
 end
 
 function Room:getAllPlaces()
@@ -260,10 +275,29 @@ end
 function Room:dispatchStepEvent(content)
 	local playType = content.playType
 	local roleId = content.roleId
+	--检查当前是否轮到该玩家操作
+	if not self._waiteList[playType] or not table.indexof(self._waiteList[playType],roleId) then
+		return error_code.faild
+	end
 	local ok, ret = pcall(function()
 		CommandCenter:getInstance():execute(playType,content)
 	end
 	return ok and error_code.success or error_code.faild
+end
+
+function Room:getWaiteList()
+	return self._waiteList
+end
+
+function Room:clearWaiteList()
+	self._waiteList = {}
+end
+
+function Room:appendWaiteList(roleId,playType)
+	if not self._waiteList[playType] then
+		self._waiteList[playType] = {}
+	end
+	table.insert(self._waiteList[playType],roleId)
 end
 
 return Room

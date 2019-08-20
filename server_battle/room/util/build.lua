@@ -261,7 +261,7 @@ function MahjongUtil:build(  )
         table.insert(contentList,string.format("\t[0X%X] = true,\n",code))
     end
     table.insert(contentList,"}\nreturn codes")
-    file:write(table.concat(contentList,"\n"))
+    file:write(table.concat(contentList,""))
     file:close()
     return allCode
 end
