@@ -39,7 +39,7 @@ function Room:init(settings,roomId)
 	self._curRound = 0             --当前的回合
 	self._zpos = 0               --庄家的位置
 	self._waiteList = {}         --等待操作的玩家列表
-
+	self._co_list = {}           --挂起协程列表
 
 
 	self:registerCommand()
@@ -279,6 +279,7 @@ function Room:dispatchStepEvent(content)
 	if not self._waiteList[playType] or not table.indexof(self._waiteList[playType],roleId) then
 		return error_code.faild
 	end
+	--开启一个新的协程去执行command
 	local ok, ret = pcall(function()
 		CommandCenter:getInstance():execute(playType,content)
 	end
@@ -298,6 +299,22 @@ function Room:appendWaiteList(roleId,playType)
 		self._waiteList[playType] = {}
 	end
 	table.insert(self._waiteList[playType],roleId)
+end
+
+function Room:waiteActive(key)
+    local co = coroutine.running()
+    self._co_list[key] = co
+    return coroutine.yield()
+end
+
+function Room:active(key,playType)
+    local co = self._co_list[key]
+    if not co then return end
+    local state = coroutine.resume(co,playType)
+    --当state的false的时候,说明该协程已经执行完毕
+    if not state then
+        self._co_list[key] = nil
+    end
 end
 
 return Room

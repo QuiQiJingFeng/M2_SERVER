@@ -99,5 +99,25 @@ function Place:removeOutCard(id)
 	assert(find)
 end
 
+function Place:isPeng(card)
+	local num = 0
+	for id,card in pairs(self._handCards) do
+		if card:getCardValue() == value then
+			num = num + 1
+		end
+	end
+	return num >= 2
+end
+
+function Place:isGang(card)
+	local num = 0
+	for id,card in pairs(self._handCards) do
+		if card:getCardValue() == value then
+			num = num + 1
+		end
+	end
+	return num >= 3
+end
+
 
 return Place
