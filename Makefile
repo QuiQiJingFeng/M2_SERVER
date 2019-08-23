@@ -42,12 +42,6 @@ jemalloc : $(MALLOC_STATICLIB)
 update3rd :
 	rm -rf 3rd/jemalloc && git submodule update --init
 
-# pbc
-all : pbc
-
-pbc : 3rd/pbc/Makefile
-	cd 3rd/pbc && $(MAKE) CC=$(CC) 
-
 # skynet
 
 CSERVICE = snlua logger gate harbor
