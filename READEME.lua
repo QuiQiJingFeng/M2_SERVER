@@ -43,3 +43,10 @@ OK
 127.0.0.1:6379> exit
 
 
+
+
+
+CONFLUENCE 镜像
+docker run -d --name confluence -p 8090:8090 --link postgresdb:db --user root:root cptactionhank/atlassian-confluence:latest
+
+
